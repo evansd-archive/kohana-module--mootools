@@ -1,6 +1,6 @@
 /* <?php echo '*','/';
 
-	require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'Drag.js');
+	$this->requires('mootools/Drag.js');
 
 echo '/*';?> */
 

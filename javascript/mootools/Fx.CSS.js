@@ -1,7 +1,7 @@
 /* <?php echo '*','/';
 
-	require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'Fx.js');
-	require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'Element.Style.js');
+	$this->requires('mootools/Fx.js');
+	$this->requires('mootools/Element.Style.js');
 
 echo '/*';?> */
 

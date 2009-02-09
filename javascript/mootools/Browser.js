@@ -1,6 +1,6 @@
 /* <?php echo '*','/';
 
-	require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'Core.js');
+	$this->requires('mootools/Core.js');
 
 echo '/*';?> */
 

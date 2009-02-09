@@ -1,6 +1,6 @@
 /* <?php echo '*','/';
 
-	require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'Fx.Elements.js');
+	$this->requires('mootools/Fx.Elements.js');
 
 echo '/*';?> */
 

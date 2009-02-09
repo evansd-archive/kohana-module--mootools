@@ -1,11 +1,11 @@
 /* <?php echo '*','/';
 
-	require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'Browser.js');
-	require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'Array.js');
-	require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'String.js');
-	require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'Function.js');
-	require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'Number.js');
-	require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'Hash.js');
+	$this->requires('mootools/Browser.js');
+	$this->requires('mootools/Array.js');
+	$this->requires('mootools/String.js');
+	$this->requires('mootools/Function.js');
+	$this->requires('mootools/Number.js');
+	$this->requires('mootools/Hash.js');
 
 echo '/*';?> */
 

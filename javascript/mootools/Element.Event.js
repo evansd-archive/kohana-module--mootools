@@ -1,7 +1,7 @@
 /* <?php echo '*','/';
 
-	require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'Element.js');
-	require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'Event.js');
+	$this->requires('mootools/Element.js');
+	$this->requires('mootools/Event.js');
 
 echo '/*';?> */
 

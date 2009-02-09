@@ -1,6 +1,6 @@
 /* <?php echo '*','/';
 
-	require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'Element.Event.js');
+	$this->requires('mootools/Element.Event.js');
 
 echo '/*';?> */
 

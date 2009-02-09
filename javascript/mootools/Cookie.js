@@ -1,8 +1,8 @@
 /* <?php echo '*','/';
 
-	require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'Browser.js');
-	require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'Class.js');
-	require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'Class.Extras.js');
+	$this->requires('mootools/Browser.js');
+	$this->requires('mootools/Class.js');
+	$this->requires('mootools/Class.Extras.js');
 
 echo '/*';?> */
 

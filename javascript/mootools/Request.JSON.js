@@ -1,7 +1,7 @@
 /* <?php echo '*','/';
 
-	require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'Request.js');
-	require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'JSON.js');
+	$this->requires('mootools/Request.js');
+	$this->requires('mootools/JSON.js');
 
 echo '/*';?> */
 

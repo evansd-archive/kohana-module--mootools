@@ -1,7 +1,7 @@
 /* <?php echo '*','/';
 
-	require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'Class.Extras.js');
-	require_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'Element.js');
+	$this->requires('mootools/Class.Extras.js');
+	$this->requires('mootools/Element.js');
 
 echo '/*';?> */
 

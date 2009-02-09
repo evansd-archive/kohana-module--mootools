@@ -6,6 +6,14 @@ $versions = array(
 	'more' => '1.2'
 );
 
+$dependencies = array
+(
+	'Fx.Slide' => array
+	(
+		'Fx', 'Browser'
+	)
+);
+
 $output_folder = realpath(dirname(__FILE__).'/javascript/mootools/');
 
 echo "Saving in: $output_folder\n";
@@ -44,7 +52,7 @@ foreach($versions as $type => $version) {
 			foreach($details['deps'] as $dependency) {
 
 				if($dependency == $file OR $dependency == 'None') continue; // Core.js has itself as a dependency, for some reason
-				$php .= "\trequire_once(dirname(__FILE__).DIRECTORY_SEPARATOR.'$dependency.js');\n";
+				$php .= "\t\$this->requires('mootools/$dependency.js');\n";
 
 			}
 
