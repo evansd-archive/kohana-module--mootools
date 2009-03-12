@@ -68,9 +68,9 @@ var Drag = new Class({
 		this.handles = (htype == 'array' || htype == 'collection') ? $$(this.options.handle) : $(this.options.handle) || this.element;
 		this.mouse = {'now': {}, 'pos': {}};
 		this.value = {'start': {}, 'now': {}};
-		
+
 		this.selection = (Browser.Engine.trident) ? 'selectstart' : 'mousedown';
-		
+
 		this.bound = {
 			start: this.start.bind(this),
 			check: this.check.bind(this),
@@ -94,8 +94,8 @@ var Drag = new Class({
 
 	start: function(event){
 		if (this.options.preventDefault) event.preventDefault();
-		this.fireEvent('beforeStart', this.element);
 		this.mouse.start = event.page;
+		this.fireEvent('beforeStart', this.element);
 		var limit = this.options.limit;
 		this.limit = {'x': [], 'y': []};
 		for (var z in this.options.modifiers){
@@ -168,7 +168,7 @@ var Drag = new Class({
 });
 
 Element.implement({
-	
+
 	makeResizable: function(options){
 		return new Drag(this, $merge({modifiers: {'x': 'width', 'y': 'height'}}, options));
 	}
