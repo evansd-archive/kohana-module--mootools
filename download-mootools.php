@@ -90,6 +90,14 @@ foreach($versions as $type => $version)
 			file_put_contents($output_folder.DIRECTORY_SEPARATOR.$file.'.js', $script);
 		}
 	}
+
+	// Download the license file
+	if ($type == 'core')
+	{
+		echo "Downloading License\n";
+		$license = file_get_contents($mootools.'/license.txt?raw=true');
+		file_put_contents($output_folder.DIRECTORY_SEPARATOR.'license.txt', $license);
+	}
 }
 
 
