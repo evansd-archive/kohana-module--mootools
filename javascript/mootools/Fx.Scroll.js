@@ -1,32 +1,9 @@
 /* <?php echo '*','/';
 
-	$this->requires('mootools/Core.js');
-	$this->requires('mootools/Browser.js');
-	$this->requires('mootools/Array.js');
-	$this->requires('mootools/Function.js');
-	$this->requires('mootools/Number.js');
-	$this->requires('mootools/String.js');
-	$this->requires('mootools/Hash.js');
-	$this->requires('mootools/Event.js');
-	$this->requires('mootools/Class.js');
-	$this->requires('mootools/Class.Extras.js');
-	$this->requires('mootools/Element.js');
-	$this->requires('mootools/Element.Event.js');
-	$this->requires('mootools/Element.Style.js');
-	$this->requires('mootools/Element.Dimensions.js');
-	$this->requires('mootools/Selectors.js');
-	$this->requires('mootools/DomReady.js');
-	$this->requires('mootools/JSON.js');
-	$this->requires('mootools/Cookie.js');
-	$this->requires('mootools/Swiff.js');
+	$this->requires('mootools/More.js');
 	$this->requires('mootools/Fx.js');
-	$this->requires('mootools/Fx.CSS.js');
-	$this->requires('mootools/Fx.Tween.js');
-	$this->requires('mootools/Fx.Morph.js');
-	$this->requires('mootools/Fx.Transitions.js');
-	$this->requires('mootools/Request.js');
-	$this->requires('mootools/Request.HTML.js');
-	$this->requires('mootools/Request.JSON.js');
+	$this->requires('mootools/Element.Event.js');
+	$this->requires('mootools/Element.Dimensions.js');
 
 echo '/*';?> */
 
@@ -34,8 +11,11 @@ echo '/*';?> */
 Script: Fx.Scroll.js
 	Effect to smoothly scroll any element, including the window.
 
-License:
-	MIT-style license.
+	License:
+		MIT-style license.
+
+	Authors:
+		Valerio Proietti
 */
 
 Fx.Scroll = new Class({
@@ -43,7 +23,7 @@ Fx.Scroll = new Class({
 	Extends: Fx,
 
 	options: {
-		offset: {'x': 0, 'y': 0},
+		offset: {x: 0, y: 0},
 		wheelStops: true
 	},
 
@@ -72,16 +52,13 @@ Fx.Scroll = new Class({
 	},
 
 	compute: function(from, to, delta){
-		var now = [];
-		var x = 2;
-		x.times(function(i){
-			now.push(Fx.compute(from[i], to[i], delta));
+		return [0, 1].map(function(i){
+			return Fx.compute(from[i], to[i], delta);
 		});
-		return now;
 	},
 
 	start: function(x, y){
-		if (!this.check(arguments.callee, x, y)) return this;
+		if (!this.check(x, y)) return this;
 		var offsetSize = this.element.getSize(), scrollSize = this.element.getScrollSize();
 		var scroll = this.element.getScroll(), values = {x: x, y: y};
 		for (var z in values){

@@ -1,32 +1,9 @@
 /* <?php echo '*','/';
 
-	$this->requires('mootools/Core.js');
-	$this->requires('mootools/Browser.js');
-	$this->requires('mootools/Array.js');
-	$this->requires('mootools/Function.js');
-	$this->requires('mootools/Number.js');
-	$this->requires('mootools/String.js');
-	$this->requires('mootools/Hash.js');
-	$this->requires('mootools/Event.js');
-	$this->requires('mootools/Class.js');
+	$this->requires('mootools/More.js');
 	$this->requires('mootools/Class.Extras.js');
-	$this->requires('mootools/Element.js');
 	$this->requires('mootools/Element.Event.js');
 	$this->requires('mootools/Element.Style.js');
-	$this->requires('mootools/Element.Dimensions.js');
-	$this->requires('mootools/Selectors.js');
-	$this->requires('mootools/DomReady.js');
-	$this->requires('mootools/JSON.js');
-	$this->requires('mootools/Cookie.js');
-	$this->requires('mootools/Swiff.js');
-	$this->requires('mootools/Fx.js');
-	$this->requires('mootools/Fx.CSS.js');
-	$this->requires('mootools/Fx.Tween.js');
-	$this->requires('mootools/Fx.Morph.js');
-	$this->requires('mootools/Fx.Transitions.js');
-	$this->requires('mootools/Request.js');
-	$this->requires('mootools/Request.HTML.js');
-	$this->requires('mootools/Request.JSON.js');
 
 echo '/*';?> */
 
@@ -34,8 +11,13 @@ echo '/*';?> */
 Script: Drag.js
 	The base Drag Class. Can be used to drag and resize Elements using mouse events.
 
-License:
-	MIT-style license.
+	License:
+		MIT-style license.
+
+	Authors:
+		Valerio Proietti
+		Tom Occhinno
+		Jan Kassens
 */
 
 var Drag = new Class({
@@ -43,11 +25,12 @@ var Drag = new Class({
 	Implements: [Events, Options],
 
 	options: {/*
-		onBeforeStart: $empty,
-		onStart: $empty,
-		onDrag: $empty,
-		onCancel: $empty,
-		onComplete: $empty,*/
+		onBeforeStart: $empty(thisElement),
+		onStart: $empty(thisElement, event),
+		onSnap: $empty(thisElement)
+		onDrag: $empty(thisElement, event),
+		onCancel: $empty(thisElement),
+		onComplete: $empty(thisElement, event),*/
 		snap: 6,
 		unit: 'px',
 		grid: false,
@@ -65,7 +48,7 @@ var Drag = new Class({
 		this.document = this.element.getDocument();
 		this.setOptions(params.options || {});
 		var htype = $type(this.options.handle);
-		this.handles = (htype == 'array' || htype == 'collection') ? $$(this.options.handle) : $(this.options.handle) || this.element;
+		this.handles = ((htype == 'array' || htype == 'collection') ? $$(this.options.handle) : $(this.options.handle)) || this.element;
 		this.mouse = {'now': {}, 'pos': {}};
 		this.value = {'start': {}, 'now': {}};
 
@@ -97,7 +80,7 @@ var Drag = new Class({
 		this.mouse.start = event.page;
 		this.fireEvent('beforeStart', this.element);
 		var limit = this.options.limit;
-		this.limit = {'x': [], 'y': []};
+		this.limit = {x: [], y: []};
 		for (var z in this.options.modifiers){
 			if (!this.options.modifiers[z]) continue;
 			if (this.options.style) this.value.now[z] = this.element.getStyle(this.options.modifiers[z]).toInt();
@@ -110,7 +93,7 @@ var Drag = new Class({
 				}
 			}
 		}
-		if ($type(this.options.grid) == 'number') this.options.grid = {'x': this.options.grid, 'y': this.options.grid};
+		if ($type(this.options.grid) == 'number') this.options.grid = {x: this.options.grid, y: this.options.grid};
 		this.document.addEvents({mousemove: this.bound.check, mouseup: this.bound.cancel});
 		this.document.addEvent(this.selection, this.bound.eventStop);
 	},
@@ -124,7 +107,7 @@ var Drag = new Class({
 				mousemove: this.bound.drag,
 				mouseup: this.bound.stop
 			});
-			this.fireEvent('start', this.element).fireEvent('snap', this.element);
+			this.fireEvent('start', [this.element, event]).fireEvent('snap', this.element);
 		}
 	},
 
@@ -142,11 +125,11 @@ var Drag = new Class({
 					this.value.now[z] = this.limit[z][0];
 				}
 			}
-			if (this.options.grid[z]) this.value.now[z] -= (this.value.now[z] % this.options.grid[z]);
+			if (this.options.grid[z]) this.value.now[z] -= ((this.value.now[z] - this.limit[z][0]) % this.options.grid[z]);
 			if (this.options.style) this.element.setStyle(this.options.modifiers[z], this.value.now[z] + this.options.unit);
 			else this.element[this.options.modifiers[z]] = this.value.now[z];
 		}
-		this.fireEvent('drag', this.element);
+		this.fireEvent('drag', [this.element, event]);
 	},
 
 	cancel: function(event){
@@ -162,7 +145,7 @@ var Drag = new Class({
 		this.document.removeEvent(this.selection, this.bound.eventStop);
 		this.document.removeEvent('mousemove', this.bound.drag);
 		this.document.removeEvent('mouseup', this.bound.stop);
-		if (event) this.fireEvent('complete', this.element);
+		if (event) this.fireEvent('complete', [this.element, event]);
 	}
 
 });
@@ -170,7 +153,11 @@ var Drag = new Class({
 Element.implement({
 
 	makeResizable: function(options){
-		return new Drag(this, $merge({modifiers: {'x': 'width', 'y': 'height'}}, options));
+		var drag = new Drag(this, $merge({modifiers: {x: 'width', y: 'height'}}, options));
+		this.store('resizer', drag);
+		return drag.addEvent('drag', function(){
+			this.fireEvent('resize', drag);
+		}.bind(this));
 	}
 
 });

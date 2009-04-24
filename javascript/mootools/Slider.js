@@ -1,6 +1,9 @@
 /* <?php echo '*','/';
 
+	$this->requires('mootools/More.js');
+	$this->requires('mootools/Class.Binds.js');
 	$this->requires('mootools/Drag.js');
+	$this->requires('mootools/Element.Dimensions.js');
 
 echo '/*';?> */
 
@@ -8,17 +11,23 @@ echo '/*';?> */
 Script: Slider.js
 	Class for creating horizontal and vertical slider controls.
 
-License:
-	MIT-style license.
+	License:
+		MIT-style license.
+
+	Authors:
+		Valerio Proietti
 */
 
 var Slider = new Class({
 
 	Implements: [Events, Options],
 
+	Binds: ['clickedElement', 'draggedKnob', 'scrolledElement'],
+
 	options: {/*
-		onChange: $empty,
-		onComplete: $empty,*/
+		onTick: $empty(intPosition),
+		onChange: $empty(intStep),
+		onComplete: $empty(strStep),*/
 		onTick: function(position){
 			if (this.options.snap) position = this.toPosition(this.step);
 			this.knob.setStyle(this.property, position);
@@ -36,8 +45,6 @@ var Slider = new Class({
 		this.element = $(element);
 		this.knob = $(knob);
 		this.previousChange = this.previousEnd = this.step = -1;
-		this.element.addEvent('mousedown', this.clickedElement.bind(this));
-		if (this.options.wheel) this.element.addEvent('mousewheel', this.scrolledElement.bindWithEvent(this));
 		var offset, limit = {}, modifiers = {'x': false, 'y': false};
 		switch (this.options.mode){
 			case 'vertical':
@@ -62,21 +69,49 @@ var Slider = new Class({
 		this.knob.setStyle('position', 'relative').setStyle(this.property, - this.options.offset);
 		modifiers[this.axis] = this.property;
 		limit[this.axis] = [- this.options.offset, this.full - this.options.offset];
-		this.drag = new Drag(this.knob, {
+
+		this.bound = {
+			clickedElement: this.clickedElement.bind(this),
+			scrolledElement: this.scrolledElement.bindWithEvent(this),
+			draggedKnob: this.draggedKnob.bind(this)
+		};
+
+		var dragOptions = {
 			snap: 0,
 			limit: limit,
 			modifiers: modifiers,
-			onDrag: this.draggedKnob.bind(this),
-			onStart: this.draggedKnob.bind(this),
+			onDrag: this.bound.draggedKnob,
+			onStart: this.bound.draggedKnob,
+			onBeforeStart: (function(){
+				this.isDragging = true;
+			}).bind(this),
 			onComplete: function(){
+				this.isDragging = false;
 				this.draggedKnob();
 				this.end();
 			}.bind(this)
-		});
-		if (this.options.snap) {
-			this.drag.options.grid = Math.ceil(this.stepWidth);
-			this.drag.options.limit[this.axis][1] = this.full;
+		};
+		if (this.options.snap){
+			dragOptions.grid = Math.ceil(this.stepWidth);
+			dragOptions.limit[this.axis][1] = this.full;
 		}
+
+		this.drag = new Drag(this.knob, dragOptions);
+		this.attach();
+	},
+
+	attach: function(){
+		this.element.addEvent('mousedown', this.bound.clickedElement);
+		if (this.options.wheel) this.element.addEvent('mousewheel', this.bound.scrolledElement);
+		this.drag.attach();
+		return this;
+	},
+
+	detach: function(){
+		this.element.removeEvent('mousedown', this.bound.clickedElement);
+		this.element.removeEvent('mousewheel', this.bound.scrolledElement);
+		this.drag.detach();
+		return this;
 	},
 
 	set: function(step){
@@ -85,20 +120,22 @@ var Slider = new Class({
 
 		this.step = Math.round(step);
 		this.checkStep();
-		this.end();
 		this.fireEvent('tick', this.toPosition(this.step));
+		this.end();
 		return this;
 	},
 
 	clickedElement: function(event){
+		if (this.isDragging || event.target == this.knob) return;
+
 		var dir = this.range < 0 ? -1 : 1;
 		var position = event.page[this.axis] - this.element.getPosition()[this.axis] - this.half;
 		position = position.limit(-this.options.offset, this.full -this.options.offset);
 
 		this.step = Math.round(this.min + dir * this.toStep(position));
 		this.checkStep();
-		this.end();
 		this.fireEvent('tick', position);
+		this.end();
 	},
 
 	scrolledElement: function(event){

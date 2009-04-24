@@ -1,32 +1,7 @@
 /* <?php echo '*','/';
 
-	$this->requires('mootools/Core.js');
-	$this->requires('mootools/Browser.js');
-	$this->requires('mootools/Array.js');
-	$this->requires('mootools/Function.js');
-	$this->requires('mootools/Number.js');
-	$this->requires('mootools/String.js');
-	$this->requires('mootools/Hash.js');
-	$this->requires('mootools/Event.js');
-	$this->requires('mootools/Class.js');
-	$this->requires('mootools/Class.Extras.js');
-	$this->requires('mootools/Element.js');
+	$this->requires('mootools/More.js');
 	$this->requires('mootools/Element.Event.js');
-	$this->requires('mootools/Element.Style.js');
-	$this->requires('mootools/Element.Dimensions.js');
-	$this->requires('mootools/Selectors.js');
-	$this->requires('mootools/DomReady.js');
-	$this->requires('mootools/JSON.js');
-	$this->requires('mootools/Cookie.js');
-	$this->requires('mootools/Swiff.js');
-	$this->requires('mootools/Fx.js');
-	$this->requires('mootools/Fx.CSS.js');
-	$this->requires('mootools/Fx.Tween.js');
-	$this->requires('mootools/Fx.Morph.js');
-	$this->requires('mootools/Fx.Transitions.js');
-	$this->requires('mootools/Request.js');
-	$this->requires('mootools/Request.HTML.js');
-	$this->requires('mootools/Request.JSON.js');
 
 echo '/*';?> */
 
@@ -34,11 +9,14 @@ echo '/*';?> */
 Script: Assets.js
 	Provides methods to dynamically load JavaScript, CSS, and Image files into the document.
 
-License:
-	MIT-style license.
+	License:
+		MIT-style license.
+
+	Authors:
+		Valerio Proietti
 */
 
-var Asset = new Hash({
+var Asset = {
 
 	javascript: function(source, properties){
 		properties = $extend({
@@ -47,7 +25,7 @@ var Asset = new Hash({
 			check: $lambda(true)
 		}, properties);
 
-		var script = new Element('script', {'src': source, 'type': 'text/javascript'});
+		var script = new Element('script', {src: source, type: 'text/javascript'});
 
 		var load = properties.onload.bind(script), check = properties.check, doc = properties.document;
 		delete properties.onload; delete properties.check; delete properties.document;
@@ -57,8 +35,7 @@ var Asset = new Hash({
 			readystatechange: function(){
 				if (['loaded', 'complete'].contains(this.readyState)) load();
 			}
-		}).setProperties(properties);
-
+		}).set(properties);
 
 		if (Browser.Engine.webkit419) var checker = (function(){
 			if (!$try(check)) return;
@@ -71,15 +48,15 @@ var Asset = new Hash({
 
 	css: function(source, properties){
 		return new Element('link', $merge({
-			'rel': 'stylesheet', 'media': 'screen', 'type': 'text/css', 'href': source
+			rel: 'stylesheet', media: 'screen', type: 'text/css', href: source
 		}, properties)).inject(document.head);
 	},
 
 	image: function(source, properties){
 		properties = $merge({
-			'onload': $empty,
-			'onabort': $empty,
-			'onerror': $empty
+			onload: $empty,
+			onabort: $empty,
+			onerror: $empty
 		}, properties);
 		var image = new Image();
 		var element = $(image) || new Element('img');
@@ -100,7 +77,7 @@ var Asset = new Hash({
 		});
 		image.src = element.src = source;
 		if (image && image.complete) image.onload.delay(1);
-		return element.setProperties(properties);
+		return element.set(properties);
 	},
 
 	images: function(sources, options){
@@ -108,20 +85,18 @@ var Asset = new Hash({
 			onComplete: $empty,
 			onProgress: $empty
 		}, options);
-		if (!sources.push) sources = [sources];
+		sources = $splat(sources);
 		var images = [];
 		var counter = 0;
-		sources.each(function(source){
-			var img = new Asset.image(source, {
-				'onload': function(){
+		return new Elements(sources.map(function(source){
+			return Asset.image(source, {
+				onload: function(){
 					options.onProgress.call(this, counter, sources.indexOf(source));
 					counter++;
 					if (counter == sources.length) options.onComplete();
 				}
 			});
-			images.push(img);
-		});
-		return new Elements(images);
+		}));
 	}
 
-});
+};

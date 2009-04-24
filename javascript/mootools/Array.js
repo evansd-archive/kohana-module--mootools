@@ -82,7 +82,7 @@ Array.implement({
 		for (var i = 0, j = array.length; i < j; i++) this.push(array[i]);
 		return this;
 	},
-
+	
 	getLast: function(){
 		return (this.length) ? this[this.length - 1] : null;
 	},

@@ -1,32 +1,8 @@
 /* <?php echo '*','/';
 
-	$this->requires('mootools/Core.js');
-	$this->requires('mootools/Browser.js');
-	$this->requires('mootools/Array.js');
-	$this->requires('mootools/Function.js');
-	$this->requires('mootools/Number.js');
-	$this->requires('mootools/String.js');
-	$this->requires('mootools/Hash.js');
-	$this->requires('mootools/Event.js');
-	$this->requires('mootools/Class.js');
-	$this->requires('mootools/Class.Extras.js');
-	$this->requires('mootools/Element.js');
-	$this->requires('mootools/Element.Event.js');
-	$this->requires('mootools/Element.Style.js');
-	$this->requires('mootools/Element.Dimensions.js');
-	$this->requires('mootools/Selectors.js');
-	$this->requires('mootools/DomReady.js');
-	$this->requires('mootools/JSON.js');
-	$this->requires('mootools/Cookie.js');
-	$this->requires('mootools/Swiff.js');
+	$this->requires('mootools/More.js');
 	$this->requires('mootools/Fx.js');
-	$this->requires('mootools/Fx.CSS.js');
-	$this->requires('mootools/Fx.Tween.js');
-	$this->requires('mootools/Fx.Morph.js');
-	$this->requires('mootools/Fx.Transitions.js');
-	$this->requires('mootools/Request.js');
-	$this->requires('mootools/Request.HTML.js');
-	$this->requires('mootools/Request.JSON.js');
+	$this->requires('mootools/Element.Style.js');
 
 echo '/*';?> */
 
@@ -34,8 +10,11 @@ echo '/*';?> */
 Script: Fx.Slide.js
 	Effect to slide an element in and out of view.
 
-License:
-	MIT-style license.
+	License:
+		MIT-style license.
+
+	Authors:
+		Valerio Proietti
 */
 
 Fx.Slide = new Class({
@@ -55,7 +34,7 @@ Fx.Slide = new Class({
 		this.parent(options);
 		var wrapper = this.element.retrieve('wrapper');
 		this.wrapper = wrapper || new Element('div', {
-			styles: $extend(this.element.getStyles('margin', 'position'), {'overflow': 'hidden'})
+			styles: $extend(this.element.getStyles('margin', 'position'), {overflow: 'hidden'})
 		}).wraps(this.element);
 		this.element.store('wrapper', this.wrapper).setStyle('margin', 0);
 		this.now = [];
@@ -81,16 +60,13 @@ Fx.Slide = new Class({
 	},
 
 	compute: function(from, to, delta){
-		var now = [];
-		var x = 2;
-		x.times(function(i){
-			now[i] = Fx.compute(from[i], to[i], delta);
+		return [0, 1].map(function(i){
+			return Fx.compute(from[i], to[i], delta);
 		});
-		return now;
 	},
 
 	start: function(how, mode){
-		if (!this.check(arguments.callee, how, mode)) return this;
+		if (!this.check(how, mode)) return this;
 		this[mode || this.options.mode]();
 		var margin = this.element.getStyle(this.margin).toInt();
 		var layout = this.wrapper.getStyle(this.layout).toInt();
@@ -100,7 +76,7 @@ Fx.Slide = new Class({
 		switch (how){
 			case 'in': start = caseIn; break;
 			case 'out': start = caseOut; break;
-			case 'toggle': start = (this.wrapper['offset' + this.layout.capitalize()] == 0) ? caseIn : caseOut;
+			case 'toggle': start = (layout == 0) ? caseIn : caseOut;
 		}
 		return this.parent(start[0], start[1]);
 	},
@@ -159,7 +135,7 @@ Element.implement({
 			case 'show': slide.show(mode); break;
 			case 'toggle':
 				var flag = this.retrieve('slide:flag', slide.open);
-				slide[(flag) ? 'slideOut' : 'slideIn'](mode);
+				slide[flag ? 'slideOut' : 'slideIn'](mode);
 				this.store('slide:flag', !flag);
 				toggle = true;
 			break;

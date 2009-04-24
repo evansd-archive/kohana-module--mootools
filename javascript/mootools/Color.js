@@ -1,32 +1,12 @@
 /* <?php echo '*','/';
 
+	$this->requires('mootools/More.js');
 	$this->requires('mootools/Core.js');
-	$this->requires('mootools/Browser.js');
 	$this->requires('mootools/Array.js');
+	$this->requires('mootools/String.js');
 	$this->requires('mootools/Function.js');
 	$this->requires('mootools/Number.js');
-	$this->requires('mootools/String.js');
 	$this->requires('mootools/Hash.js');
-	$this->requires('mootools/Event.js');
-	$this->requires('mootools/Class.js');
-	$this->requires('mootools/Class.Extras.js');
-	$this->requires('mootools/Element.js');
-	$this->requires('mootools/Element.Event.js');
-	$this->requires('mootools/Element.Style.js');
-	$this->requires('mootools/Element.Dimensions.js');
-	$this->requires('mootools/Selectors.js');
-	$this->requires('mootools/DomReady.js');
-	$this->requires('mootools/JSON.js');
-	$this->requires('mootools/Cookie.js');
-	$this->requires('mootools/Swiff.js');
-	$this->requires('mootools/Fx.js');
-	$this->requires('mootools/Fx.CSS.js');
-	$this->requires('mootools/Fx.Tween.js');
-	$this->requires('mootools/Fx.Morph.js');
-	$this->requires('mootools/Fx.Transitions.js');
-	$this->requires('mootools/Request.js');
-	$this->requires('mootools/Request.HTML.js');
-	$this->requires('mootools/Request.JSON.js');
 
 echo '/*';?> */
 
@@ -34,15 +14,18 @@ echo '/*';?> */
 Script: Color.js
 	Class for creating and manipulating colors in JavaScript. Supports HSB -> RGB Conversions and vice versa.
 
-License:
-	MIT-style license.
+	License:
+		MIT-style license.
+
+	Authors:
+		Valerio Proietti
 */
 
 var Color = new Native({
 
 	initialize: function(color, type){
 		if (arguments.length >= 3){
-			type = "rgb"; color = Array.slice(arguments, 0, 3);
+			type = 'rgb'; color = Array.slice(arguments, 0, 3);
 		} else if (typeof color == 'string'){
 			if (color.match(/rgb/)) color = color.rgbToHex().hexToRgb(true);
 			else if (color.match(/hsb/)) color = color.hsbToRgb();
@@ -98,15 +81,15 @@ Color.implement({
 
 });
 
-function $RGB(r, g, b){
+var $RGB = function(r, g, b){
 	return new Color([r, g, b], 'rgb');
 };
 
-function $HSB(h, s, b){
+var $HSB = function(h, s, b){
 	return new Color([h, s, b], 'hsb');
 };
 
-function $HEX(hex){
+var $HEX = function(hex){
 	return new Color(hex, 'hex');
 };
 
