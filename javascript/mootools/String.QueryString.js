@@ -6,7 +6,7 @@
 
 echo '/*';?> */
 
-﻿/*
+/*
 Script: String.QueryString.js
 	...
 

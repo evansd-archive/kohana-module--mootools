@@ -83,7 +83,8 @@ var Asset = {
 	images: function(sources, options){
 		options = $merge({
 			onComplete: $empty,
-			onProgress: $empty
+			onProgress: $empty,
+			onError: $empty
 		}, options);
 		sources = $splat(sources);
 		var images = [];
@@ -92,6 +93,11 @@ var Asset = {
 			return Asset.image(source, {
 				onload: function(){
 					options.onProgress.call(this, counter, sources.indexOf(source));
+					counter++;
+					if (counter == sources.length) options.onComplete();
+				},
+				onerror: function(){
+					options.onError.call(this, counter, sources.indexOf(source));
 					counter++;
 					if (counter == sources.length) options.onComplete();
 				}

@@ -5,5 +5,5 @@
 echo '/*';?> */
 
 MooTools.More = {
-	'version': '1.2.2.1'
+	'version': '1.2.2.2'
 };

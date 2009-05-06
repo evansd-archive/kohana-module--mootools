@@ -30,7 +30,7 @@ PHP_SAPI === 'cli' or die('Please run from the command line');
 $versions = array
 (
 	'core' => '1.2.2',
-	'more' => '1.2.2.1'
+	'more' => '1.2.2.2'
 );
 
 $output_folder = realpath(dirname(__FILE__).'/javascript/mootools/');

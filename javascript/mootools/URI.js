@@ -4,6 +4,7 @@
 	$this->requires('mootools/Function.js');
 	$this->requires('mootools/Array.js');
 	$this->requires('mootools/Hash.js');
+	$this->requires('mootools/Class.Refactor.js');
 
 echo '/*';?> */
 
