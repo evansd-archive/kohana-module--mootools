@@ -16,6 +16,7 @@ Script: Element.Forms.js
 		Aaron Newton
 
 */
+
 Element.implement({
 
 	tidy: function(){
@@ -27,8 +28,8 @@ Element.implement({
 	},
 
 	getSelectedText: function(){
-		if (document.selection && document.selection.createRange) return document.selection.createRange().text;
-		return this.getTextInRange(this.getSelectionStart(), this.getSelectionEnd());
+		if (this.setSelectionRange) return this.getTextInRange(this.getSelectionStart(), this.getSelectionEnd());
+		return document.selection.createRange().text;
 	},
 
 	getSelectedRange: function() {
@@ -71,7 +72,10 @@ Element.implement({
 	},
 
 	selectRange: function(start, end){
-		if (this.createTextRange){
+		if (this.setSelectionRange) {
+			this.focus();
+			this.setSelectionRange(start, end);
+		} else {
 			var value = this.get('value');
 			var diff = value.substr(start, end - start).replace(/\r/g, '').length;
 			start = value.substr(0, start).replace(/\r/g, '').length;
@@ -80,9 +84,6 @@ Element.implement({
 			range.moveEnd('character', start + diff);
 			range.moveStart('character', start);
 			range.select();
-		} else {
-			this.focus();
-			this.setSelectionRange(start, end);
 		}
 		return this;
 	},

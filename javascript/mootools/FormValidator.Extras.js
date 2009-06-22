@@ -22,7 +22,7 @@ FormValidator.addAllThese([
 			if (element.checked){
 				var fv = element.getParent('form').retrieve('validator');
 				if (!fv) return true;
-				(props.toEnforce || $(props.enforceChildrenOf).getElements('input, select, textarea')).map(function(item){
+				(props.toEnforce || document.id(props.enforceChildrenOf).getElements('input, select, textarea')).map(function(item){
 					fv.enforceField(item);
 				});
 			}
@@ -35,7 +35,7 @@ FormValidator.addAllThese([
 			if (element.checked){
 				var fv = element.getParent('form').retrieve('validator');
 				if (!fv) return true;
-				(props.toIgnore || $(props.ignoreChildrenOf).getElements('input, select, textarea')).each(function(item){
+				(props.toIgnore || document.id(props.ignoreChildrenOf).getElements('input, select, textarea')).each(function(item){
 					fv.ignoreField(item);
 					fv.resetField(item);
 				});
@@ -57,7 +57,7 @@ FormValidator.addAllThese([
 		test: function(element, props){
 			var fv = element.getParent('form').retrieve('validator');
 			if (!fv) return true;
-			var eleArr = props.toToggle || $(props.toToggleChildrenOf).getElements('input, select, textarea');
+			var eleArr = props.toToggle || document.id(props.toToggleChildrenOf).getElements('input, select, textarea');
 			if (!element.checked){
 				eleArr.each(function(item){
 					fv.ignoreField(item);
@@ -77,7 +77,7 @@ FormValidator.addAllThese([
 			return FormValidator.getMsg('reqChkByNode');
 		},
 		test: function(element, props){
-			return ($(props.nodeId).getElements(props.selector || 'input[type=checkbox], input[type=radio]')).some(function(item){
+			return (document.id(props.nodeId).getElements(props.selector || 'input[type=checkbox], input[type=radio]')).some(function(item){
 				return item.checked;
 			});
 		}
@@ -109,11 +109,11 @@ FormValidator.addAllThese([
 
 	['validate-match', {
 		errorMsg: function(element, props){
-			return FormValidator.getMsg('match').substitute({matchName: props.matchName || $(props.matchInput).get('name')});
+			return FormValidator.getMsg('match').substitute({matchName: props.matchName || document.id(props.matchInput).get('name')});
 		},
 		test: function(element, props){
 			var eleVal = element.get('value');
-			var matchVal = $(props.matchInput) && $(props.matchInput).get('value');
+			var matchVal = document.id(props.matchInput) && document.id(props.matchInput).get('value');
 			return eleVal && matchVal ? eleVal == matchVal : true;
 		}
 	}],
@@ -125,7 +125,7 @@ FormValidator.addAllThese([
 			});
 		},
 		test: function(element, props){
-			var start = $(props.afterElement) ? Date.parse($(props.afterElement).get('value')) : new Date();
+			var start = document.id(props.afterElement) ? Date.parse(document.id(props.afterElement).get('value')) : new Date();
 			var end = Date.parse(element.get('value'));
 			return end && start ? end >= start : true;
 		}
@@ -139,7 +139,7 @@ FormValidator.addAllThese([
 		},
 		test: function(element, props){
 			var start = Date.parse(element.get('value'));
-			var end = $(props.beforeElement) ? Date.parse($(props.beforeElement).get('value')) : new Date();
+			var end = document.id(props.beforeElement) ? Date.parse(document.id(props.beforeElement).get('value')) : new Date();
 			return end && start ? end >= start : true;
 		}
 	}],
@@ -155,13 +155,13 @@ FormValidator.addAllThese([
 
 	['validate-same-month', {
 		errorMsg: function(element, props){
-			var startMo = $(props.sameMonthAs) && $(props.sameMonthAs).get('value');
+			var startMo = document.id(props.sameMonthAs) && document.id(props.sameMonthAs).get('value');
 			var eleVal = element.get('value');
 			if (eleVal != '') return FormValidator.getMsg(startMo ? 'sameMonth' : 'startMonth');
 		},
 		test: function(element, props){
 			var d1 = Date.parse(element.get('value'));
-			var d2 = Date.parse($(props.sameMonthAs) && $(props.sameMonthAs).get('value'));
+			var d2 = Date.parse(document.id(props.sameMonthAs) && document.id(props.sameMonthAs).get('value'));
 			return d1 && d2 ? d1.format('%B') == d2.format('%B') : true;
 		}
 	}]

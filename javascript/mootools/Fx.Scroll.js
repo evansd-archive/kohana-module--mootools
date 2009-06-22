@@ -28,11 +28,11 @@ Fx.Scroll = new Class({
 	},
 
 	initialize: function(element, options){
-		this.element = this.subject = $(element);
+		this.element = this.subject = document.id(element);
 		this.parent(options);
 		var cancel = this.cancel.bind(this, false);
 
-		if ($type(this.element) != 'element') this.element = $(this.element.getDocument().body);
+		if ($type(this.element) != 'element') this.element = document.id(this.element.getDocument().body);
 
 		var stopper = this.element;
 
@@ -87,8 +87,32 @@ Fx.Scroll = new Class({
 	},
 
 	toElement: function(el){
-		var position = $(el).getPosition(this.element);
+		var position = document.id(el).getPosition(this.element);
 		return this.start(position.x, position.y);
+	},
+
+	scrollIntoView: function(el, axes, offset){
+		axes = axes ? $splat(axes) : ['x','y'];
+		var to = {};
+		el = document.id(el);
+		var pos = el.getPosition(this.element);
+		var size = el.getSize();
+		var scroll = this.element.getScroll();
+		var containerSize = this.element.getSize();
+		var edge = {
+			x: pos.x + size.x,
+			y: pos.y + size.y
+		};
+		['x','y'].each(function(axis) {
+			if (axes.contains(axis)) {
+				if (edge[axis] > scroll[axis] + containerSize[axis]) to[axis] = edge[axis] - containerSize[axis];
+				if (pos[axis] < scroll[axis]) to[axis] = pos[axis];
+			}
+			if (to[axis] == null) to[axis] = scroll[axis];
+			if (offset && offset[axis]) to[axis] = to[axis] + offset[axis];
+		}, this);
+		if (to.x != scroll.x || to.y != scroll.y) this.start(to.x, to.y);
+		return this;
 	}
 
 });

@@ -5,7 +5,6 @@
 	$this->requires('mootools/Element.Event.js');
 	$this->requires('mootools/Element.Style.js');
 	$this->requires('mootools/Element.Dimensions.js');
-	$this->requires('mootools/Element.Measure.js');
 
 echo '/*';?> */
 

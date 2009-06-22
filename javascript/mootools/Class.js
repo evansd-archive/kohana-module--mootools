@@ -6,7 +6,6 @@
 	$this->requires('mootools/Function.js');
 	$this->requires('mootools/Number.js');
 	$this->requires('mootools/Hash.js');
-	$this->requires('mootools/Browser.js');
 
 echo '/*';?> */
 
