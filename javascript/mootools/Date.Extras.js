@@ -1,9 +1,5 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/More.js');
-	$this->requires('mootools/Date.js');
-
-echo '/*';?> */
+//= requires "More"
+//= requires "Date"
 
 /*
 Script: Date.Extras.js

@@ -1,10 +1,6 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/More.js');
-	$this->requires('mootools/String.js');
-	$this->requires('mootools/Array.js');
-
-echo '/*';?> */
+//= requires "More"
+//= requires "String"
+//= requires "Array"
 
 /*
 Script: String.QueryString.js

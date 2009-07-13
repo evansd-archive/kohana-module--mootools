@@ -1,8 +1,4 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/Core.js');
-
-echo '/*';?> */
+//= requires "Core"
 
 MooTools.More = {
 	'version': '1.2.3.1'

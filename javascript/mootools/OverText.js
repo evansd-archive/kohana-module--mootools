@@ -1,14 +1,10 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/More.js');
-	$this->requires('mootools/Class.Extras.js');
-	$this->requires('mootools/Element.Event.js');
-	$this->requires('mootools/Class.Binds.js');
-	$this->requires('mootools/Class.Occlude.js');
-	$this->requires('mootools/Element.Position.js');
-	$this->requires('mootools/Element.Shortcuts.js');
-
-echo '/*';?> */
+//= requires "More"
+//= requires "Class.Extras"
+//= requires "Element.Event"
+//= requires "Class.Binds"
+//= requires "Class.Occlude"
+//= requires "Element.Position"
+//= requires "Element.Shortcuts"
 
 /*
 Script: OverText.js

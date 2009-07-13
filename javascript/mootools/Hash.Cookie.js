@@ -1,11 +1,7 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/More.js');
-	$this->requires('mootools/Class.Extras.js');
-	$this->requires('mootools/Cookie.js');
-	$this->requires('mootools/JSON.js');
-
-echo '/*';?> */
+//= requires "More"
+//= requires "Class.Extras"
+//= requires "Cookie"
+//= requires "JSON"
 
 /*
 Script: Hash.Cookie.js

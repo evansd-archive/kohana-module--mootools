@@ -1,10 +1,6 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/More.js');
-	$this->requires('mootools/Fx.js');
-	$this->requires('mootools/Element.Style.js');
-
-echo '/*';?> */
+//= requires "More"
+//= requires "Fx"
+//= requires "Element.Style"
 
 /*
 Script: Fx.Slide.js

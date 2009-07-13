@@ -1,18 +1,14 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/More.js');
-	$this->requires('mootools/Lang.js');
-	$this->requires('mootools/Class.Extras.js');
-	$this->requires('mootools/Class.Binds.js');
-	$this->requires('mootools/Selectors.js');
-	$this->requires('mootools/Element.Event.js');
-	$this->requires('mootools/Element.Style.js');
-	$this->requires('mootools/JSON.js');
-	$this->requires('mootools/Date.js');
-	$this->requires('mootools/Element.Forms.js');
-	$this->requires('mootools/FormValidator.English.js');
-
-echo '/*';?> */
+//= requires "More"
+//= requires "Lang"
+//= requires "Class.Extras"
+//= requires "Class.Binds"
+//= requires "Selectors"
+//= requires "Element.Event"
+//= requires "Element.Style"
+//= requires "JSON"
+//= requires "Date"
+//= requires "Element.Forms"
+//= requires "FormValidator.English"
 
 /*
 Script: FormValidator.js

@@ -1,10 +1,6 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/Browser.js');
-	$this->requires('mootools/Class.js');
-	$this->requires('mootools/Class.Extras.js');
-
-echo '/*';?> */
+//= requires "Browser"
+//= requires "Class"
+//= requires "Class.Extras"
 
 /*
 Script: Cookie.js

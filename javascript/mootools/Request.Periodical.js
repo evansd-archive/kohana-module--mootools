@@ -1,10 +1,6 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/More.js');
-	$this->requires('mootools/Request.js');
-	$this->requires('mootools/Class.Refactor.js');
-
-echo '/*';?> */
+//= requires "More"
+//= requires "Request"
+//= requires "Class.Refactor"
 
 /*
 Script: Request.Periodical.js

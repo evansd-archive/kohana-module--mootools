@@ -1,9 +1,5 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/Request.js');
-	$this->requires('mootools/Element.js');
-
-echo '/*';?> */
+//= requires "Request"
+//= requires "Element"
 
 /*
 Script: Request.HTML.js

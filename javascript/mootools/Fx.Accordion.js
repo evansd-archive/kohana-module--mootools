@@ -1,10 +1,6 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/More.js');
-	$this->requires('mootools/Fx.Elements.js');
-	$this->requires('mootools/Element.Event.js');
-
-echo '/*';?> */
+//= requires "More"
+//= requires "Fx.Elements"
+//= requires "Element.Event"
 
 /*
 Script: Fx.Accordion.js

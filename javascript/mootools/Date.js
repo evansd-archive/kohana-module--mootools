@@ -1,14 +1,10 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/More.js');
-	$this->requires('mootools/Core.js');
-	$this->requires('mootools/String.js');
-	$this->requires('mootools/Number.js');
-	$this->requires('mootools/Array.js');
-	$this->requires('mootools/Lang.js');
-	$this->requires('mootools/Date.English.US.js');
-
-echo '/*';?> */
+//= requires "More"
+//= requires "Core"
+//= requires "String"
+//= requires "Number"
+//= requires "Array"
+//= requires "Lang"
+//= requires "Date.English.US"
 
 /*
 Script: Date.js

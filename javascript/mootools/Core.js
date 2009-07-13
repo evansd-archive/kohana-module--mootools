@@ -1,3 +1,5 @@
+
+
 /*
 Script: Core.js
 	MooTools - My Object Oriented JavaScript Tools.

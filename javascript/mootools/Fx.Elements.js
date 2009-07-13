@@ -1,9 +1,5 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/More.js');
-	$this->requires('mootools/Fx.CSS.js');
-
-echo '/*';?> */
+//= requires "More"
+//= requires "Fx.CSS"
 
 /*
 Script: Fx.Elements.js

@@ -1,10 +1,6 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/More.js');
-	$this->requires('mootools/Fx.Scroll.js');
-	$this->requires('mootools/Selectors.js');
-
-echo '/*';?> */
+//= requires "More"
+//= requires "Fx.Scroll"
+//= requires "Selectors"
 
 /*
 Script: Fx.SmoothScroll.js

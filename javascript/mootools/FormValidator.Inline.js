@@ -1,9 +1,5 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/More.js');
-	$this->requires('mootools/FormValidator.js');
-
-echo '/*';?> */
+//= requires "More"
+//= requires "FormValidator"
 
 /*
 Script: FormValidator.Inline.js

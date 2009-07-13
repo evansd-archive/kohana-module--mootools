@@ -1,11 +1,7 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/More.js');
-	$this->requires('mootools/Fx.Morph.js');
-	$this->requires('mootools/Element.Shortcuts.js');
-	$this->requires('mootools/Element.Measure.js');
-
-echo '/*';?> */
+//= requires "More"
+//= requires "Fx.Morph"
+//= requires "Element.Shortcuts"
+//= requires "Element.Measure"
 
 /*
 Script: Fx.Reveal.js

@@ -1,9 +1,5 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/More.js');
-	$this->requires('mootools/Core.js');
-
-echo '/*';?> */
+//= requires "More"
+//= requires "Core"
 
 /*
 Script: Hash.Extras.js

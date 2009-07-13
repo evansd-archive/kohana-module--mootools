@@ -1,9 +1,5 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/More.js');
-	$this->requires('mootools/Class.js');
-
-echo '/*';?> */
+//= requires "More"
+//= requires "Class"
 
 /*
 Script: Class.Binds.js

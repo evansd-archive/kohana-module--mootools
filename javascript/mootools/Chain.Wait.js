@@ -1,9 +1,5 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/More.js');
-	$this->requires('mootools/Class.Extras.js');
-
-echo '/*';?> */
+//= requires "More"
+//= requires "Class.Extras"
 
 /*
 Script: Chain.Wait.js

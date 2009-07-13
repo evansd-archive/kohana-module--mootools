@@ -1,9 +1,5 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/More.js');
-	$this->requires('mootools/Drag.Move.js');
-
-echo '/*';?> */
+//= requires "More"
+//= requires "Drag.Move"
 
 /*
 Script: Sortables.js

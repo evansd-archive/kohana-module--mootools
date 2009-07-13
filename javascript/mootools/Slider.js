@@ -1,11 +1,7 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/More.js');
-	$this->requires('mootools/Class.Binds.js');
-	$this->requires('mootools/Drag.js');
-	$this->requires('mootools/Element.Dimensions.js');
-
-echo '/*';?> */
+//= requires "More"
+//= requires "Class.Binds"
+//= requires "Drag"
+//= requires "Element.Dimensions"
 
 /*
 Script: Slider.js

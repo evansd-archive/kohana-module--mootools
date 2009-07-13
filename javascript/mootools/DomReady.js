@@ -1,8 +1,4 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/Element.Event.js');
-
-echo '/*';?> */
+//= requires "Element.Event"
 
 /*
 Script: Domready.js

@@ -1,13 +1,9 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/More.js');
-	$this->requires('mootools/Log.js');
-	$this->requires('mootools/Browser.js');
-	$this->requires('mootools/Element.js');
-	$this->requires('mootools/Request.js');
-	$this->requires('mootools/Class.Extras.js');
-
-echo '/*';?> */
+//= requires "More"
+//= requires "Log"
+//= requires "Browser"
+//= requires "Element"
+//= requires "Request"
+//= requires "Class.Extras"
 
 /*
 Script: Request.JSONP.js

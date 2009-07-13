@@ -1,10 +1,6 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/More.js');
-	$this->requires('mootools/Fx.Morph.js');
-	$this->requires('mootools/Element.Position.js');
-
-echo '/*';?> */
+//= requires "More"
+//= requires "Fx.Morph"
+//= requires "Element.Position"
 
 /*
 Script: Fx.Move.js

@@ -1,8 +1,4 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/Core.js');
-
-echo '/*';?> */
+//= requires "Core"
 
 /*
 Script: String.js

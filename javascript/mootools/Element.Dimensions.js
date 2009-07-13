@@ -1,8 +1,4 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/Element.js');
-
-echo '/*';?> */
+//= requires "Element"
 
 /*
 Script: Element.Dimensions.js

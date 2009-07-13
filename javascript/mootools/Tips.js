@@ -1,12 +1,8 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/More.js');
-	$this->requires('mootools/Class.Extras.js');
-	$this->requires('mootools/Element.Event.js');
-	$this->requires('mootools/Element.Style.js');
-	$this->requires('mootools/Element.Dimensions.js');
-
-echo '/*';?> */
+//= requires "More"
+//= requires "Class.Extras"
+//= requires "Element.Event"
+//= requires "Element.Style"
+//= requires "Element.Dimensions"
 
 /*
 Script: Tips.js

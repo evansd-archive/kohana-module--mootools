@@ -1,8 +1,4 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/URI.js');
-
-echo '/*';?> */
+//= requires "URI"
 
 /*
 Script: URI.Relative.js

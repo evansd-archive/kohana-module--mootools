@@ -1,13 +1,9 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/More.js');
-	$this->requires('mootools/Element.Position.js');
-	$this->requires('mootools/Element.Event.js');
-	$this->requires('mootools/Element.Style.js');
-	$this->requires('mootools/Class.Extras.js');
-	$this->requires('mootools/Class.Occlude.js');
-
-echo '/*';?> */
+//= requires "More"
+//= requires "Element.Position"
+//= requires "Element.Event"
+//= requires "Element.Style"
+//= requires "Class.Extras"
+//= requires "Class.Occlude"
 
 /*
 Script: IframeShim.js

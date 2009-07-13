@@ -1,11 +1,7 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/More.js');
-	$this->requires('mootools/Element.Event.js');
-	$this->requires('mootools/Element.Dimensions.js');
-	$this->requires('mootools/Element.Style.js');
-
-echo '/*';?> */
+//= requires "More"
+//= requires "Element.Event"
+//= requires "Element.Dimensions"
+//= requires "Element.Style"
 
 /*
 Script: Element.Pin.js

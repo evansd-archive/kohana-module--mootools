@@ -1,14 +1,10 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/More.js');
-	$this->requires('mootools/Core.js');
-	$this->requires('mootools/Array.js');
-	$this->requires('mootools/String.js');
-	$this->requires('mootools/Function.js');
-	$this->requires('mootools/Number.js');
-	$this->requires('mootools/Hash.js');
-
-echo '/*';?> */
+//= requires "More"
+//= requires "Core"
+//= requires "Array"
+//= requires "String"
+//= requires "Function"
+//= requires "Number"
+//= requires "Hash"
 
 /*
 Script: Color.js

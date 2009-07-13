@@ -1,9 +1,5 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/More.js');
-	$this->requires('mootools/Request.js');
-
-echo '/*';?> */
+//= requires "More"
+//= requires "Request"
 
 /*
 Script: Request.Queue.js

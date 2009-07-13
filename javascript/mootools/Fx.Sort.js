@@ -1,11 +1,7 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/More.js');
-	$this->requires('mootools/Fx.Elements.js');
-	$this->requires('mootools/Element.Dimensions.js');
-	$this->requires('mootools/Element.Measure.js');
-
-echo '/*';?> */
+//= requires "More"
+//= requires "Fx.Elements"
+//= requires "Element.Dimensions"
+//= requires "Element.Measure"
 
 /*
 Script: Fx.Sort.js

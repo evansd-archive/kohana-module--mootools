@@ -1,10 +1,6 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/More.js');
-	$this->requires('mootools/Drag.js');
-	$this->requires('mootools/Element.Dimensions.js');
-
-echo '/*';?> */
+//= requires "More"
+//= requires "Drag"
+//= requires "Element.Dimensions"
 
 /*
 Script: Drag.Move.js

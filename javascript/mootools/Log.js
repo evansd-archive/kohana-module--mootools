@@ -1,8 +1,4 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/Class.js');
-
-echo '/*';?> */
+//= requires "Class"
 
 /*
 Script: Log.js

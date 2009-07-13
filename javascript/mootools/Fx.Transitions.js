@@ -1,8 +1,4 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/Fx.js');
-
-echo '/*';?> */
+//= requires "Fx"
 
 /*
 Script: Fx.Transitions.js

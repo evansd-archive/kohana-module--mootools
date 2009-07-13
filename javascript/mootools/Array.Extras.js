@@ -1,10 +1,6 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/More.js');
-	$this->requires('mootools/Core.js');
-	$this->requires('mootools/Array.js');
-
-echo '/*';?> */
+//= requires "More"
+//= requires "Core"
+//= requires "Array"
 
 /*
 Script: Array.Extras.js

@@ -1,8 +1,4 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/Fx.CSS.js');
-
-echo '/*';?> */
+//= requires "Fx.CSS"
 
 /*
 Script: Fx.Tween.js

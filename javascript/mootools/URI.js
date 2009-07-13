@@ -1,12 +1,8 @@
-/* <?php echo '*','/';
-
-	$this->requires('mootools/More.js');
-	$this->requires('mootools/Function.js');
-	$this->requires('mootools/Array.js');
-	$this->requires('mootools/Hash.js');
-	$this->requires('mootools/Class.Refactor.js');
-
-echo '/*';?> */
+//= requires "More"
+//= requires "Function"
+//= requires "Array"
+//= requires "Hash"
+//= requires "Class.Refactor"
 
 /*
 Script: URI.js
