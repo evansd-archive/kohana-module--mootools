@@ -1,4 +1,4 @@
-//= requires "Element"
+//= require "Element"
 
 /*
 Script: Element.Dimensions.js

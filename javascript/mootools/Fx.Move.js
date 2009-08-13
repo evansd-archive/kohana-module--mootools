@@ -1,6 +1,6 @@
-//= requires "More"
-//= requires "Fx.Morph"
-//= requires "Element.Position"
+//= require "More"
+//= require "Fx.Morph"
+//= require "Element.Position"
 
 /*
 Script: Fx.Move.js

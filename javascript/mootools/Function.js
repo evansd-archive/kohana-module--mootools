@@ -1,4 +1,4 @@
-//= requires "Core"
+//= require "Core"
 
 /*
 Script: Function.js

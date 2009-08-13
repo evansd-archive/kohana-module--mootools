@@ -1,5 +1,5 @@
-//= requires "More"
-//= requires "Date"
+//= require "More"
+//= require "Date"
 
 /*
 Script: Date.Extras.js

@@ -1,7 +1,7 @@
-//= requires "More"
-//= requires "Element.Event"
-//= requires "Element.Dimensions"
-//= requires "Element.Style"
+//= require "More"
+//= require "Element.Event"
+//= require "Element.Dimensions"
+//= require "Element.Style"
 
 /*
 Script: Element.Pin.js

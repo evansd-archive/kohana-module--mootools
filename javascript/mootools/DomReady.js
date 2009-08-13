@@ -1,4 +1,4 @@
-//= requires "Element.Event"
+//= require "Element.Event"
 
 /*
 Script: Domready.js

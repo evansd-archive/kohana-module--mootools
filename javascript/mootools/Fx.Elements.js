@@ -1,5 +1,5 @@
-//= requires "More"
-//= requires "Fx.CSS"
+//= require "More"
+//= require "Fx.CSS"
 
 /*
 Script: Fx.Elements.js

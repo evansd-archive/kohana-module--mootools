@@ -1,5 +1,5 @@
-//= requires "More"
-//= requires "Element.Style"
+//= require "More"
+//= require "Element.Style"
 
 /*
 Script: Element.Measure.js

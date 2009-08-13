@@ -1,5 +1,5 @@
-//= requires "More"
-//= requires "Core"
+//= require "More"
+//= require "Core"
 
 /*
 Script: Hash.Extras.js

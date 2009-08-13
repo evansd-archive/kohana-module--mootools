@@ -1,6 +1,6 @@
-//= requires "More"
-//= requires "String"
-//= requires "Array"
+//= require "More"
+//= require "String"
+//= require "Array"
 
 /*
 Script: String.QueryString.js

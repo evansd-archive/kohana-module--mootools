@@ -1,8 +1,8 @@
-//= requires "Array"
-//= requires "String"
-//= requires "Function"
-//= requires "Number"
-//= requires "Hash"
+//= require "Array"
+//= require "String"
+//= require "Function"
+//= require "Number"
+//= require "Hash"
 
 /*
 Script: JSON.js

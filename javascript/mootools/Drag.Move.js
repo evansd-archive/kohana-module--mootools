@@ -1,6 +1,6 @@
-//= requires "More"
-//= requires "Drag"
-//= requires "Element.Dimensions"
+//= require "More"
+//= require "Drag"
+//= require "Element.Dimensions"
 
 /*
 Script: Drag.Move.js

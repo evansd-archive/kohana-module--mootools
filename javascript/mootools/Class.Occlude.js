@@ -1,6 +1,6 @@
-//= requires "More"
-//= requires "Class"
-//= requires "Element"
+//= require "More"
+//= require "Class"
+//= require "Element"
 
 /*
 Script: Class.Occlude.js

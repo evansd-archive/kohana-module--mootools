@@ -1,7 +1,7 @@
-//= requires "More"
-//= requires "Fx.Elements"
-//= requires "Element.Dimensions"
-//= requires "Element.Measure"
+//= require "More"
+//= require "Fx.Elements"
+//= require "Element.Dimensions"
+//= require "Element.Measure"
 
 /*
 Script: Fx.Sort.js

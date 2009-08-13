@@ -1,4 +1,4 @@
-//= requires "Fx"
+//= require "Fx"
 
 /*
 Script: Fx.Transitions.js

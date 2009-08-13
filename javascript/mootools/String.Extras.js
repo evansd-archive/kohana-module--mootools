@@ -1,7 +1,7 @@
-//= requires "More"
-//= requires "String"
-//= requires "Array"
-//= requires "Hash.Extras"
+//= require "More"
+//= require "String"
+//= require "Array"
+//= require "Hash.Extras"
 
 /*
 Script: String.Extras.js

@@ -1,10 +1,10 @@
-//= requires "More"
-//= requires "Core"
-//= requires "String"
-//= requires "Number"
-//= requires "Array"
-//= requires "Lang"
-//= requires "Date.English.US"
+//= require "More"
+//= require "Core"
+//= require "String"
+//= require "Number"
+//= require "Array"
+//= require "Lang"
+//= require "Date.English.US"
 
 /*
 Script: Date.js

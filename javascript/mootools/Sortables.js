@@ -1,5 +1,5 @@
-//= requires "More"
-//= requires "Drag.Move"
+//= require "More"
+//= require "Drag.Move"
 
 /*
 Script: Sortables.js

@@ -1,6 +1,6 @@
-//= requires "More"
-//= requires "Fx.Scroll"
-//= requires "Selectors"
+//= require "More"
+//= require "Fx.Scroll"
+//= require "Selectors"
 
 /*
 Script: Fx.SmoothScroll.js

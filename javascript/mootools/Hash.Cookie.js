@@ -1,7 +1,7 @@
-//= requires "More"
-//= requires "Class.Extras"
-//= requires "Cookie"
-//= requires "JSON"
+//= require "More"
+//= require "Class.Extras"
+//= require "Cookie"
+//= require "JSON"
 
 /*
 Script: Hash.Cookie.js

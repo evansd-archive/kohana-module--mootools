@@ -1,9 +1,9 @@
-//= requires "More"
-//= requires "Log"
-//= requires "Browser"
-//= requires "Element"
-//= requires "Request"
-//= requires "Class.Extras"
+//= require "More"
+//= require "Log"
+//= require "Browser"
+//= require "Element"
+//= require "Request"
+//= require "Class.Extras"
 
 /*
 Script: Request.JSONP.js

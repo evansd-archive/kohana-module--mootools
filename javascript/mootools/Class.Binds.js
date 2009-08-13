@@ -1,5 +1,5 @@
-//= requires "More"
-//= requires "Class"
+//= require "More"
+//= require "Class"
 
 /*
 Script: Class.Binds.js

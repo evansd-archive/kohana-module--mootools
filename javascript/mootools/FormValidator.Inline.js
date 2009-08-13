@@ -1,5 +1,5 @@
-//= requires "More"
-//= requires "FormValidator"
+//= require "More"
+//= require "FormValidator"
 
 /*
 Script: FormValidator.Inline.js

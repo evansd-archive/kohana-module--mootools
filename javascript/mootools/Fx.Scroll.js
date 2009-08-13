@@ -1,7 +1,7 @@
-//= requires "More"
-//= requires "Fx"
-//= requires "Element.Event"
-//= requires "Element.Dimensions"
+//= require "More"
+//= require "Fx"
+//= require "Element.Event"
+//= require "Element.Dimensions"
 
 /*
 Script: Fx.Scroll.js

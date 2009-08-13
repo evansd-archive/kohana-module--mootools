@@ -1,8 +1,8 @@
-//= requires "More"
-//= requires "Class.Extras"
-//= requires "Element.Event"
-//= requires "Element.Style"
-//= requires "Element.Dimensions"
+//= require "More"
+//= require "Class.Extras"
+//= require "Element.Event"
+//= require "Element.Style"
+//= require "Element.Dimensions"
 
 /*
 Script: Tips.js

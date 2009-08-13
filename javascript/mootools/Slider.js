@@ -1,7 +1,7 @@
-//= requires "More"
-//= requires "Class.Binds"
-//= requires "Drag"
-//= requires "Element.Dimensions"
+//= require "More"
+//= require "Class.Binds"
+//= require "Drag"
+//= require "Element.Dimensions"
 
 /*
 Script: Slider.js

@@ -1,4 +1,4 @@
-//= requires "URI"
+//= require "URI"
 
 /*
 Script: URI.Relative.js

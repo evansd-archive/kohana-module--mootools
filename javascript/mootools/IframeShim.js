@@ -1,9 +1,9 @@
-//= requires "More"
-//= requires "Element.Position"
-//= requires "Element.Event"
-//= requires "Element.Style"
-//= requires "Class.Extras"
-//= requires "Class.Occlude"
+//= require "More"
+//= require "Element.Position"
+//= require "Element.Event"
+//= require "Element.Style"
+//= require "Class.Extras"
+//= require "Class.Occlude"
 
 /*
 Script: IframeShim.js

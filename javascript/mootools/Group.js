@@ -1,5 +1,5 @@
-//= requires "More"
-//= requires "Class.Extras"
+//= require "More"
+//= require "Class.Extras"
 
 /*
 Script: Group.js

@@ -1,6 +1,6 @@
-//= requires "More"
-//= requires "Fx.Elements"
-//= requires "Element.Event"
+//= require "More"
+//= require "Fx.Elements"
+//= require "Element.Event"
 
 /*
 Script: Fx.Accordion.js

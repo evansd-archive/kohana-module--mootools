@@ -1,8 +1,8 @@
-//= requires "More"
-//= requires "Function"
-//= requires "Array"
-//= requires "Hash"
-//= requires "Class.Refactor"
+//= require "More"
+//= require "Function"
+//= require "Array"
+//= require "Hash"
+//= require "Class.Refactor"
 
 /*
 Script: URI.js

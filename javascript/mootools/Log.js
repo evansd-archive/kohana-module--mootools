@@ -1,4 +1,4 @@
-//= requires "Class"
+//= require "Class"
 
 /*
 Script: Log.js

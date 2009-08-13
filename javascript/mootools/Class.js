@@ -1,9 +1,9 @@
-//= requires "Core"
-//= requires "Array"
-//= requires "String"
-//= requires "Function"
-//= requires "Number"
-//= requires "Hash"
+//= require "Core"
+//= require "Array"
+//= require "String"
+//= require "Function"
+//= require "Number"
+//= require "Hash"
 
 /*
 Script: Class.js

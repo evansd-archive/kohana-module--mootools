@@ -1,7 +1,7 @@
-//= requires "More"
-//= requires "Class.Extras"
-//= requires "Element.Event"
-//= requires "Element.Dimensions"
+//= require "More"
+//= require "Class.Extras"
+//= require "Element.Event"
+//= require "Element.Dimensions"
 
 /*
 Script: Scroller.js

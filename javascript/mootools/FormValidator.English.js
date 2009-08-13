@@ -1,5 +1,5 @@
-//= requires "More"
-//= requires "Lang"
+//= require "More"
+//= require "Lang"
 
 /*
 Script: FormValidator.English.js

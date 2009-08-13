@@ -1,5 +1,5 @@
-//= requires "More"
-//= requires "Element"
+//= require "More"
+//= require "Element"
 
 /*
 Script: Element.Forms.js

@@ -1,5 +1,5 @@
-//= requires "Request"
-//= requires "JSON"
+//= require "Request"
+//= require "JSON"
 
 /*
 Script: Request.JSON.js

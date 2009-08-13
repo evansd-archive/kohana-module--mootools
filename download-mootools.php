@@ -64,7 +64,7 @@ foreach($versions as $type => $version)
 			// If a filesays it depends on itself (e.g., Core.js) we ignore it
 			if (isset($deps[$file])) unset($deps[$file]);
 			
-			$deps = preg_replace('/^.*$/', '//= requires "$0"', $deps);
+			$deps = preg_replace('/^.*$/', '//= require "$0"', $deps);
 
 			$script = join("\n", $deps)."\n\n".$script;
 
@@ -72,7 +72,7 @@ foreach($versions as $type => $version)
 		}
 	}
 	
-	$file_list = preg_replace('/^.*$/', '//= requires "mootools/$0"', $file_list);
+	$file_list = preg_replace('/^.*$/', '//= require "mootools/$0"', $file_list);
 	$file_list = join("\n", $file_list);
 	file_put_contents($output_folder.DIRECTORY_SEPARATOR."mootools-$type.js", $file_list);
 	

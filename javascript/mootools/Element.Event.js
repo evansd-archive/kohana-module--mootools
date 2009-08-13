@@ -1,5 +1,5 @@
-//= requires "Element"
-//= requires "Event"
+//= require "Element"
+//= require "Event"
 
 /*
 Script: Element.Event.js

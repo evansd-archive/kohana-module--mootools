@@ -1,6 +1,6 @@
-//= requires "More"
-//= requires "Fx"
-//= requires "Element.Style"
+//= require "More"
+//= require "Fx"
+//= require "Element.Style"
 
 /*
 Script: Fx.Slide.js

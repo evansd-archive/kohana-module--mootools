@@ -1,6 +1,6 @@
-//= requires "More"
-//= requires "Core"
-//= requires "Array"
+//= require "More"
+//= require "Core"
+//= require "Array"
 
 /*
 Script: Array.Extras.js

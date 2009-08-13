@@ -1,7 +1,7 @@
-//= requires "More"
-//= requires "Fx.Morph"
-//= requires "Element.Shortcuts"
-//= requires "Element.Measure"
+//= require "More"
+//= require "Fx.Morph"
+//= require "Element.Shortcuts"
+//= require "Element.Measure"
 
 /*
 Script: Fx.Reveal.js

@@ -1,9 +1,9 @@
-//= requires "Browser"
-//= requires "Array"
-//= requires "Function"
-//= requires "Number"
-//= requires "String"
-//= requires "Hash"
+//= require "Browser"
+//= require "Array"
+//= require "Function"
+//= require "Number"
+//= require "String"
+//= require "Hash"
 
 /*
 Script: Event.js

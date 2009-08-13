@@ -1,9 +1,9 @@
-//= requires "Browser"
-//= requires "Array"
-//= requires "String"
-//= requires "Function"
-//= requires "Number"
-//= requires "Hash"
+//= require "Browser"
+//= require "Array"
+//= require "String"
+//= require "Function"
+//= require "Number"
+//= require "Hash"
 
 /*
 Script: Element.js

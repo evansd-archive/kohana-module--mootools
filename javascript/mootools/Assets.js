@@ -1,5 +1,5 @@
-//= requires "More"
-//= requires "Element.Event"
+//= require "More"
+//= require "Element.Event"
 
 /*
 Script: Assets.js

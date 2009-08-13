@@ -1,6 +1,6 @@
-//= requires "More"
-//= requires "Request"
-//= requires "Class.Refactor"
+//= require "More"
+//= require "Request"
+//= require "Class.Refactor"
 
 /*
 Script: Request.Periodical.js

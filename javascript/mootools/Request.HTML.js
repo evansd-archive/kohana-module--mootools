@@ -1,5 +1,5 @@
-//= requires "Request"
-//= requires "Element"
+//= require "Request"
+//= require "Element"
 
 /*
 Script: Request.HTML.js

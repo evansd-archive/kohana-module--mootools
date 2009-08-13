@@ -1,10 +1,10 @@
-//= requires "More"
-//= requires "Class.Extras"
-//= requires "Element.Event"
-//= requires "Class.Binds"
-//= requires "Class.Occlude"
-//= requires "Element.Position"
-//= requires "Element.Shortcuts"
+//= require "More"
+//= require "Class.Extras"
+//= require "Element.Event"
+//= require "Class.Binds"
+//= require "Class.Occlude"
+//= require "Element.Position"
+//= require "Element.Shortcuts"
 
 /*
 Script: OverText.js

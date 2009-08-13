@@ -1,4 +1,4 @@
-//= requires "Class"
+//= require "Class"
 
 /*
 Script: Class.Extras.js

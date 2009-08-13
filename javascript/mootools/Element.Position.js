@@ -1,6 +1,6 @@
-//= requires "More"
-//= requires "Element.Dimensions"
-//= requires "Element.Measure"
+//= require "More"
+//= require "Element.Dimensions"
+//= require "Element.Measure"
 
 /*
 Script: Element.Position.js

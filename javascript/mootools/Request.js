@@ -1,5 +1,5 @@
-//= requires "Class.Extras"
-//= requires "Element"
+//= require "Class.Extras"
+//= require "Element"
 
 /*
 Script: Request.js

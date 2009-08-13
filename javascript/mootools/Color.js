@@ -1,10 +1,10 @@
-//= requires "More"
-//= requires "Core"
-//= requires "Array"
-//= requires "String"
-//= requires "Function"
-//= requires "Number"
-//= requires "Hash"
+//= require "More"
+//= require "Core"
+//= require "Array"
+//= require "String"
+//= require "Function"
+//= require "Number"
+//= require "Hash"
 
 /*
 Script: Color.js

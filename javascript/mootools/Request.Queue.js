@@ -1,5 +1,5 @@
-//= requires "More"
-//= requires "Request"
+//= require "More"
+//= require "Request"
 
 /*
 Script: Request.Queue.js

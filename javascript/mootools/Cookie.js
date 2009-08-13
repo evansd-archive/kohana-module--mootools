@@ -1,6 +1,6 @@
-//= requires "Browser"
-//= requires "Class"
-//= requires "Class.Extras"
+//= require "Browser"
+//= require "Class"
+//= require "Class.Extras"
 
 /*
 Script: Cookie.js

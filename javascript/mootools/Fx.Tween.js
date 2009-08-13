@@ -1,4 +1,4 @@
-//= requires "Fx.CSS"
+//= require "Fx.CSS"
 
 /*
 Script: Fx.Tween.js

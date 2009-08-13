@@ -1,4 +1,4 @@
-//= requires "Class.Extras"
+//= require "Class.Extras"
 
 /*
 Script: Swiff.js
