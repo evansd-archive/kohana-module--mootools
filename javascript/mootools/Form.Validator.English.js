@@ -2,18 +2,27 @@
 //= require "Lang"
 
 /*
-Script: FormValidator.English.js
-	Date messages for English.
+---
 
-	License:
-		MIT-style license.
+script: Form.Validator.English.js
 
-	Authors:
-		Aaron Newton
+description: Date messages for English.
 
+license: MIT-style license
+
+authors:
+- Aaron Newton
+
+requires:
+- /Lang
+- /Form.Validator
+
+provides: [Form.Validator.English]
+
+...
 */
 
-MooTools.lang.set('en-US', 'FormValidator', {
+MooTools.lang.set('en-US', 'Form.Validator', {
 
 	required:'This field is required.',
 	minLength:'Please enter at least {minLength} characters (you entered {length} characters).',
@@ -32,7 +41,7 @@ MooTools.lang.set('en-US', 'FormValidator', {
 	errorPrefix: 'Error: ',
 	warningPrefix: 'Warning: ',
 
-	//FormValidator.Extras
+	//Form.Validator.Extras
 
 	noSpace: 'There can be no spaces in this input.',
 	reqChkByNode: 'No items are selected.',
@@ -45,6 +54,7 @@ MooTools.lang.set('en-US', 'FormValidator', {
 	afterDate: 'The date should be the same or after {label}.',
 	beforeDate: 'The date should be the same or before {label}.',
 	startMonth: 'Please select a start month',
-	sameMonth: 'These two dates must be in the same month - you must change one or the other.'
+	sameMonth: 'These two dates must be in the same month - you must change one or the other.',
+	creditcard: 'The credit card number entered is invalid. Please check the number and try again. {length} digits entered.'
 
 });

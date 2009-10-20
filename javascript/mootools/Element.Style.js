@@ -1,11 +1,20 @@
 //= require "Element"
 
 /*
-Script: Element.Style.js
-	Contains methods for interacting with the styles of Elements in a fashionable way.
+---
 
-License:
-	MIT-style license.
+script: Element.Style.js
+
+description: Contains methods for interacting with the styles of Elements in a fashionable way.
+
+license: MIT-style license.
+
+requires:
+- /Element
+
+provides: [Element.Style]
+
+...
 */
 
 Element.Properties.styles = {set: function(styles){

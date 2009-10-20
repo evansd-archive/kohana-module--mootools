@@ -2,14 +2,23 @@
 //= require "Drag.Move"
 
 /*
-Script: Sortables.js
-	Class for creating a drag and drop sorting interface for lists of items.
+---
 
-	License:
-		MIT-style license.
+script: Sortables.js
 
-	Authors:
-		Tom Occhino
+description: Class for creating a drag and drop sorting interface for lists of items.
+
+license: MIT-style license
+
+authors:
+- Tom Occhino
+
+requires:
+- /Drag.Move
+
+provides: [Slider]
+
+...
 */
 
 var Sortables = new Class({
@@ -93,7 +102,7 @@ var Sortables = new Class({
 			position: 'absolute',
 			visibility: 'hidden',
 			'width': element.getStyle('width')
-		}).inject(this.list).position(element.getPosition(element.getOffsetParent()));
+		}).inject(this.list).setPosition(element.getPosition(element.getOffsetParent()));
 	},
 
 	getDroppables: function(){

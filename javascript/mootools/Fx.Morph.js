@@ -1,11 +1,20 @@
 //= require "Fx.CSS"
 
 /*
-Script: Fx.Morph.js
-	Formerly Fx.Styles, effect to transition any number of CSS properties for an element using an object of rules, or CSS based selector rules.
+---
 
-License:
-	MIT-style license.
+script: Fx.Morph.js
+
+description: Formerly Fx.Styles, effect to transition any number of CSS properties for an element using an object of rules, or CSS based selector rules.
+
+license: MIT-style license.
+
+requires:
+- /Fx.CSS
+
+provides: [Fx.Morph]
+
+...
 */
 
 Fx.Morph = new Class({

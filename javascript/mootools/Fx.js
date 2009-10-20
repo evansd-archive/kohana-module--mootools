@@ -1,11 +1,22 @@
 //= require "Class.Extras"
 
 /*
-Script: Fx.js
-	Contains the basic animation logic to be extended by all other Fx Classes.
+---
 
-License:
-	MIT-style license.
+script: Fx.js
+
+description: Contains the basic animation logic to be extended by all other Fx Classes.
+
+license: MIT-style license.
+
+requires:
+- /Chain
+- /Events
+- /Options
+
+provides: [Fx]
+
+...
 */
 
 var Fx = new Class({

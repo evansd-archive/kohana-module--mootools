@@ -1,11 +1,20 @@
 //= require "Element"
 
 /*
-Script: Selectors.js
-	Adds advanced CSS Querying capabilities for targeting elements. Also includes pseudoselectors support.
+---
 
-License:
-	MIT-style license.
+script: Selectors.js
+
+description: Adds advanced CSS-style querying capabilities for targeting HTML Elements. Includes pseudo selectors.
+
+license: MIT-style license.
+
+requires:
+- /Element
+
+provides: [Selectors]
+
+...
 */
 
 Native.implement([Document, Element], {
@@ -248,7 +257,7 @@ Selectors.Filters = {
 	},
 
 	byClass: function(self, klass){
-		return (self.className && self.className.contains(klass, ' '));
+		return (self.className && self.className.contains && self.className.contains(klass, ' '));
 	},
 
 	byPseudo: function(self, parser, argument, local){

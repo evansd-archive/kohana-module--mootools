@@ -1,11 +1,20 @@
 //= require "Element.Event"
 
 /*
-Script: Domready.js
-	Contains the domready custom event.
+---
 
-License:
-	MIT-style license.
+script: DomReady.js
+
+description: Contains the custom event domready.
+
+license: MIT-style license.
+
+requires:
+- /Element.Event
+
+provides: [DomReady]
+
+...
 */
 
 Element.Events.domready = {
@@ -24,6 +33,8 @@ Element.Events.domready = {
 		window.fireEvent('domready');
 		document.fireEvent('domready');
 	};
+	
+	window.addEvent('load', domready);
 
 	if (Browser.Engine.trident){
 		var temp = document.createElement('div');
@@ -38,7 +49,6 @@ Element.Events.domready = {
 			(['loaded', 'complete'].contains(document.readyState)) ? domready() : arguments.callee.delay(50);
 		})();
 	} else {
-		window.addEvent('load', domready);
 		document.addEvent('DOMContentLoaded', domready);
 	}
 

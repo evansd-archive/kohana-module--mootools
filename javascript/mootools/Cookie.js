@@ -1,16 +1,24 @@
 //= require "Browser"
-//= require "Class"
 //= require "Class.Extras"
 
 /*
-Script: Cookie.js
-	Class for creating, loading, and saving browser Cookies.
+---
 
-License:
-	MIT-style license.
+script: Cookie.js
 
-Credits:
-	Based on the functions by Peter-Paul Koch (http://quirksmode.org).
+description: Class for creating, reading, and deleting browser Cookies.
+
+license: MIT-style license.
+
+credits:
+- Based on the functions by Peter-Paul Koch (http://quirksmode.org).
+
+requires:
+- /Options
+
+provides: [Cookie]
+
+...
 */
 
 var Cookie = new Class({

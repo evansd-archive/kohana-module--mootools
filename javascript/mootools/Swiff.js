@@ -1,14 +1,24 @@
 //= require "Class.Extras"
 
 /*
-Script: Swiff.js
-	Wrapper for embedding SWF movies. Supports (and fixes) External Interface Communication.
+---
 
-License:
-	MIT-style license.
+script: Swiff.js
 
-Credits:
-	Flash detection & Internet Explorer + Flash Player 9 fix inspired by SWFObject.
+description: Wrapper for embedding SWF movies. Supports External Interface Communication.
+
+license: MIT-style license.
+
+credits: 
+- Flash detection & Internet Explorer + Flash Player 9 fix inspired by SWFObject.
+
+requires:
+- /Options
+- /$util
+
+provides: [Swiff]
+
+...
 */
 
 var Swiff = new Class({

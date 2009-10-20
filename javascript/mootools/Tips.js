@@ -5,54 +5,78 @@
 //= require "Element.Dimensions"
 
 /*
-Script: Tips.js
-	Class for creating nice tips that follow the mouse cursor when hovering an element.
+---
 
-	License:
-		MIT-style license.
+script: Tips.js
 
-	Authors:
-		Valerio Proietti
-		Christoph Pojer
+description: Class for creating nice tips that follow the mouse cursor when hovering an element.
+
+license: MIT-style license
+
+authors:
+- Valerio Proietti
+- Christoph Pojer
+
+requires:
+- core:1.2.4/Options
+- core:1.2.4/Events
+- core:1.2.4/Element.Event
+- core:1.2.4/Element.Style
+- core:1.2.4/Element.Dimensions
+- /MooTools.More
+
+provides: [Tips]
+
+...
 */
 
-var Tips = new Class({
+(function(){
+
+var read = function(option, element){
+	return (option) ? ($type(option) == 'function' ? option(element) : element.get(option)) : '';
+};
+
+this.Tips = new Class({
 
 	Implements: [Events, Options],
 
 	options: {
-		onShow: function(tip){
-			tip.setStyle('visibility', 'visible');
+		/*
+		onAttach: $empty(element),
+		onDetach: $empty(element),
+		*/
+		onShow: function(){
+			this.tip.setStyle('display', 'block');
 		},
-		onHide: function(tip){
-			tip.setStyle('visibility', 'hidden');
+		onHide: function(){
+			this.tip.setStyle('display', 'none');
 		},
 		title: 'title',
-		text: function(el){
-			return el.get('rel') || el.get('href');
+		text: function(element){
+			return element.get('rel') || element.get('href');
 		},
 		showDelay: 100,
 		hideDelay: 100,
-		className: null,
+		className: 'tip-wrap',
 		offset: {x: 16, y: 16},
 		fixed: false
 	},
 
 	initialize: function(){
 		var params = Array.link(arguments, {options: Object.type, elements: $defined});
-		if (params.options && params.options.offsets) params.options.offset = params.options.offsets;
 		this.setOptions(params.options);
-		this.container = new Element('div', {'class': 'tip'});
-		this.tip = this.getTip();
+		document.id(this);
 		
 		if (params.elements) this.attach(params.elements);
 	},
 
-	getTip: function(){
-		return new Element('div', {
+	toElement: function(){
+		if (this.tip) return this.tip;
+		
+		this.container = new Element('div', {'class': 'tip'});
+		return this.tip = new Element('div', {
 			'class': this.options.className,
 			styles: {
-				visibility: 'hidden',
 				display: 'none',
 				position: 'absolute',
 				top: 0,
@@ -66,20 +90,22 @@ var Tips = new Class({
 	},
 
 	attach: function(elements){
-		var read = function(option, element){
-			if (option == null) return '';
-			return $type(option) == 'function' ? option(element) : element.get(option);
-		};
 		$$(elements).each(function(element){
-			var title = read(this.options.title, element);
+			var title = read(this.options.title, element),
+				text = read(this.options.text, element);
+			
 			element.erase('title').store('tip:native', title).retrieve('tip:title', title);
-			element.retrieve('tip:text', read(this.options.text, element));
+			element.retrieve('tip:text', text);
+			this.fireEvent('attach', [element]);
 			
 			var events = ['enter', 'leave'];
 			if (!this.options.fixed) events.push('move');
 			
 			events.each(function(value){
-				element.addEvent('mouse' + value, element.retrieve('tip:' + value, this['element' + value.capitalize()].bindWithEvent(this, element)));
+				var event = element.retrieve('tip:' + value);
+				if (!event) event = this['element' + value.capitalize()].bindWithEvent(this, element);
+				
+				element.store('tip:' + value, event).addEvent('mouse' + value, event);
 			}, this);
 		}, this);
 		
@@ -89,12 +115,12 @@ var Tips = new Class({
 	detach: function(elements){
 		$$(elements).each(function(element){
 			['enter', 'leave', 'move'].each(function(value){
-				element.removeEvent('mouse' + value, element.retrieve('tip:' + value) || $empty);
+				element.removeEvent('mouse' + value, element.retrieve('tip:' + value)).eliminate('tip:' + value);
 			});
 			
-			element.eliminate('tip:enter').eliminate('tip:leave').eliminate('tip:move');
+			this.fireEvent('detach', [element]);
 			
-			if ($type(this.options.title) == 'string' && this.options.title == 'title'){
+			if (this.options.title == 'title'){ // This is necessary to check if we can revert the title
 				var original = element.retrieve('tip:native');
 				if (original) element.set('title', original);
 			}
@@ -104,29 +130,32 @@ var Tips = new Class({
 	},
 
 	elementEnter: function(event, element){
-		$A(this.container.childNodes).each(Element.dispose);
+		this.container.empty();
 		
 		['title', 'text'].each(function(value){
 			var content = element.retrieve('tip:' + value);
-			if (!content) return;
-			
-			this[value + 'Element'] = new Element('div', {'class': 'tip-' + value}).inject(this.container);
-			this.fill(this[value + 'Element'], content);
+			if (content) this.fill(new Element('div', {'class': 'tip-' + value}).inject(this.container), content);
 		}, this);
 		
-		this.timer = $clear(this.timer);
+		$clear(this.timer);
 		this.timer = this.show.delay(this.options.showDelay, this, element);
-		this.tip.setStyle('display', 'block');
-		this.position((!this.options.fixed) ? event : {page: element.getPosition()});
+		this.position((this.options.fixed) ? {page: element.getPosition()} : event);
 	},
 
 	elementLeave: function(event, element){
 		$clear(this.timer);
-		this.tip.setStyle('display', 'none');
 		this.timer = this.hide.delay(this.options.hideDelay, this, element);
+		this.fireForParent(event, element);
 	},
 
-	elementMove: function(event){
+	fireForParent: function(event, element) {
+			parentNode = element.getParent();
+			if (parentNode == document.body) return;
+			if (parentNode.retrieve('tip:enter')) parentNode.fireEvent('mouseenter', event);
+			else return this.fireForParent(parentNode, event);
+	},
+
+	elementMove: function(event, element){
 		this.position(event);
 	},
 
@@ -149,12 +178,14 @@ var Tips = new Class({
 		else element.adopt(contents);
 	},
 
-	show: function(el){
-		this.fireEvent('show', [this.tip, el]);
+	show: function(element){
+		this.fireEvent('show', [element]);
 	},
 
-	hide: function(el){
-		this.fireEvent('hide', [this.tip, el]);
+	hide: function(element){
+		this.fireEvent('hide', [element]);
 	}
 
 });
+
+})();

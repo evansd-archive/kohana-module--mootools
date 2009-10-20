@@ -2,19 +2,27 @@
 //= require "Element.Style"
 
 /*
-Script: Element.Measure.js
-	Extends the Element native object to include methods useful in measuring dimensions.
+---
 
-	Element.measure / .expose methods by Daniel Steigerwald
-	License: MIT-style license.
-	Copyright: Copyright (c) 2008 Daniel Steigerwald, daniel.steigerwald.cz
+script: Element.Measure.js
 
-	License:
-		MIT-style license.
+description: Extends the Element native object to include methods useful in measuring dimensions.
 
-	Authors:
-		Aaron Newton
+credits: "Element.measure / .expose methods by Daniel Steigerwald License: MIT-style license. Copyright: Copyright (c) 2008 Daniel Steigerwald, daniel.steigerwald.cz"
 
+license: MIT-style license
+
+authors:
+- Aaron Newton
+
+requires:
+- core:1.2.4/Element.Style
+- core:1.2.4/Element.Dimensions
+- /MooTools.More
+
+provides: [Element.Measure]
+
+...
 */
 
 Element.implement({
@@ -25,8 +33,8 @@ Element.implement({
 		};
 		if (vis(this)) return fn.apply(this);
 		var parent = this.getParent(),
-			toMeasure = [], 
-			restorers = [];
+			restorers = [],
+			toMeasure = []; 
 		while (!vis(parent) && parent != document.body) {
 			toMeasure.push(parent.expose());
 			parent = parent.getParent();
@@ -59,14 +67,17 @@ Element.implement({
 		var getSize = function(el, options){
 			return (options.computeSize)?el.getComputedSize(options):el.getSize();
 		};
-		if (this.getStyle('display') == 'none'){
+		var parent = this.getParent('body');
+		if (parent && this.getStyle('display') == 'none'){
 			dim = this.measure(function(){
 				return getSize(this, options);
 			});
-		} else {
+		} else if (parent){
 			try { //safari sometimes crashes here, so catch it
 				dim = getSize(this, options);
 			}catch(e){}
+		} else {
+			dim = {x: 0, y: 0};
 		}
 		return $chk(dim.x) ? $extend(dim, {width: dim.x, height: dim.y}) : $extend(dim, {x: dim.width, y: dim.height});
 	},
@@ -105,8 +116,7 @@ Element.implement({
 		var subtracted = [];
 		$each(options.plains, function(plain, key){ //keys: width, height, plains: ['left', 'right'], ['top','bottom']
 			var capitalized = key.capitalize();
-			size['total' + capitalized] = 0;
-			size['computed' + capitalized] = 0;
+			size['total' + capitalized] = size['computed' + capitalized] = 0;
 			plain.each(function(edge){ //top, left, right, bottom
 				size['computed' + edge.capitalize()] = 0;
 				getStyles.each(function(style, i){ //padding, border, etc.

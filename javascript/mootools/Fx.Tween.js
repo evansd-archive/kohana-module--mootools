@@ -1,11 +1,20 @@
 //= require "Fx.CSS"
 
 /*
-Script: Fx.Tween.js
-	Formerly Fx.Style, effect to transition any CSS property for an element.
+---
 
-License:
-	MIT-style license.
+script: Fx.Tween.js
+
+description: Formerly Fx.Style, effect to transition any CSS property for an element.
+
+license: MIT-style license.
+
+requires: 
+- /Fx.CSS
+
+provides: [Fx.Tween, Element.fade, Element.highlight]
+
+...
 */
 
 Fx.Tween = new Class({

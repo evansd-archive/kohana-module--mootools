@@ -2,14 +2,25 @@
 //= require "Request"
 
 /*
-Script: Request.Queue.js
-	Controls several instances of Request and its variants to run only one request at a time.
+---
 
-	License:
-		MIT-style license.
+script: Request.Queue.js
 
-	Authors:
-		Aaron Newton
+description: Controls several instances of Request and its variants to run only one request at a time.
+
+license: MIT-style license
+
+authors:
+- Aaron Newton
+
+requires:
+- core:1.2.4/Element
+- core:1.2.4/Request
+- /Log
+
+provides: [Request.Queue]
+
+...
 */
 
 Request.Queue = new Class({
@@ -24,7 +35,9 @@ Request.Queue = new Class({
 		onComplete: $empty(argsPassedToOnComplete),
 		onCancel: $empty(argsPassedToOnCancel),
 		onException: $empty(argsPassedToOnException),
-		onFailure: $empty(argsPassedToOnFailure),*/
+		onFailure: $empty(argsPassedToOnFailure),
+		onEnd: $empty,
+		*/
 		stopOnFailure: true,
 		autoAdvance: true,
 		concurrent: 1,
@@ -32,11 +45,16 @@ Request.Queue = new Class({
 	},
 
 	initialize: function(options){
+		if(options){
+			var requests = options.requests;
+			delete options.requests;	
+		}
 		this.setOptions(options);
 		this.requests = new Hash;
-		this.addRequests(this.options.requests);
 		this.queue = [];
 		this.reqBinders = {};
+		
+		if(requests) this.addRequests(requests);
 	},
 
 	addRequest: function(name, request){
@@ -87,11 +105,13 @@ Request.Queue = new Class({
 	},
 
 	getRunning: function(){
-		return this.requests.filter(function(r){ return r.running; });
+		return this.requests.filter(function(r){
+			return r.running;
+		});
 	},
 
 	isRunning: function(){
-		return !!this.getRunning().getKeys().length;
+		return !!(this.getRunning().getKeys().length);
 	},
 
 	send: function(name, options){
@@ -161,6 +181,7 @@ Request.Queue = new Class({
 
 	onComplete: function(){
 		this.fireEvent('complete', arguments);
+		if (!this.queue.length) this.fireEvent('end');
 	},
 
 	onCancel: function(){

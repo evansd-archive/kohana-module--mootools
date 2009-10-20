@@ -2,11 +2,21 @@
 //= require "Element.Style"
 
 /*
-Script: Fx.CSS.js
-	Contains the CSS animation logic. Used by Fx.Tween, Fx.Morph, Fx.Elements.
+---
 
-License:
-	MIT-style license.
+script: Fx.CSS.js
+
+description: Contains the CSS animation logic. Used by Fx.Tween, Fx.Morph, Fx.Elements.
+
+license: MIT-style license.
+
+requires:
+- /Fx
+- /Element.Style
+
+provides: [Fx.CSS]
+
+...
 */
 
 Fx.CSS = new Class({

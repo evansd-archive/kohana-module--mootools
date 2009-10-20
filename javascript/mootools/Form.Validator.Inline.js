@@ -1,20 +1,29 @@
 //= require "More"
-//= require "FormValidator"
+//= require "Form.Validator"
 
 /*
-Script: FormValidator.Inline.js
-	Extends FormValidator to add inline messages.
+---
 
-	License:
-		MIT-style license.
+script: Form.Validator.Inline.js
 
-	Authors:
-		Aaron Newton
+description: Extends Form.Validator to add inline messages.
+
+license: MIT-style license
+
+authors:
+- Aaron Newton
+
+requires:
+- /Form.Validator
+
+provides: [Form.Validator.Inline]
+
+...
 */
 
-FormValidator.Inline = new Class({
+Form.Validator.Inline = new Class({
 
-	Extends: FormValidator,
+	Extends: Form.Validator,
 
 	options: {
 		scrollToErrorsOnSubmit: true,

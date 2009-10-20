@@ -1,5 +1,4 @@
 //= require "More"
-//= require "Core"
 //= require "Array"
 //= require "String"
 //= require "Function"
@@ -7,14 +6,28 @@
 //= require "Hash"
 
 /*
-Script: Color.js
-	Class for creating and manipulating colors in JavaScript. Supports HSB -> RGB Conversions and vice versa.
+---
 
-	License:
-		MIT-style license.
+script: Color.js
 
-	Authors:
-		Valerio Proietti
+description: Class for creating and manipulating colors in JavaScript. Supports HSB -> RGB Conversions and vice versa.
+
+license: MIT-style license
+
+authors:
+- Valerio Proietti
+
+requires:
+- core:1.2.4/Array
+- core:1.2.4/String
+- core:1.2.4/Number
+- core:1.2.4/Hash
+- core:1.2.4/Function
+- core:1.2.4/$util
+
+provides: [Color]
+
+...
 */
 
 var Color = new Native({
@@ -92,15 +105,16 @@ var $HEX = function(hex){
 Array.implement({
 
 	rgbToHsb: function(){
-		var red = this[0], green = this[1], blue = this[2];
-		var hue, saturation, brightness;
-		var max = Math.max(red, green, blue), min = Math.min(red, green, blue);
+		var red = this[0],
+				green = this[1],
+				blue = this[2],
+				hue = 0;
+		var max = Math.max(red, green, blue),
+				min = Math.min(red, green, blue);
 		var delta = max - min;
-		brightness = max / 255;
-		saturation = (max != 0) ? delta / max : 0;
-		if (saturation == 0){
-			hue = 0;
-		} else {
+		var brightness = max / 255,
+				saturation = (max != 0) ? delta / max : 0;
+		if(saturation != 0) {
 			var rr = (max - red) / delta;
 			var gr = (max - green) / delta;
 			var br = (max - blue) / delta;

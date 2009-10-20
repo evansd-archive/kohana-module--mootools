@@ -2,11 +2,20 @@
 //= require "JSON"
 
 /*
-Script: Request.JSON.js
-	Extends the basic Request Class with additional methods for sending and receiving JSON data.
+---
 
-License:
-	MIT-style license.
+script: Request.JSON.js
+
+description: Extends the basic Request Class with additional methods for sending and receiving JSON data.
+
+license: MIT-style license.
+
+requires:
+- /Request JSON
+
+provides: [Request.HTML]
+
+...
 */
 
 Request.JSON = new Class({

@@ -4,15 +4,25 @@
 //= require "Element.Measure"
 
 /*
-Script: Fx.Reveal.js
-	Defines Fx.Reveal, a class that shows and hides elements with a transition.
+---
 
-	License:
-		MIT-style license.
+script: Fx.Reveal.js
 
-	Authors:
-		Aaron Newton
+description: Defines Fx.Reveal, a class that shows and hides elements with a transition.
 
+license: MIT-style license
+
+authors:
+- Aaron Newton
+
+requires:
+- core:1.2.4/Fx.Morph
+- /Element.Shortcuts
+- /Element.Measure
+
+provides: [Fx.Reveal]
+
+...
 */
 
 Fx.Reveal = new Class({
@@ -25,6 +35,7 @@ Fx.Reveal = new Class({
 		onComplete: $empty(thisElement),
 		heightOverride: null,
 		widthOverride: null, */
+		link: 'cancel',
 		styles: ['padding', 'border', 'margin'],
 		transitionOpacity: !Browser.Engine.trident4,
 		mode: 'vertical',
@@ -99,8 +110,7 @@ Fx.Reveal = new Class({
 					 this.element.getStyle('visiblity') == 'hidden' ||
 					 this.element.getStyle('opacity') == 0){
 					this.showing = true;
-					this.hiding = false;
-					this.hidden = false;
+					this.hiding = this.hidden =  false;
 					var setToAuto, startStyles;
 					//toggle display, but hide it
 					this.element.measure(function(){
@@ -180,6 +190,12 @@ Fx.Reveal = new Class({
 			this.dissolve();
 		}
 		return this;
+	},
+
+	cancel: function(){
+		this.parent.apply(this, arguments);
+		this.hidding = false;
+		this.showing = false;
 	}
 
 });
@@ -189,7 +205,7 @@ Element.Properties.reveal = {
 	set: function(options){
 		var reveal = this.retrieve('reveal');
 		if (reveal) reveal.cancel();
-		return this.eliminate('reveal').store('reveal:options', $extend({link: 'cancel'}, options));
+		return this.eliminate('reveal').store('reveal:options', options);
 	},
 
 	get: function(options){

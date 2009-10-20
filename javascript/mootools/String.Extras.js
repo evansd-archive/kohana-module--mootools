@@ -4,16 +4,26 @@
 //= require "Hash.Extras"
 
 /*
-Script: String.Extras.js
-	Extends the String native object to include methods useful in managing various kinds of strings (query strings, urls, html, etc).
+---
 
-	License:
-		MIT-style license.
+script: String.Extras.js
 
-	Authors:
-		Aaron Newton
-		Guillermo Rauch
+description: Extends the String native object to include methods useful in managing various kinds of strings (query strings, urls, html, etc).
 
+license: MIT-style license
+
+authors:
+- Aaron Newton
+- Guillermo Rauch
+
+requires:
+- core:1.2.4/String
+- core:1.2.4/$util
+- core:1.2.4/Array
+
+provides: [String.Extras]
+
+...
 */
 
 (function(){
@@ -33,6 +43,13 @@ var tidymap = {
 	"\uFFFD": "&raquo;"
 };
 
+var getRegForTag = function(tag, contents) {
+	tag = tag || '';
+	var regstr = contents ? "<" + tag + "[^>]*>([\\s\\S]*?)<\/" + tag + ">" : "<\/?" + tag + "([^>]+)?>";
+	reg = new RegExp(regstr, "gi");
+	return reg;
+};
+
 String.implement({
 
 	standardize: function(){
@@ -49,15 +66,18 @@ String.implement({
 
 	pad: function(length, str, dir){
 		if (this.length >= length) return this;
-		str = str || ' ';
-		var pad = str.repeat(length - this.length).substr(0, length - this.length);
+		var pad = (str == null ? ' ' : '' + str).repeat(length - this.length).substr(0, length - this.length);
 		if (!dir || dir == 'right') return this + pad;
 		if (dir == 'left') return pad + this;
 		return pad.substr(0, (pad.length / 2).floor()) + this + pad.substr(0, (pad.length / 2).ceil());
 	},
 
-	stripTags: function(){
-		return this.replace(/<\/?[^>]+>/gi, '');
+	getTags: function(tag, contents){
+		return this.match(getRegForTag(tag, contents)) || [];
+	},
+
+	stripTags: function(tag, contents){
+		return this.replace(getRegForTag(tag, contents), '');
 	},
 
 	tidy: function(){

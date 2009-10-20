@@ -1,14 +1,27 @@
+//= require "More"
 //= require "URI"
+//= require "Class.Refactor"
 
 /*
-Script: URI.Relative.js
-	Extends the URI class to add methods for computing relative and absolute urls.
+---
 
-	License:
-		MIT-style license.
+script: URI.Relative.js
 
-	Authors:
-		Sebastian Markbåge
+description: Extends the URI class to add methods for computing relative and absolute urls.
+
+license: MIT-style license
+
+authors:
+- Sebastian Markbåge
+
+
+requires:
+- /Class.refactor
+- /URI
+
+provides: [URI.Relative]
+
+...
 */
 
 URI = Class.refactor(URI, {

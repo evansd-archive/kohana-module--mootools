@@ -2,15 +2,24 @@
 //= require "Lang"
 
 /*
-Script: Date.English.US.js
-	Date messages for US English.
+---
 
-	License:
-		MIT-style license.
+script: Date.English.US.js
 
-	Authors:
-		Aaron Newton
+description: Date messages for US English.
 
+license: MIT-style license
+
+authors:
+- Aaron Newton
+
+requires:
+- /Lang
+- /Date
+
+provides: [Date.English.US]
+
+...
 */
 
 MooTools.lang.set('en-US', 'Date', {
@@ -37,12 +46,24 @@ MooTools.lang.set('en-US', 'Date', {
 	hoursAgo: 'about {delta} hours ago',
 	dayAgo: '1 day ago',
 	daysAgo: '{delta} days ago',
+	weekAgo: '1 week ago',
+	weeksAgo: '{delta} weeks ago',
+	monthAgo: '1 month ago',
+	monthsAgo: '{delta} months ago',
+	yearAgo: '1 year ago',
+	yearsAgo: '{delta} years ago',
 	lessThanMinuteUntil: 'less than a minute from now',
 	minuteUntil: 'about a minute from now',
 	minutesUntil: '{delta} minutes from now',
 	hourUntil: 'about an hour from now',
 	hoursUntil: 'about {delta} hours from now',
 	dayUntil: '1 day from now',
-	daysUntil: '{delta} days from now'
+	daysUntil: '{delta} days from now',
+	weekUntil: '1 week from now',
+	weeksUntil: '{delta} weeks from now',
+	monthUntil: '1 month from now',
+	monthsUntil: '{delta} months from now',
+	yearUntil: '1 year from now',
+	yearsUntil: '{delta} years from now'
 
 });

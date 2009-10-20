@@ -1,20 +1,29 @@
 //= require "More"
 //= require "Log"
-//= require "Browser"
 //= require "Element"
 //= require "Request"
-//= require "Class.Extras"
 
 /*
-Script: Request.JSONP.js
-	Defines Request.JSONP, a class for cross domain javascript via script injection.
+---
 
-	License:
-		MIT-style license.
+script: Request.JSONP.js
 
-	Authors:
-		Aaron Newton
-		Guillermo Rauch
+description: Defines Request.JSONP, a class for cross domain javascript via script injection.
+
+license: MIT-style license
+
+authors:
+- Aaron Newton
+- Guillermo Rauch
+
+requires:
+- core:1.2.4/Element
+- core:1.2.4/Request
+- /Log
+
+provides: [Request.JSONP]
+
+...
 */
 
 Request.JSONP = new Class({
@@ -26,7 +35,9 @@ Request.JSONP = new Class({
 		onRequest: $empty(scriptElement),
 		onComplete: $empty(data),
 		onSuccess: $empty(data),
-		onCancel: $empty(),*/
+		onCancel: $empty(),
+		log: false,
+		*/
 		url: '',
 		data: {},
 		retries: 0,
@@ -38,6 +49,7 @@ Request.JSONP = new Class({
 
 	initialize: function(options){
 		this.setOptions(options);
+		if (this.options.log) this.enableLog();
 		this.running = false;
 		this.requests = 0;
 		this.triesRemaining = [];
@@ -55,7 +67,9 @@ Request.JSONP = new Class({
 	send: function(options){
 		if (!$chk(arguments[1]) && !this.check(options)) return this;
 
-		var type = $type(options), old = this.options, index = $chk(arguments[1]) ? arguments[1] : this.requests++;
+		var type = $type(options), 
+				old = this.options, 
+				index = $chk(arguments[1]) ? arguments[1] : this.requests++;
 		if (type == 'string' || type == 'element') options = {data: options};
 
 		options = $extend({data: old.data, url: old.url}, options);
@@ -74,13 +88,11 @@ Request.JSONP = new Class({
 					this.triesRemaining[index] = remaining - 1;
 					if (script){
 						script.destroy();
-						this.send(options, index);
-						this.fireEvent('retry', this.triesRemaining[index]);
+						this.send(options, index).fireEvent('retry', this.triesRemaining[index]);
 					}
 				} else if(script && this.options.timeout){
 					script.destroy();
-					this.cancel();
-					this.fireEvent('failure');
+					this.cancel().fireEvent('failure');
 				}
 			}).delay(this.options.timeout, this);
 		}).delay(Browser.Engine.trident ? 50 : 0, this);
@@ -95,7 +107,8 @@ Request.JSONP = new Class({
 	},
 
 	getScript: function(options){
-		var index = Request.JSONP.counter, data;
+		var index = Request.JSONP.counter,
+				data;
 		Request.JSONP.counter++;
 
 		switch ($type(options.data)){

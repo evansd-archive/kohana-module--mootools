@@ -2,11 +2,21 @@
 //= require "Element"
 
 /*
-Script: Request.HTML.js
-	Extends the basic Request Class with additional methods for interacting with HTML responses.
+---
 
-License:
-	MIT-style license.
+script: Request.HTML.js
+
+description: Extends the basic Request Class with additional methods for interacting with HTML responses.
+
+license: MIT-style license.
+
+requires:
+- /Request
+- /Element
+
+provides: [Request.HTML]
+
+...
 */
 
 Request.HTML = new Class({

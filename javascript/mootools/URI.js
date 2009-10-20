@@ -1,42 +1,48 @@
 //= require "More"
-//= require "Function"
-//= require "Array"
-//= require "Hash"
-//= require "Class.Refactor"
+//= require "String.QueryString"
+//= require "Selectors"
 
 /*
-Script: URI.js
-	Provides methods useful in managing the window location and uris.
+---
 
-	License:
-		MIT-style license.
+script: URI.js
 
-	Authors:
-		Sebastian Markbåge, Aaron Newton
+description: Provides methods useful in managing the window location and uris.
+
+license: MIT-style license
+
+authors:
+- Sebastian Markbåge
+- Aaron Newton
+
+requires:
+- core:1.2.4/Selectors
+- /String.QueryString
+
+provides: URI
+
+...
 */
 
 var URI = new Class({
 
 	Implements: Options,
 
-	/*
 	options: {
-		base: false
+		/*base: false*/
 	},
-	*/
 
 	regex: /^(?:(\w+):)?(?:\/\/(?:(?:([^:@]*):?([^:@]*))?@)?([^:\/?#]*)(?::(\d*))?)?(\.\.?$|(?:[^?#\/]*\/)*)([^?#]*)(?:\?([^#]*))?(?:#(.*))?/,
 	parts: ['scheme', 'user', 'password', 'host', 'port', 'directory', 'file', 'query', 'fragment'],
-	schemes: { http: 80, https: 443, ftp: 21, rtsp: 554, mms: 1755, file: 0 },
+	schemes: {http: 80, https: 443, ftp: 21, rtsp: 554, mms: 1755, file: 0},
 
 	initialize: function(uri, options){
 		this.setOptions(options);
 		var base = this.options.base || URI.base;
-		uri = uri || base;
-		if (uri && uri.parsed)
-			this.parsed = $unlink(uri.parsed);
-		else
-			this.set('value', uri.href || uri.toString(), base ? new URI(base) : false);
+		if(!uri) uri = base;
+		
+		if (uri && uri.parsed) this.parsed = $unlink(uri.parsed);
+		else this.set('value', uri.href || uri.toString(), base ? new URI(base) : false);
 	},
 
 	parse: function(value, base){
@@ -99,7 +105,7 @@ var URI = new Class({
 			case 'value': return this.combine(this.parsed, base ? base.parsed : false);
 			case 'data' : return this.getData();
 		}
-		return this.parsed[part] || undefined;
+		return this.parsed[part] || '';
 	},
 
 	go: function(){
@@ -118,9 +124,9 @@ var URI = new Class({
 	},
 
 	setData: function(values, merge, part){
-		if ($type(arguments[0]) == 'string'){ 
-			values = this.getData(); 
-			values[arguments[0]] = arguments[1]; 
+		if (typeof values == 'string'){
+			values = this.getData();
+			values[arguments[0]] = arguments[1];
 		} else if (merge) {
 			values = $merge(this.getData(), values);
 		}
@@ -133,12 +139,9 @@ var URI = new Class({
 
 });
 
-['toString', 'valueOf'].each(function(method){
-	URI.prototype[method] = function(){
-		return this.get('value');
-	};
-});
-
+URI.prototype.toString = URI.prototype.valueOf = function(){
+	return this.get('value');
+};
 
 URI.regs = {
 	endSlash: /\/$/,
@@ -146,10 +149,12 @@ URI.regs = {
 	directoryDot: /\.\/|\.$/
 };
 
-URI.base = new URI($$('base[href]').getLast(), { base: document.location });
+URI.base = new URI(document.getElements('base[href]', true).getLast(), {base: document.location});
 
 String.implement({
 
-	toURI: function(options){ return new URI(this, options); }
+	toURI: function(options){
+		return new URI(this, options);
+	}
 
 });

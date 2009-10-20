@@ -4,14 +4,26 @@
 //= require "Element.Dimensions"
 
 /*
-Script: Scroller.js
-	Class which scrolls the contents of any Element (including the window) when the mouse reaches the Element's boundaries.
+---
 
-	License:
-		MIT-style license.
+script: Scroller.js
 
-	Authors:
-		Valerio Proietti
+description: Class which scrolls the contents of any Element (including the window) when the mouse reaches the Element's boundaries.
+
+license: MIT-style license
+
+authors:
+- Valerio Proietti
+
+requires:
+- core:1.2.4/Events
+- core:1.2.4/Options
+- core:1.2.4/Element.Event
+- core:1.2.4/Element.Dimensions
+
+provides: [Scroller]
+
+...
 */
 
 var Scroller = new Class({
@@ -41,16 +53,17 @@ var Scroller = new Class({
 
 	start: function(){
 		this.listener.addEvents({
-			mouseenter: this.bound.attach,
-			mouseleave: this.bound.detach
+			mouseover: this.bound.attach,
+			mouseout: this.bound.detach
 		});
 	},
 
 	stop: function(){
 		this.listener.removeEvents({
-			mouseenter: this.bound.attach,
-			mouseleave: this.bound.detach
+			mouseover: this.bound.attach,
+			mouseout: this.bound.detach
 		});
+		this.detach();
 		this.timer = $clear(this.timer);
 	},
 
