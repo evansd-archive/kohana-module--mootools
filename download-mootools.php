@@ -30,7 +30,7 @@ PHP_SAPI === 'cli' or die('Please run from the command line');
 $versions = array
 (
 	'core' => '1.2.4',
-	'more' => '1.2.4.1'
+	'more' => '1.2.4.2'
 );
 
 $output_folder = realpath(dirname(__FILE__).'/javascript/');
