@@ -1,3 +1,4 @@
+//= require "More"
 //= require "Form.Request"
 //= require "Fx.Reveal"
 //= require "Elements.From"

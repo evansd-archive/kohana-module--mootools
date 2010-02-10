@@ -3,7 +3,7 @@
 /*
 ---
 
-script: Date.Catalan.US.js
+script: Date.Catalan.js
 
 description: Date messages for Catalan.
 

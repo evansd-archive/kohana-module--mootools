@@ -6,7 +6,7 @@
 
 script: Form.Validator.English.js
 
-description: Date messages for English.
+description: Form Validator messages for English.
 
 license: MIT-style license
 

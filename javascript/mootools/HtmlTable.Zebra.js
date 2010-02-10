@@ -1,3 +1,4 @@
+//= require "More"
 //= require "HtmlTable"
 //= require "Class.Refactor"
 

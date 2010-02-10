@@ -1,18 +1,27 @@
 //= require "Lang"
 
 /*
-Script: FormValidator.Czech.js
-	Date messages for Czech
+---
 
-	License:
-		MIT-style license.
+script: Form.Validator.Czech.js
 
-	Authors:
-		Jan Černý chemiX
+description: Form Validator messages for Czech.
 
+license: MIT-style license
+
+authors:
+- Jan Černý chemiX
+
+requires:
+- /Lang
+- /Form.Validator
+
+provides: [Form.Validator.Czech]
+
+...
 */
 
-MooTools.lang.set('cs-CZ', 'FormValidator', {
+MooTools.lang.set('cs-CZ', 'Form.Validator', {
 
 	required:'Tato položka je povinná.',
 	minLength:'Zadejte prosím alespoň {minLength} znaků (napsáno {length} znaků).',
@@ -31,7 +40,7 @@ MooTools.lang.set('cs-CZ', 'FormValidator', {
 	errorPrefix: 'Chyba: ',
 	warningPrefix: 'Upozornění: ',
 
-	//FormValidator.Extras
+	//Form.Validator.Extras
 
 	noSpace: 'V této položce nejsou povoleny mezery',
 	reqChkByNode: 'Nejsou vybrány žádné položky.',
@@ -44,5 +53,7 @@ MooTools.lang.set('cs-CZ', 'FormValidator', {
 	afterDate: 'Datum by mělo být stejné nebo větší než {label}.',
 	beforeDate: 'Datum by mělo být stejné nebo menší než {label}.',
 	startMonth: 'Vyberte počáteční měsíc.',
-	sameMonth: 'Tyto dva datumy musí být ve stejném měsíci - změňte jeden z nich.'
+	sameMonth: 'Tyto dva datumy musí být ve stejném měsíci - změňte jeden z nich.',
+    creditcard: 'Zadané číslo kreditní karty je neplatné. Prosím opravte ho. Bylo zadáno {length} čísel.'
+
 });
