@@ -41,7 +41,7 @@ $core = array();
 
 foreach($versions as $type => $version)
 {
-	$mootools = "http://github.com/mootools/mootools-$type/tree/$version/Source";
+	$mootools = "http://github.com/mootools/mootools-$type/blob/$version/Source";
 
 	echo "From: $mootools\n";
 
