@@ -8,20 +8,13 @@
 /*
 ---
 
-script: Element.js
+name: Element
 
 description: One of the most important items in MooTools. Contains the dollar function, the dollars function, and an handful of cross-browser, time-saver methods to let you easily work with HTML Elements.
 
 license: MIT-style license.
 
-requires:
-- /Window
-- /Document
-- /Array
-- /String
-- /Function
-- /Number
-- /Hash
+requires: [Window, Document, Array, String, Function, Number, Hash]
 
 provides: [Element, Elements, $, $$, Iframe]
 
@@ -128,18 +121,35 @@ Elements.implement({
 
 });
 
+(function(){
+
+/*<ltIE8>*/
+var createElementAcceptsHTML;
+try {
+	var x = document.createElement('<input name=x>');
+	createElementAcceptsHTML = (x.name == 'x');
+} catch(e){}
+
+var escapeQuotes = function(html){
+	return ('' + html).replace(/&/g,'&amp;').replace(/"/g,'&quot;');
+};
+/*</ltIE8>*/
+
 Document.implement({
 
 	newElement: function(tag, props){
-		if (Browser.Engine.trident && props){
-			['name', 'type', 'checked'].each(function(attribute){
-				if (!props[attribute]) return;
-				tag += ' ' + attribute + '="' + props[attribute] + '"';
-				if (attribute != 'checked') delete props[attribute];
-			});
-			tag = '<' + tag + '>';
+		if (props && props.checked != null) props.defaultChecked = props.checked;
+		/*<ltIE8>*/// Fix for readonly name and type properties in IE < 8
+		if (createElementAcceptsHTML && props){
+			tag = '<' + tag;
+			if (props.name) tag += ' name="' + escapeQuotes(props.name) + '"';
+			if (props.type) tag += ' type="' + escapeQuotes(props.type) + '"';
+			tag += '>';
+			delete props.name;
+			delete props.type;
 		}
-		return document.id(this.createElement(tag)).set(props);
+		/*</ltIE8>*/
+		return this.id(this.createElement(tag)).set(props);
 	},
 
 	newTextNode: function(text){
@@ -190,6 +200,8 @@ Document.implement({
 	})()
 
 });
+
+})();
 
 if (window.$ == null) Window.implement({
 	$: function(el, nc){
@@ -254,6 +266,7 @@ var get = function(uid){
 var clean = function(item, retain){
 	if (!item) return;
 	var uid = item.uid;
+	if (retain !== true) retain = false;
 	if (Browser.Engine.trident){
 		if (item.clearAttributes){
 			var clone = retain && item.cloneNode(false);

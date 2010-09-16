@@ -4,17 +4,15 @@
 /*
 ---
 
-script: Element.Event.js
+name: Element.Event
 
 description: Contains Element methods for dealing with events. This file also includes mouseenter and mouseleave custom Element Events.
 
 license: MIT-style license.
 
-requires: 
-- /Element
-- /Event
+requires: [Element, Event]
 
-provides: [Element.Event]
+provides: Element.Event
 
 ...
 */
@@ -120,6 +118,12 @@ Native.implement([Element, Window, Document], {
 	}
 
 });
+
+// IE9
+try {
+	if (typeof HTMLElement != 'undefined')
+		HTMLElement.prototype.fireEvent = Element.prototype.fireEvent;
+} catch(e){}
 
 Element.NativeEvents = {
 	click: 2, dblclick: 2, mouseup: 2, mousedown: 2, contextmenu: 2, //mouse buttons
