@@ -88,8 +88,9 @@ foreach($types as $type)
 	}
 }
 
-echo "Creating symlink from DomReady.js to DOMReady.js for backwards compatibility\n";
+echo "Creating symlinks for backwards compatibility\n";
 symlink($output_dir.'mootools/DOMReady.js', $output_dir.'mootools/DomReady.js');
+symlink($output_dir.'mootools/Slick.Finder.js', $output_dir.'mootools/Selectors.js');
 
 echo "Creating mootools-core.js, which includes all of Mootools Core\n";
 $headers = array();
