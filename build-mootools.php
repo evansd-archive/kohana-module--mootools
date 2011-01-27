@@ -88,7 +88,10 @@ foreach($types as $type)
 	}
 }
 
-echo "Creating mootools-core.js, which includeds all of Mootools Core\n";
+echo "Creating symlink from DomReady.js to DOMReady.js for backwards compatibility\n";
+symlink($output_dir.'mootools/DOMReady.js', $output_dir.'mootools/DomReady.js');
+
+echo "Creating mootools-core.js, which includes all of Mootools Core\n";
 $headers = array();
 foreach($files['core'] as $file => $info)
 {
