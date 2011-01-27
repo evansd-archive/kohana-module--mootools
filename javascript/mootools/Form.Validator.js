@@ -1,39 +1,42 @@
-//= require "More"
-//= require "Lang"
 //= require "Class.Extras"
-//= require "Class.Binds"
-//= require "Selectors"
+//= require "Class.Extras"
+//= require "Slick.Finder"
 //= require "Element.Event"
 //= require "Element.Style"
 //= require "JSON"
+//= require "Locale"
+//= require "Class.Binds"
 //= require "Date"
 //= require "Element.Forms"
-//= require "Form.Validator.English"
+//= require "Locale.en-US.Form.Validator"
 //= require "Element.Shortcuts"
-
 /*
 ---
 
 script: Form.Validator.js
+
+name: Form.Validator
 
 description: A css-class based form validation system.
 
 license: MIT-style license
 
 authors:
-- Aaron Newton
+  - Aaron Newton
 
 requires:
-- core:1.2.4/Options
-- core:1.2.4/Events
-- core:1.2.4/Selectors
-- core:1.2.4/Element.Event
-- core:1.2.4/Element.Style
-- core:1.2.4/JSON
-- /Lang- /Class.Binds
-- /Date Element.Forms
-- /Form.Validator.English
-- /Element.Shortcuts
+  - Core/Options
+  - Core/Events
+  - Core/Slick.Finder
+  - Core/Element.Event
+  - Core/Element.Style
+  - Core/JSON
+  - /Locale
+  - /Class.Binds
+  - /Date
+  - /Element.Forms
+  - /Locale.en-US.Form.Validator
+  - /Element.Shortcuts
 
 provides: [Form.Validator, InputValidator, FormValidator.BaseValidators]
 
@@ -56,13 +59,13 @@ var InputValidator = new Class({
 	},
 
 	test: function(field, props){
-		if (document.id(field)) return this.options.test(document.id(field), props||this.getProps(field));
+		if (document.id(field)) return this.options.test(document.id(field), props || this.getProps(field));
 		else return false;
 	},
 
 	getError: function(field, props){
 		var err = this.options.errorMsg;
-		if ($type(err) == 'function') err = err(document.id(field), props||this.getProps(field));
+		if (typeOf(err) == 'function') err = err(document.id(field), props || this.getProps(field));
 		return err;
 	},
 
@@ -76,15 +79,15 @@ var InputValidator = new Class({
 Element.Properties.validatorProps = {
 
 	set: function(props){
-		return this.eliminate('validatorProps').store('validatorProps', props);
+		return this.eliminate('$moo:validatorProps').store('$moo:validatorProps', props);
 	},
 
 	get: function(props){
 		if (props) this.set(props);
-		if (this.retrieve('validatorProps')) return this.retrieve('validatorProps');
-		if (this.getProperty('validatorProps')){
+		if (this.retrieve('$moo:validatorProps')) return this.retrieve('$moo:validatorProps');
+		if (this.getProperty('$moo:validatorProps')){
 			try {
-				this.store('validatorProps', JSON.decode(this.getProperty('validatorProps')));
+				this.store('$moo:validatorProps', JSON.decode(this.getProperty('$moo:validatorProps')));
 			}catch(e){
 				return {};
 			}
@@ -93,21 +96,21 @@ Element.Properties.validatorProps = {
 				return cls.test(':');
 			});
 			if (!vals.length){
-				this.store('validatorProps', {});
+				this.store('$moo:validatorProps', {});
 			} else {
 				props = {};
 				vals.each(function(cls){
 					var split = cls.split(':');
-					if (split[1]) {
+					if (split[1]){
 						try {
 							props[split[0]] = JSON.decode(split[1]);
-						} catch(e) {}
+						} catch(e){}
 					}
 				});
-				this.store('validatorProps', props);
+				this.store('$moo:validatorProps', props);
 			}
 		}
-		return this.retrieve('validatorProps');
+		return this.retrieve('$moo:validatorProps');
 	}
 
 };
@@ -119,10 +122,10 @@ Form.Validator = new Class({
 	Binds: ['onSubmit'],
 
 	options: {/*
-		onFormValidate: $empty(isValid, form, event),
-		onElementValidate: $empty(isValid, field, className, warn),
-		onElementPass: $empty(field),
-		onElementFail: $empty(field, validatorsFailed) */
+		onFormValidate: function(isValid, form, event){},
+		onElementValidate: function(isValid, field, className, warn){},
+		onElementPass: function(field){},
+		onElementFail: function(field, validatorsFailed){}, */
 		fieldSelectors: 'input, select, textarea',
 		ignoreHidden: true,
 		ignoreDisabled: true,
@@ -144,8 +147,8 @@ Form.Validator = new Class({
 		this.setOptions(options);
 		this.element = document.id(form);
 		this.element.store('validator', this);
-		this.warningPrefix = $lambda(this.options.warningPrefix)();
-		this.errorPrefix = $lambda(this.options.errorPrefix)();
+		this.warningPrefix = Function.from(this.options.warningPrefix)();
+		this.errorPrefix = Function.from(this.options.errorPrefix)();
 		if (this.options.evaluateOnSubmit) this.element.addEvent('submit', this.onSubmit);
 		if (this.options.evaluateFieldsOnBlur || this.options.evaluateFieldsOnChange) this.watchFields(this.getFields());
 	},
@@ -168,7 +171,7 @@ Form.Validator = new Class({
 	},
 
 	validationMonitor: function(){
-		$clear(this.timer);
+		clearTimeout(this.timer);
 		this.timer = this.validateField.delay(50, this, arguments);
 	},
 
@@ -237,13 +240,12 @@ Form.Validator = new Class({
 
 	test: function(className, field, warn){
 		field = document.id(field);
-		if((this.options.ignoreHidden && !field.isVisible()) || (this.options.ignoreDisabled && field.get('disabled'))) return true;
+		if ((this.options.ignoreHidden && !field.isVisible()) || (this.options.ignoreDisabled && field.get('disabled'))) return true;
 		var validator = this.getValidator(className);
-		if (field.hasClass('ignoreValidation')) return true;
-		warn = $pick(warn, false);
+		warn = warn != null ? warn : false;
 		if (field.hasClass('warnOnly')) warn = true;
-		var isValid = validator ? validator.test(field) : true;
-		if (validator && field.isVisible()) this.fireEvent('elementValidate', [isValid, field, className, warn]);
+		var isValid = field.hasClass('ignoreValidation') || (validator ? validator.test(field) : true);
+		if (validator) this.fireEvent('elementValidate', [isValid, field, className, warn]);
 		if (warn) return true;
 		return isValid;
 	},
@@ -290,7 +292,7 @@ Form.Validator = new Class({
 });
 
 Form.Validator.getMsg = function(key){
-	return MooTools.lang.get('Form.Validator', key);
+	return Locale.get('FormValidator.' + key);
 };
 
 Form.Validator.adders = {
@@ -310,7 +312,7 @@ Form.Validator.adders = {
 	},
 
 	addAllThese : function(validators){
-		$A(validators).each(function(validator){
+		Array.from(validators).each(function(validator){
 			this.add(validator[0], validator[1]);
 		}, this);
 	},
@@ -321,7 +323,7 @@ Form.Validator.adders = {
 
 };
 
-$extend(Form.Validator, Form.Validator.adders);
+Object.append(Form.Validator, Form.Validator.adders);
 
 Form.Validator.implement(Form.Validator.adders);
 
@@ -350,12 +352,12 @@ Form.Validator.addAllThese([
 
 	['minLength', {
 		errorMsg: function(element, props){
-			if ($type(props.minLength))
+			if (typeOf(props.minLength) != 'null')
 				return Form.Validator.getMsg('minLength').substitute({minLength:props.minLength,length:element.get('value').length });
 			else return '';
 		},
 		test: function(element, props){
-			if ($type(props.minLength)) return (element.get('value').length >= $pick(props.minLength, 0));
+			if (typeOf(props.minLength) != 'null') return (element.get('value').length >= (props.minLength || 0));
 			else return true;
 		}
 	}],
@@ -363,13 +365,13 @@ Form.Validator.addAllThese([
 	['maxLength', {
 		errorMsg: function(element, props){
 			//props is {maxLength:10}
-			if ($type(props.maxLength))
+			if (typeOf(props.maxLength) != 'null')
 				return Form.Validator.getMsg('maxLength').substitute({maxLength:props.maxLength,length:element.get('value').length });
 			else return '';
 		},
 		test: function(element, props){
 			//if the value is <= than the maxLength value, element passes test
-			return (element.get('value').length <= $pick(props.maxLength, 10000));
+			return (element.get('value').length <= (props.maxLength || 10000));
 		}
 	}],
 
@@ -398,7 +400,7 @@ Form.Validator.addAllThese([
 	['validate-alpha', {
 		errorMsg: Form.Validator.getMsg.pass('alpha'),
 		test: function(element){
-			return Form.Validator.getValidator('IsEmpty').test(element) ||  (/^[a-zA-Z]+$/).test(element.get('value'));
+			return Form.Validator.getValidator('IsEmpty').test(element) || (/^[a-zA-Z]+$/).test(element.get('value'));
 		}
 	}],
 
@@ -459,14 +461,14 @@ Form.Validator.addAllThese([
 			// [$]1###+[.##]
 			// [$]0.##
 			// [$].##
-			return Form.Validator.getValidator('IsEmpty').test(element) ||  (/^\$?\-?([1-9]{1}[0-9]{0,2}(\,[0-9]{3})*(\.[0-9]{0,2})?|[1-9]{1}\d*(\.[0-9]{0,2})?|0(\.[0-9]{0,2})?|(\.[0-9]{1,2})?)$/).test(element.get('value'));
+			return Form.Validator.getValidator('IsEmpty').test(element) || (/^\$?\-?([1-9]{1}[0-9]{0,2}(\,[0-9]{3})*(\.[0-9]{0,2})?|[1-9]{1}\d*(\.[0-9]{0,2})?|0(\.[0-9]{0,2})?|(\.[0-9]{1,2})?)$/).test(element.get('value'));
 		}
 	}],
 
 	['validate-one-required', {
 		errorMsg: Form.Validator.getMsg.pass('oneRequired'),
 		test: function(element, props){
-			var p = document.id(props['validate-one-required']) || element.getParent();
+			var p = document.id(props['validate-one-required']) || element.getParent(props['validate-one-required']);
 			return p.getElements('input').some(function(el){
 				if (['checkbox', 'radio'].contains(el.get('type'))) return el.get('checked');
 				return el.get('value');
@@ -481,13 +483,13 @@ Element.Properties.validator = {
 	set: function(options){
 		var validator = this.retrieve('validator');
 		if (validator) validator.setOptions(options);
-		return this.store('validator:options');
+		return this.store('$moo:validator:options', options);
 	},
 
 	get: function(options){
 		if (options || !this.retrieve('validator')){
-			if (options || !this.retrieve('validator:options')) this.set('validator', options);
-			this.store('validator', new Form.Validator(this, this.retrieve('validator:options')));
+			if (options || !this.retrieve('$moo:validator:options')) this.set('validator', options);
+			this.store('validator', new Form.Validator(this, this.retrieve('$moo:validator:options')));
 		}
 		return this.retrieve('validator');
 	}
@@ -497,10 +499,12 @@ Element.Properties.validator = {
 Element.implement({
 
 	validate: function(options){
-		this.set('validator', options);
+		if (options) this.set('validator', options);
 		return this.get('validator', options).validate();
 	}
 
 });
+//<1.2compat>
 //legacy
 var FormValidator = Form.Validator;
+//</1.2compat>

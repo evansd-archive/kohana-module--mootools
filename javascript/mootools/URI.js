@@ -1,30 +1,42 @@
-//= require "More"
+//= require "Object"
+//= require "Class"
+//= require "Class.Extras"
+//= require "Element"
 //= require "String.QueryString"
-//= require "Selectors"
-
 /*
 ---
 
 script: URI.js
+
+name: URI
 
 description: Provides methods useful in managing the window location and uris.
 
 license: MIT-style license
 
 authors:
-- Sebastian Markbåge
-- Aaron Newton
+  - Sebastian MarkbÃ¥ge
+  - Aaron Newton
 
 requires:
-- core:1.2.4/Selectors
-- /String.QueryString
+  - Core/Object
+  - Core/Class
+  - Core/Class.Extras
+  - Core/Element
+  - /String.QueryString
 
-provides: URI
+provides: [URI]
 
 ...
 */
 
-var URI = new Class({
+(function(){
+
+var toString = function(){
+	return this.get('value');
+};
+
+var URI = this.URI = new Class({
 
 	Implements: Options,
 
@@ -39,9 +51,9 @@ var URI = new Class({
 	initialize: function(uri, options){
 		this.setOptions(options);
 		var base = this.options.base || URI.base;
-		if(!uri) uri = base;
-		
-		if (uri && uri.parsed) this.parsed = $unlink(uri.parsed);
+		if (!uri) uri = base;
+
+		if (uri && uri.parsed) this.parsed = Object.clone(uri.parsed);
 		else this.set('value', uri.href || uri.toString(), base ? new URI(base) : false);
 	},
 
@@ -66,7 +78,7 @@ var URI = new Class({
 		return bits;
 	},
 
-	parseDirectory: function(directory, baseDirectory) {
+	parseDirectory: function(directory, baseDirectory){
 		directory = (directory.substr(0, 1) == '/' ? '' : (baseDirectory || '/')) + directory;
 		if (!directory.test(URI.regs.directoryDot)) return directory;
 		var result = [];
@@ -90,9 +102,9 @@ var URI = new Class({
 		if (part == 'value'){
 			var scheme = value.match(URI.regs.scheme);
 			if (scheme) scheme = scheme[1];
-			if (scheme && !$defined(this.schemes[scheme.toLowerCase()])) this.parsed = { scheme: scheme, value: value };
+			if (scheme && this.schemes[scheme.toLowerCase()] == null) this.parsed = { scheme: scheme, value: value };
 			else this.parsed = this.parse(value, (base || this).parsed) || (scheme ? { scheme: scheme, value: value } : { value: value });
-		} else if (part == 'data') {
+		} else if (part == 'data'){
 			this.setData(value);
 		} else {
 			this.parsed[part] = value;
@@ -118,31 +130,30 @@ var URI = new Class({
 
 	getData: function(key, part){
 		var qs = this.get(part || 'query');
-		if (!$chk(qs)) return key ? null : {};
+		if (!(qs || qs === 0)) return key ? null : {};
 		var obj = qs.parseQueryString();
 		return key ? obj[key] : obj;
 	},
 
 	setData: function(values, merge, part){
 		if (typeof values == 'string'){
-			data = this.getData();
+			var data = this.getData();
 			data[arguments[0]] = arguments[1];
 			values = data;
-		} else if (merge) {
-			values = $merge(this.getData(), values);
+		} else if (merge){
+			values = Object.merge(this.getData(), values);
 		}
-		return this.set(part || 'query', Hash.toQueryString(values));
+		return this.set(part || 'query', Object.toQueryString(values));
 	},
 
 	clearData: function(part){
 		return this.set(part || 'query', '');
-	}
+	},
+
+	toString: toString,
+	valueOf: toString
 
 });
-
-URI.prototype.toString = URI.prototype.valueOf = function(){
-	return this.get('value');
-};
 
 URI.regs = {
 	endSlash: /\/$/,
@@ -150,7 +161,7 @@ URI.regs = {
 	directoryDot: /\.\/|\.$/
 };
 
-URI.base = new URI(document.getElements('base[href]', true).getLast(), {base: document.location});
+URI.base = new URI(Array.from(document.getElements('base[href]', true)).getLast(), {base: document.location});
 
 String.implement({
 
@@ -159,3 +170,5 @@ String.implement({
 	}
 
 });
+
+})();

@@ -1,5 +1,4 @@
 //= require "Fx"
-
 /*
 ---
 
@@ -9,7 +8,8 @@ description: Contains a set of advanced transitions to be used with any of the F
 
 license: MIT-style license.
 
-credits: Easing Equations by Robert Penner, <http://www.robertpenner.com/easing/>, modified and optimized to be used with MooTools.
+credits:
+  - Easing Equations by Robert Penner, <http://www.robertpenner.com/easing/>, modified and optimized to be used with MooTools.
 
 requires: Fx
 
@@ -34,8 +34,8 @@ Fx.implement({
 });
 
 Fx.Transition = function(transition, params){
-	params = $splat(params);
-	return $extend(transition, {
+	params = Array.from(params);
+	return Object.append(transition, {
 		easeIn: function(pos){
 			return transition(pos, params);
 		},
@@ -48,11 +48,19 @@ Fx.Transition = function(transition, params){
 	});
 };
 
-Fx.Transitions = new Hash({
+Fx.Transitions = {
 
-	linear: $arguments(0)
+	linear: function(zero){
+		return zero;
+	}
 
-});
+};
+
+//<1.2compat>
+
+Fx.Transitions = new Hash(Fx.Transitions);
+
+//</1.2compat>
 
 Fx.Transitions.extend = function(transitions){
 	for (var transition in transitions) Fx.Transitions[transition] = new Fx.Transition(transitions[transition]);
@@ -61,7 +69,7 @@ Fx.Transitions.extend = function(transitions){
 Fx.Transitions.extend({
 
 	Pow: function(p, x){
-		return Math.pow(p, x[0] || 6);
+		return Math.pow(p, x && x[0] || 6);
 	},
 
 	Expo: function(p){
@@ -77,7 +85,7 @@ Fx.Transitions.extend({
 	},
 
 	Back: function(p, x){
-		x = x[0] || 1.618;
+		x = x && x[0] || 1.618;
 		return Math.pow(p, 2) * ((x + 1) * p - x);
 	},
 
@@ -93,7 +101,7 @@ Fx.Transitions.extend({
 	},
 
 	Elastic: function(p, x){
-		return Math.pow(2, 10 * --p) * Math.cos(20 * p * Math.PI * (x[0] || 1) / 3);
+		return Math.pow(2, 10 * --p) * Math.cos(20 * p * Math.PI * (x && x[0] || 1) / 3);
 	}
 
 });

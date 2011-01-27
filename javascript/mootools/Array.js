@@ -1,5 +1,4 @@
 //= require "Core"
-
 /*
 ---
 
@@ -9,7 +8,7 @@ description: Contains Array Prototypes like each, contains, and erase.
 
 license: MIT-style license.
 
-requires: [$util, Array.each]
+requires: Type
 
 provides: Array
 
@@ -18,9 +17,16 @@ provides: Array
 
 Array.implement({
 
+	invoke: function(methodName){
+		var args = Array.slice(arguments, 1);
+		return this.map(function(item){
+			return item[methodName].apply(item, args);
+		});
+	},
+
 	every: function(fn, bind){
 		for (var i = 0, l = this.length; i < l; i++){
-			if (!fn.call(bind, this[i], i, this)) return false;
+			if ((i in this) && !fn.call(bind, this[i], i, this)) return false;
 		}
 		return true;
 	},
@@ -28,13 +34,15 @@ Array.implement({
 	filter: function(fn, bind){
 		var results = [];
 		for (var i = 0, l = this.length; i < l; i++){
-			if (fn.call(bind, this[i], i, this)) results.push(this[i]);
+			if ((i in this) && fn.call(bind, this[i], i, this)) results.push(this[i]);
 		}
 		return results;
 	},
 
 	clean: function(){
-		return this.filter($defined);
+		return this.filter(function(item){
+			return item != null;
+		});
 	},
 
 	indexOf: function(item, from){
@@ -47,13 +55,15 @@ Array.implement({
 
 	map: function(fn, bind){
 		var results = [];
-		for (var i = 0, l = this.length; i < l; i++) results[i] = fn.call(bind, this[i], i, this);
+		for (var i = 0, l = this.length; i < l; i++){
+			if (i in this) results[i] = fn.call(bind, this[i], i, this);
+		}
 		return results;
 	},
 
 	some: function(fn, bind){
 		for (var i = 0, l = this.length; i < l; i++){
-			if (fn.call(bind, this[i], i, this)) return true;
+			if ((i in this) && fn.call(bind, this[i], i, this)) return true;
 		}
 		return false;
 	},
@@ -82,17 +92,17 @@ Array.implement({
 		return this.indexOf(item, from) != -1;
 	},
 
-	extend: function(array){
-		for (var i = 0, j = array.length; i < j; i++) this.push(array[i]);
+	append: function(array){
+		this.push.apply(this, array);
 		return this;
 	},
-	
+
 	getLast: function(){
 		return (this.length) ? this[this.length - 1] : null;
 	},
 
 	getRandom: function(){
-		return (this.length) ? this[$random(0, this.length - 1)] : null;
+		return (this.length) ? this[Number.random(0, this.length - 1)] : null;
 	},
 
 	include: function(item){
@@ -106,7 +116,7 @@ Array.implement({
 	},
 
 	erase: function(item){
-		for (var i = this.length; i--; i){
+		for (var i = this.length; i--;){
 			if (this[i] === item) this.splice(i, 1);
 		}
 		return this;
@@ -120,11 +130,18 @@ Array.implement({
 	flatten: function(){
 		var array = [];
 		for (var i = 0, l = this.length; i < l; i++){
-			var type = $type(this[i]);
-			if (!type) continue;
-			array = array.concat((type == 'array' || type == 'collection' || type == 'arguments') ? Array.flatten(this[i]) : this[i]);
+			var type = typeOf(this[i]);
+			if (type == 'null') continue;
+			array = array.concat((type == 'array' || type == 'collection' || type == 'arguments' || instanceOf(this[i], Array)) ? Array.flatten(this[i]) : this[i]);
 		}
 		return array;
+	},
+
+	pick: function(){
+		for (var i = 0, l = this.length; i < l; i++){
+			if (this[i] != null) return this[i];
+		}
+		return null;
 	},
 
 	hexToRgb: function(array){
@@ -148,3 +165,13 @@ Array.implement({
 	}
 
 });
+
+//<1.2compat>
+
+Array.alias('extend', 'append');
+
+var $pick = function(){
+	return Array.from(arguments).pick();
+};
+
+//</1.2compat>

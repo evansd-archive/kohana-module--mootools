@@ -1,168 +1,266 @@
-//= require "Core"
-
+//= require "Array"
+//= require "Function"
+//= require "Number"
+//= require "String"
 /*
 ---
 
 name: Browser
 
-description: The Browser Core. Contains Browser initialization, Window and Document, and the Browser Hash.
+description: The Browser Object. Contains Browser initialization, Window and Document, and the Browser Hash.
 
 license: MIT-style license.
 
-requires: [Native, $util]
+requires: [Array, Function, Number, String]
 
-provides: [Browser, Window, Document, $exec]
+provides: [Browser, Window, Document]
 
 ...
 */
 
-var Browser = $merge({
+(function(){
 
-	Engine: {name: 'unknown', version: 0},
+var document = this.document;
+var window = document.window = this;
 
-	Platform: {name: (window.orientation != undefined) ? 'ipod' : (navigator.platform.match(/mac|win|linux/i) || ['other'])[0].toLowerCase()},
+var UID = 1;
 
-	Features: {xpath: !!(document.evaluate), air: !!(window.runtime), query: !!(document.querySelector)},
+this.$uid = (window.ActiveXObject) ? function(item){
+	return (item.uid || (item.uid = [UID++]))[0];
+} : function(item){
+	return item.uid || (item.uid = UID++);
+};
 
-	Plugins: {},
+$uid(window);
+$uid(document);
 
-	Engines: {
+var ua = navigator.userAgent.toLowerCase(),
+	platform = navigator.platform.toLowerCase(),
+	UA = ua.match(/(opera|ie|firefox|chrome|version)[\s\/:]([\w\d\.]+)?.*?(safari|version[\s\/:]([\w\d\.]+)|$)/) || [null, 'unknown', 0],
+	mode = UA[1] == 'ie' && document.documentMode;
 
-		presto: function(){
-			return (!window.opera) ? false : ((arguments.callee.caller) ? 960 : ((document.getElementsByClassName) ? 950 : 925));
-		},
+var Browser = this.Browser = {
 
-		trident: function(){
-			return (!window.ActiveXObject) ? false : ((window.XMLHttpRequest) ? ((document.querySelectorAll) ? 6 : 5) : 4);
-		},
+	extend: Function.prototype.extend,
 
-		webkit: function(){
-			return (navigator.taintEnabled) ? false : ((Browser.Features.xpath) ? ((Browser.Features.query) ? 525 : 420) : 419);
-		},
+	name: (UA[1] == 'version') ? UA[3] : UA[1],
 
-		gecko: function(){
-			return (!document.getBoxObjectFor && window.mozInnerScreenX == null) ? false : ((document.getElementsByClassName) ? 19 : 18);
-		}
+	version: mode || parseFloat((UA[1] == 'opera' && UA[4]) ? UA[4] : UA[2]),
 
-	}
+	Platform: {
+		name: ua.match(/ip(?:ad|od|hone)/) ? 'ios' : (ua.match(/(?:webos|android)/) || platform.match(/mac|win|linux/) || ['other'])[0]
+	},
 
-}, Browser || {});
+	Features: {
+		xpath: !!(document.evaluate),
+		air: !!(window.runtime),
+		query: !!(document.querySelector),
+		json: !!(window.JSON)
+	},
 
+	Plugins: {}
+
+};
+
+Browser[Browser.name] = true;
+Browser[Browser.name + parseInt(Browser.version, 10)] = true;
 Browser.Platform[Browser.Platform.name] = true;
 
-Browser.detect = function(){
+// Request
 
-	for (var engine in this.Engines){
-		var version = this.Engines[engine]();
-		if (version){
-			this.Engine = {name: engine, version: version};
-			this.Engine[engine] = this.Engine[engine + version] = true;
-			break;
-		}
-	}
+Browser.Request = (function(){
 
-	return {name: engine, version: version};
-
-};
-
-Browser.detect();
-
-Browser.Request = function(){
-	return $try(function(){
+	var XMLHTTP = function(){
 		return new XMLHttpRequest();
-	}, function(){
+	};
+
+	var MSXML2 = function(){
 		return new ActiveXObject('MSXML2.XMLHTTP');
-	}, function(){
+	};
+
+	var MSXML = function(){
 		return new ActiveXObject('Microsoft.XMLHTTP');
-	});
-};
+	};
 
-Browser.Features.xhr = !!(Browser.Request());
-
-Browser.Plugins.Flash = (function(){
-	var version = ($try(function(){
-		return navigator.plugins['Shockwave Flash'].description;
+	return Function.attempt(function(){
+		XMLHTTP();
+		return XMLHTTP;
 	}, function(){
-		return new ActiveXObject('ShockwaveFlash.ShockwaveFlash').GetVariable('$version');
-	}) || '0 r0').match(/\d+/g);
-	return {version: parseInt(version[0] || 0 + '.' + version[1], 10) || 0, build: parseInt(version[2], 10) || 0};
+		MSXML2();
+		return MSXML2;
+	}, function(){
+		MSXML();
+		return MSXML;
+	});
+
 })();
 
-function $exec(text){
+Browser.Features.xhr = !!(Browser.Request);
+
+// Flash detection
+
+var version = (Function.attempt(function(){
+	return navigator.plugins['Shockwave Flash'].description;
+}, function(){
+	return new ActiveXObject('ShockwaveFlash.ShockwaveFlash').GetVariable('$version');
+}) || '0 r0').match(/\d+/g);
+
+Browser.Plugins.Flash = {
+	version: Number(version[0] || '0.' + version[1]) || 0,
+	build: Number(version[2]) || 0
+};
+
+// String scripts
+
+Browser.exec = function(text){
 	if (!text) return text;
 	if (window.execScript){
 		window.execScript(text);
 	} else {
 		var script = document.createElement('script');
 		script.setAttribute('type', 'text/javascript');
-		script[(Browser.Engine.webkit && Browser.Engine.version < 420) ? 'innerText' : 'text'] = text;
+		script.text = text;
 		document.head.appendChild(script);
 		document.head.removeChild(script);
 	}
 	return text;
 };
 
-Native.UID = 1;
+String.implement('stripScripts', function(exec){
+	var scripts = '';
+	var text = this.replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, function(all, code){
+		scripts += code + '\n';
+		return '';
+	});
+	if (exec === true) Browser.exec(scripts);
+	else if (typeOf(exec) == 'function') exec(scripts, text);
+	return text;
+});
 
-var $uid = (Browser.Engine.trident) ? function(item){
-	return (item.uid || (item.uid = [Native.UID++]))[0];
-} : function(item){
-	return item.uid || (item.uid = Native.UID++);
+// Window, Document
+
+Browser.extend({
+	Document: this.Document,
+	Window: this.Window,
+	Element: this.Element,
+	Event: this.Event
+});
+
+this.Window = this.$constructor = new Type('Window', function(){});
+
+this.$family = Function.from('window').hide();
+
+Window.mirror(function(name, method){
+	window[name] = method;
+});
+
+this.Document = document.$constructor = new Type('Document', function(){});
+
+document.$family = Function.from('document').hide();
+
+Document.mirror(function(name, method){
+	document[name] = method;
+});
+
+document.html = document.documentElement;
+document.head = document.getElementsByTagName('head')[0];
+
+if (document.execCommand) try {
+	document.execCommand("BackgroundImageCache", false, true);
+} catch (e){}
+
+if (this.attachEvent && !this.addEventListener){
+	var unloadEvent = function(){
+		this.detachEvent('onunload', unloadEvent);
+		document.head = document.html = document.window = null;
+	};
+	this.attachEvent('onunload', unloadEvent);
+}
+
+// IE fails on collections and <select>.options (refers to <select>)
+var arrayFrom = Array.from;
+try {
+	arrayFrom(document.html.childNodes);
+} catch(e){
+	Array.from = function(item){
+		if (typeof item != 'string' && Type.isEnumerable(item) && typeOf(item) != 'array'){
+			var i = item.length, array = new Array(i);
+			while (i--) array[i] = item[i];
+			return array;
+		}
+		return arrayFrom(item);
+	};
+
+	var prototype = Array.prototype,
+		slice = prototype.slice;
+	['pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift', 'concat', 'join', 'slice'].each(function(name){
+		var method = prototype[name];
+		Array[name] = function(item){
+			return method.apply(Array.from(item), slice.call(arguments, 1));
+		};
+	});
+}
+
+//<1.2compat>
+
+if (Browser.Platform.ios) Browser.Platform.ipod = true;
+
+Browser.Engine = {};
+
+var setEngine = function(name, version){
+	Browser.Engine.name = name;
+	Browser.Engine[name + version] = true;
+	Browser.Engine.version = version;
 };
 
-var Window = new Native({
+if (Browser.ie){
+	Browser.Engine.trident = true;
 
-	name: 'Window',
-
-	legacy: (Browser.Engine.trident) ? null: window.Window,
-
-	initialize: function(win){
-		$uid(win);
-		if (!win.Element){
-			win.Element = $empty;
-			if (Browser.Engine.webkit) win.document.createElement("iframe"); //fixes safari 2
-			win.Element.prototype = (Browser.Engine.webkit) ? window["[[DOMElement.prototype]]"] : {};
-		}
-		win.document.window = win;
-		return $extend(win, Window.Prototype);
-	},
-
-	afterImplement: function(property, value){
-		window[property] = Window.Prototype[property] = value;
+	switch (Browser.version){
+		case 6: setEngine('trident', 4); break;
+		case 7: setEngine('trident', 5); break;
+		case 8: setEngine('trident', 6);
 	}
+}
 
-});
+if (Browser.firefox){
+	Browser.Engine.gecko = true;
 
-Window.Prototype = {$family: {name: 'window'}};
+	if (Browser.version >= 3) setEngine('gecko', 19);
+	else setEngine('gecko', 18);
+}
 
-new Window(window);
+if (Browser.safari || Browser.chrome){
+	Browser.Engine.webkit = true;
 
-var Document = new Native({
-
-	name: 'Document',
-
-	legacy: (Browser.Engine.trident) ? null: window.Document,
-
-	initialize: function(doc){
-		$uid(doc);
-		doc.head = doc.getElementsByTagName('head')[0];
-		doc.html = doc.getElementsByTagName('html')[0];
-		if (Browser.Engine.trident && Browser.Engine.version <= 4) $try(function(){
-			doc.execCommand("BackgroundImageCache", false, true);
-		});
-		if (Browser.Engine.trident) doc.window.attachEvent('onunload', function(){
-			doc.window.detachEvent('onunload', arguments.callee);
-			doc.head = doc.html = doc.window = null;
-		});
-		return $extend(doc, Document.Prototype);
-	},
-
-	afterImplement: function(property, value){
-		document[property] = Document.Prototype[property] = value;
+	switch (Browser.version){
+		case 2: setEngine('webkit', 419); break;
+		case 3: setEngine('webkit', 420); break;
+		case 4: setEngine('webkit', 525);
 	}
+}
 
-});
+if (Browser.opera){
+	Browser.Engine.presto = true;
 
-Document.Prototype = {$family: {name: 'document'}};
+	if (Browser.version >= 9.6) setEngine('presto', 960);
+	else if (Browser.version >= 9.5) setEngine('presto', 950);
+	else setEngine('presto', 925);
+}
 
-new Document(document);
+if (Browser.name == 'unknown'){
+	switch ((ua.match(/(?:webkit|khtml|gecko)/) || [])[0]){
+		case 'webkit':
+		case 'khtml':
+			Browser.Engine.webkit = true;
+		break;
+		case 'gecko':
+			Browser.Engine.gecko = true;
+	}
+}
+
+this.$exec = Browser.exec;
+
+//</1.2compat>
+
+})();

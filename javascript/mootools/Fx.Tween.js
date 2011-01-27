@@ -1,5 +1,4 @@
 //= require "Fx.CSS"
-
 /*
 ---
 
@@ -47,17 +46,17 @@ Fx.Tween = new Class({
 Element.Properties.tween = {
 
 	set: function(options){
-		var tween = this.retrieve('tween');
-		if (tween) tween.cancel();
-		return this.eliminate('tween').store('tween:options', $extend({link: 'cancel'}, options));
+		this.get('tween').cancel().setOptions(options);
+		return this;
 	},
 
-	get: function(options){
-		if (options || !this.retrieve('tween')){
-			if (options || !this.retrieve('tween:options')) this.set('tween', options);
-			this.store('tween', new Fx.Tween(this, this.retrieve('tween:options')));
+	get: function(){
+		var tween = this.retrieve('tween');
+		if (!tween){
+			tween = new Fx.Tween(this, {link: 'cancel'});
+			this.store('tween', tween);
 		}
-		return this.retrieve('tween');
+		return tween;
 	}
 
 };
@@ -71,7 +70,7 @@ Element.implement({
 
 	fade: function(how){
 		var fade = this.get('tween'), o = 'opacity', toggle;
-		how = $pick(how, 'toggle');
+		how = [how, 'toggle'].pick();
 		switch (how){
 			case 'in': fade.start(o, 1); break;
 			case 'out': fade.start(o, 0); break;

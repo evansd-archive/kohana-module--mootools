@@ -1,5 +1,4 @@
 //= require "Core"
-
 /*
 ---
 
@@ -9,7 +8,7 @@ description: Contains String Prototypes like camelCase, capitalize, test, and to
 
 license: MIT-style license.
 
-requires: Native
+requires: Type
 
 provides: String
 
@@ -19,7 +18,7 @@ provides: String
 String.implement({
 
 	test: function(regex, params){
-		return ((typeof regex == 'string') ? new RegExp(regex, params) : regex).test(this);
+		return ((typeOf(regex) == 'regexp') ? regex : new RegExp('' + regex, params)).test(this);
 	},
 
 	contains: function(string, separator){
@@ -74,21 +73,10 @@ String.implement({
 		return (rgb) ? rgb.rgbToHex(array) : null;
 	},
 
-	stripScripts: function(option){
-		var scripts = '';
-		var text = this.replace(/<script[^>]*>([\s\S]*?)<\/script>/gi, function(){
-			scripts += arguments[1] + '\n';
-			return '';
-		});
-		if (option === true) $exec(scripts);
-		else if ($type(option) == 'function') option(scripts, text);
-		return text;
-	},
-
 	substitute: function(object, regexp){
 		return this.replace(regexp || (/\\?\{([^{}]+)\}/g), function(match, name){
 			if (match.charAt(0) == '\\') return match.slice(1);
-			return (object[name] != undefined) ? object[name] : '';
+			return (object[name] != null) ? object[name] : '';
 		});
 	}
 

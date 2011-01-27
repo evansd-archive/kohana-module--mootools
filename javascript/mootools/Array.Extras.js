@@ -1,21 +1,21 @@
-//= require "More"
-//= require "Core"
 //= require "Array"
-
 /*
 ---
 
 script: Array.Extras.js
+
+name: Array.Extras
 
 description: Extends the Array native object to include useful methods to work with arrays.
 
 license: MIT-style license
 
 authors:
-- Christoph Pojer
+  - Christoph Pojer
+  - Sebastian Markbåge
 
 requires:
-- core:1.2.4/Array
+  - Core/Array
 
 provides: [Array.Extras]
 
@@ -38,9 +38,7 @@ Array.implement({
 	sum: function(){
 		var result = 0, l = this.length;
 		if (l){
-			do {
-				result += this[--l];
-			} while (l);
+			while(l--) result += this[l];
 		}
 		return result;
 	},
@@ -56,6 +54,22 @@ Array.implement({
 			this[r] = temp;
 		}
 		return this;
+	},
+
+	reduce: function(fn, value){
+		var undefined;
+		for (var i = 0, l = this.length; i < l; i++){
+			if (i in this) value = value === undefined ? this[i] : fn.call(null, value, this[i], i, this);
+		}
+		return value;
+	},
+
+	reduceRight: function(fn, value){
+		var i = this.length, undefined;
+		while (i--){
+			if (i in this) value = value === undefined ? this[i] : fn.call(null, value, this[i], i, this);
+		}
+		return value;
 	}
 
 });

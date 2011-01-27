@@ -1,29 +1,32 @@
-//= require "More"
+//= require "Class.Extras"
 //= require "Class.Extras"
 //= require "Element.Event"
 //= require "Element.Style"
 //= require "Element.Dimensions"
-
+//= require "More"
 /*
 ---
 
 script: Tips.js
+
+name: Tips
 
 description: Class for creating nice tips that follow the mouse cursor when hovering an element.
 
 license: MIT-style license
 
 authors:
-- Valerio Proietti
-- Christoph Pojer
+  - Valerio Proietti
+  - Christoph Pojer
+  - Luis Merino
 
 requires:
-- core:1.2.4/Options
-- core:1.2.4/Events
-- core:1.2.4/Element.Event
-- core:1.2.4/Element.Style
-- core:1.2.4/Element.Dimensions
-- /MooTools.More
+  - Core/Options
+  - Core/Events
+  - Core/Element.Event
+  - Core/Element.Style
+  - Core/Element.Dimensions
+  - /MooTools.More
 
 provides: [Tips]
 
@@ -33,18 +36,17 @@ provides: [Tips]
 (function(){
 
 var read = function(option, element){
-	return (option) ? ($type(option) == 'function' ? option(element) : element.get(option)) : '';
+	return (option) ? (typeOf(option) == 'function' ? option(element) : element.get(option)) : '';
 };
 
 this.Tips = new Class({
 
 	Implements: [Events, Options],
 
-	options: {
-		/*
-		onAttach: $empty(element),
-		onDetach: $empty(element),
-		*/
+	options: {/*
+		onAttach: function(element){},
+		onDetach: function(element){},
+		onBound: function(coords){},*/
 		onShow: function(){
 			this.tip.setStyle('display', 'block');
 		},
@@ -64,7 +66,12 @@ this.Tips = new Class({
 	},
 
 	initialize: function(){
-		var params = Array.link(arguments, {options: Object.type, elements: $defined});
+		var params = Array.link(arguments, {
+			options: Type.isObject,
+			elements: function(obj){
+				return obj != null;
+			}
+		});
 		this.setOptions(params.options);
 		if (params.elements) this.attach(params.elements);
 		this.container = new Element('div', {'class': 'tip'});
@@ -73,7 +80,7 @@ this.Tips = new Class({
 	toElement: function(){
 		if (this.tip) return this.tip;
 
-		return this.tip = new Element('div', {
+		this.tip = new Element('div', {
 			'class': this.options.className,
 			styles: {
 				position: 'absolute',
@@ -84,29 +91,33 @@ this.Tips = new Class({
 			new Element('div', {'class': 'tip-top'}),
 			this.container,
 			new Element('div', {'class': 'tip-bottom'})
-		).inject(document.body);
+		);
+
+		return this.tip;
 	},
 
 	attach: function(elements){
 		$$(elements).each(function(element){
 			var title = read(this.options.title, element),
 				text = read(this.options.text, element);
-			
-			element.erase('title').store('tip:native', title).retrieve('tip:title', title);
+
+			element.set('title', '').store('tip:native', title).retrieve('tip:title', title);
 			element.retrieve('tip:text', text);
 			this.fireEvent('attach', [element]);
-			
+
 			var events = ['enter', 'leave'];
 			if (!this.options.fixed) events.push('move');
-			
+
 			events.each(function(value){
 				var event = element.retrieve('tip:' + value);
-				if (!event) event = this['element' + value.capitalize()].bindWithEvent(this, element);
-				
+				if (!event) event = function(event){
+					this['element' + value.capitalize()].apply(this, [event, element]);
+				}.bind(this);
+
 				element.store('tip:' + value, event).addEvent('mouse' + value, event);
 			}, this);
 		}, this);
-		
+
 		return this;
 	},
 
@@ -115,35 +126,35 @@ this.Tips = new Class({
 			['enter', 'leave', 'move'].each(function(value){
 				element.removeEvent('mouse' + value, element.retrieve('tip:' + value)).eliminate('tip:' + value);
 			});
-			
+
 			this.fireEvent('detach', [element]);
-			
+
 			if (this.options.title == 'title'){ // This is necessary to check if we can revert the title
 				var original = element.retrieve('tip:native');
 				if (original) element.set('title', original);
 			}
 		}, this);
-		
+
 		return this;
 	},
 
 	elementEnter: function(event, element){
 		this.container.empty();
-		
+
 		['title', 'text'].each(function(value){
 			var content = element.retrieve('tip:' + value);
 			if (content) this.fill(new Element('div', {'class': 'tip-' + value}).inject(this.container), content);
 		}, this);
-		
-		$clear(this.timer);
+
+		clearTimeout(this.timer);
 		this.timer = (function(){
-			this.show(this, element);
+			this.show(element);
 			this.position((this.options.fixed) ? {page: element.getPosition()} : event);
 		}).delay(this.options.showDelay, this);
 	},
 
 	elementLeave: function(event, element){
-		$clear(this.timer);
+		clearTimeout(this.timer);
 		this.timer = this.hide.delay(this.options.hideDelay, this, element);
 		this.fireForParent(event, element);
 	},
@@ -165,23 +176,30 @@ this.Tips = new Class({
 		var size = window.getSize(), scroll = window.getScroll(),
 			tip = {x: this.tip.offsetWidth, y: this.tip.offsetHeight},
 			props = {x: 'left', y: 'top'},
+			bounds = {y: false, x2: false, y2: false, x: false},
 			obj = {};
-		
+
 		for (var z in props){
 			obj[props[z]] = event.page[z] + this.options.offset[z];
-			if ((obj[props[z]] + tip[z] - scroll[z]) > size[z] - this.options.windowPadding[z]) obj[props[z]] = event.page[z] - this.options.offset[z] - tip[z];
+			if (obj[props[z]] < 0) bounds[z] = true;
+			if ((obj[props[z]] + tip[z] - scroll[z]) > size[z] - this.options.windowPadding[z]){
+				obj[props[z]] = event.page[z] - this.options.offset[z] - tip[z];
+				bounds[z+'2'] = true;
+			}
 		}
-		
+
+		this.fireEvent('bound', bounds);
 		this.tip.setStyles(obj);
 	},
 
 	fill: function(element, contents){
-		if(typeof contents == 'string') element.set('html', contents);
+		if (typeof contents == 'string') element.set('html', contents);
 		else element.adopt(contents);
 	},
 
 	show: function(element){
 		if (!this.tip) document.id(this);
+		if (!this.tip.getParent()) this.tip.inject(document.body);
 		this.fireEvent('show', [this.tip, element]);
 	},
 

@@ -1,28 +1,31 @@
-//= require "More"
 //= require "Class.Extras"
-
+//= require "More"
 /*
 ---
 
 script: Group.js
+
+name: Group
 
 description: Class for monitoring collections of events
 
 license: MIT-style license
 
 authors:
-- Valerio Proietti
+  - Valerio Proietti
 
 requires:
-- core:1.2.4/Events
-- /MooTools.More
+  - Core/Events
+  - /MooTools.More
 
 provides: [Group]
 
 ...
 */
 
-var Group = new Class({
+(function(){
+
+this.Group = new Class({
 
 	initialize: function(){
 		this.instances = Array.flatten(arguments);
@@ -36,7 +39,7 @@ var Group = new Class({
 		if (this.events[type].contains(fn)) return false;
 		else this.events[type].push(fn);
 		this.instances.each(function(instance, i){
-			instance.addEvent(type, this.check.bind(this, [type, instance, i]));
+			instance.addEvent(type, this.check.pass([type, instance, i], this));
 		}, this);
 		return this;
 	},
@@ -54,3 +57,5 @@ var Group = new Class({
 	}
 
 });
+
+})();

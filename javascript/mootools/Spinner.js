@@ -1,24 +1,26 @@
-//= require "More"
-//= require "Class.Refactor"
 //= require "Fx.Tween"
+//= require "Request"
+//= require "Class.Refactor"
 //= require "Mask"
-
 /*
 ---
 
 script: Spinner.js
+
+name: Spinner
 
 description: Adds a semi-transparent overlay over a dom element with a spinnin ajax icon.
 
 license: MIT-style license
 
 authors:
-- Aaron Newton
+  - Aaron Newton
 
 requires:
-- core:1.2.4/Fx.Tween
-- /Class.refactor
-- /Mask
+  - Core/Fx.Tween
+  - Core/Request
+  - /Class.refactor
+  - /Mask
 
 provides: [Spinner]
 
@@ -29,29 +31,34 @@ var Spinner = new Class({
 
 	Extends: Mask,
 
-	options: {
-		/*message: false,*/
-		'class':'spinner',
+	Implements: Chain,
+
+	options: {/*
+		message: false,*/
+		'class': 'spinner',
 		containerPosition: {},
 		content: {
-			'class':'spinner-content'
+			'class': 'spinner-content'
 		},
 		messageContainer: {
-			'class':'spinner-msg'
+			'class': 'spinner-msg'
 		},
 		img: {
-			'class':'spinner-img'
+			'class': 'spinner-img'
 		},
 		fxOptions: {
 			link: 'chain'
 		}
 	},
 
-	initialize: function(){
-		this.parent.apply(this, arguments);
+	initialize: function(target, options){
+		this.target = document.id(target) || document.id(document.body);
 		this.target.store('spinner', this);
+		this.setOptions(options);
+		this.render();
+		this.inject();
 
-		//add this to events for when noFx is true; parent methods handle hide/show
+		// Add this to events for when noFx is true; parent methods handle hide/show.
 		var deactivate = function(){ this.active = false; }.bind(this);
 		this.addEvents({
 			hide: deactivate,
@@ -61,44 +68,53 @@ var Spinner = new Class({
 
 	render: function(){
 		this.parent();
-		this.element.set('id', this.options.id || 'spinner-'+$time());
+
+		this.element.set('id', this.options.id || 'spinner-' + String.uniqueID());
+
 		this.content = document.id(this.options.content) || new Element('div', this.options.content);
 		this.content.inject(this.element);
-		if (this.options.message) {
+
+		if (this.options.message){
 			this.msg = document.id(this.options.message) || new Element('p', this.options.messageContainer).appendText(this.options.message);
 			this.msg.inject(this.content);
 		}
-		if (this.options.img) {
+
+		if (this.options.img){
 			this.img = document.id(this.options.img) || new Element('div', this.options.img);
 			this.img.inject(this.content);
 		}
+
 		this.element.set('tween', this.options.fxOptions);
 	},
 
 	show: function(noFx){
 		if (this.active) return this.chain(this.show.bind(this));
-		if (!this.hidden) {
+		if (!this.hidden){
 			this.callChain.delay(20, this);
 			return this;
 		}
+
 		this.active = true;
+
 		return this.parent(noFx);
 	},
 
 	showMask: function(noFx){
 		var pos = function(){
-			this.content.position($merge({
+			this.content.position(Object.merge({
 				relativeTo: this.element
 			}, this.options.containerPosition));
 		}.bind(this);
-		if (noFx) {
+
+		if (noFx){
 			this.parent();
 			pos();
 		} else {
+			if (!this.options.style.opacity) this.options.style.opacity = this.element.getStyle('opacity').toFloat();
 			this.element.setStyles({
 				display: 'block',
 				opacity: 0
-			}).tween('opacity', this.options.style.opacity || 0.9);
+			}).tween('opacity', this.options.style.opacity);
 			pos();
 			this.hidden = false;
 			this.fireEvent('show');
@@ -108,7 +124,7 @@ var Spinner = new Class({
 
 	hide: function(noFx){
 		if (this.active) return this.chain(this.hide.bind(this));
-		if (this.hidden) {
+		if (this.hidden){
 			this.callChain.delay(20, this);
 			return this;
 		}
@@ -134,55 +150,56 @@ var Spinner = new Class({
 
 });
 
-Spinner.implement(new Chain);
+Request = Class.refactor(Request, {
 
-if (window.Request) {
-	Request = Class.refactor(Request, {
-		
-		options: {
-			useSpinner: false,
-			spinnerOptions: {},
-			spinnerTarget: false
-		},
-		
-		initialize: function(options){
-			this._send = this.send;
-			this.send = function(options){
-				if (this.spinner) this.spinner.chain(this._send.bind(this, options)).show();
-				else this._send(options);
-				return this;
-			};
-			this.previous(options);
+	options: {
+		useSpinner: false,
+		spinnerOptions: {},
+		spinnerTarget: false
+	},
+
+	initialize: function(options){
+		this._send = this.send;
+		this.send = function(options){
+			var spinner = this.getSpinner();
+			if (spinner) spinner.chain(this._send.pass(options, this)).show();
+			else this._send(options);
+			return this;
+		};
+		this.previous(options);
+	},
+
+	getSpinner: function(){
+		if (!this.spinner){
 			var update = document.id(this.options.spinnerTarget) || document.id(this.options.update);
-			if (this.options.useSpinner && update) {
-				this.spinner = update.get('spinner', this.options.spinnerOptions);
-				['onComplete', 'onException', 'onCancel'].each(function(event){
-					this.addEvent(event, this.spinner.hide.bind(this.spinner));
+			if (this.options.useSpinner && update){
+				update.set('spinner', this.options.spinnerOptions);
+				var spinner = this.spinner = update.get('spinner');
+				['complete', 'exception', 'cancel'].each(function(event){
+					this.addEvent(event, spinner.hide.bind(spinner));
 				}, this);
 			}
-		},
-		
-		getSpinner: function(){
-			return this.spinner;
 		}
-		
-	});
-}
+		return this.spinner;
+	}
+
+});
 
 Element.Properties.spinner = {
 
 	set: function(options){
 		var spinner = this.retrieve('spinner');
+		if (spinner) spinner.destroy();
 		return this.eliminate('spinner').store('spinner:options', options);
 	},
 
-	get: function(options){
-		if (options || !this.retrieve('spinner')){
-			if (this.retrieve('spinner')) this.retrieve('spinner').destroy();
-			if (options || !this.retrieve('spinner:options')) this.set('spinner', options);
-			new Spinner(this, this.retrieve('spinner:options'));
+	get: function(){
+		var spinner = this.retrieve('spinner');
+		if (!spinner){
+			spinner = new Spinner(this, this.retrieve('spinner:options'));
+			this.store('spinner', spinner);
 		}
-		return this.retrieve('spinner');
+		return spinner;
 	}
 
 };
@@ -190,13 +207,13 @@ Element.Properties.spinner = {
 Element.implement({
 
 	spin: function(options){
-		this.get('spinner', options).show();
+		if (options) this.set('spinner', options);
+		this.get('spinner').show();
 		return this;
 	},
 
 	unspin: function(){
-		var opt = Array.link(arguments, {options: Object.type, callback: Function.type});
-		this.get('spinner', opt.options).hide(opt.callback);
+		this.get('spinner').hide();
 		return this;
 	}
 

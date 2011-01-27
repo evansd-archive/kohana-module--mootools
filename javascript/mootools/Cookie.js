@@ -1,6 +1,4 @@
-//= require "Browser"
 //= require "Class.Extras"
-
 /*
 ---
 
@@ -10,7 +8,8 @@ description: Class for creating, reading, and deleting browser Cookies.
 
 license: MIT-style license.
 
-credits: Based on the functions by Peter-Paul Koch (http://quirksmode.org).
+credits:
+  - Based on the functions by Peter-Paul Koch (http://quirksmode.org).
 
 requires: Options
 
@@ -24,11 +23,12 @@ var Cookie = new Class({
 	Implements: Options,
 
 	options: {
-		path: false,
+		path: '/',
 		domain: false,
 		duration: false,
 		secure: false,
-		document: document
+		document: document,
+		encode: true
 	},
 
 	initialize: function(key, options){
@@ -37,7 +37,7 @@ var Cookie = new Class({
 	},
 
 	write: function(value){
-		value = encodeURIComponent(value);
+		if (this.options.encode) value = encodeURIComponent(value);
 		if (this.options.domain) value += '; domain=' + this.options.domain;
 		if (this.options.path) value += '; path=' + this.options.path;
 		if (this.options.duration){
@@ -56,7 +56,7 @@ var Cookie = new Class({
 	},
 
 	dispose: function(){
-		new Cookie(this.key, $merge(this.options, {duration: -1})).write('');
+		new Cookie(this.key, Object.merge({}, this.options, {duration: -1})).write('');
 		return this;
 	}
 

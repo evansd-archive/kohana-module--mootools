@@ -1,23 +1,22 @@
-//= require "More"
 //= require "Drag.Move"
-//= require "Selectors"
-
 /*
 ---
 
 script: Sortables.js
+
+name: Sortables
 
 description: Class for creating a drag and drop sorting interface for lists of items.
 
 license: MIT-style license
 
 authors:
-- Tom Occhino
+  - Tom Occhino
 
 requires:
-- /Drag.Move
+  - /Drag.Move
 
-provides: [Slider]
+provides: [Sortables]
 
 ...
 */
@@ -27,26 +26,32 @@ var Sortables = new Class({
 	Implements: [Events, Options],
 
 	options: {/*
-		onSort: $empty(element, clone),
-		onStart: $empty(element, clone),
-		onComplete: $empty(element),*/
+		onSort: function(element, clone){},
+		onStart: function(element, clone){},
+		onComplete: function(element){},*/
 		snap: 4,
 		opacity: 1,
 		clone: false,
 		revert: false,
 		handle: false,
-		constrain: false
+		constrain: false,
+		preventDefault: false
 	},
 
 	initialize: function(lists, options){
 		this.setOptions(options);
+
 		this.elements = [];
 		this.lists = [];
 		this.idle = true;
 
 		this.addLists($$(document.id(lists) || lists));
+
 		if (!this.options.clone) this.options.revert = false;
-		if (this.options.revert) this.effect = new Fx.Morph(null, $merge({duration: 250, link: 'cancel'}, this.options.revert));
+		if (this.options.revert) this.effect = new Fx.Morph(null, Object.merge({
+			duration: 250,
+			link: 'cancel'
+		}, this.options.revert));
 	},
 
 	attach: function(){
@@ -62,7 +67,9 @@ var Sortables = new Class({
 	addItems: function(){
 		Array.flatten(arguments).each(function(element){
 			this.elements.push(element);
-			var start = element.retrieve('sortables:start', this.start.bindWithEvent(this, element));
+			var start = element.retrieve('sortables:start', function(event){
+				this.start.call(this, event, element);
+			}.bind(this));
 			(this.options.handle ? element.getElement(this.options.handle) || element : element).addEvent('mousedown', start);
 		}, this);
 		return this;
@@ -81,7 +88,7 @@ var Sortables = new Class({
 			this.elements.erase(element);
 			var start = element.retrieve('sortables:start');
 			(this.options.handle ? element.getElement(this.options.handle) || element : element).removeEvent('mousedown', start);
-			
+
 			return element;
 		}, this));
 	},
@@ -90,34 +97,35 @@ var Sortables = new Class({
 		return $$(Array.flatten(arguments).map(function(list){
 			this.lists.erase(list);
 			this.removeItems(list.getChildren());
-			
+
 			return list;
 		}, this));
 	},
 
 	getClone: function(event, element){
-		if (!this.options.clone) return new Element('div').inject(document.body);
-		if ($type(this.options.clone) == 'function') return this.options.clone.call(this, event, element, this.list);
+		if (!this.options.clone) return new Element(element.tagName).inject(document.body);
+		if (typeOf(this.options.clone) == 'function') return this.options.clone.call(this, event, element, this.list);
 		var clone = element.clone(true).setStyles({
-			margin: '0px',
+			margin: 0,
 			position: 'absolute',
 			visibility: 'hidden',
-			'width': element.getStyle('width')
+			width: element.getStyle('width')
 		});
 		//prevent the duplicated radio inputs from unchecking the real one
-		if (clone.get('html').test('radio')) {
-			clone.getElements('input[type=radio]').each(function(input, i) {
+		if (clone.get('html').test('radio')){
+			clone.getElements('input[type=radio]').each(function(input, i){
 				input.set('name', 'clone_' + i);
+				if (input.get('checked')) element.getElements('input[type=radio]')[i].set('checked', true);
 			});
 		}
-		
+
 		return clone.inject(this.list).setPosition(element.getPosition(element.getOffsetParent()));
 	},
 
 	getDroppables: function(){
-		var droppables = this.list.getChildren();
-		if (!this.options.constrain) droppables = this.lists.concat(droppables).erase(this.list);
-		return droppables.erase(this.clone).erase(this.element);
+		var droppables = this.list.getChildren().erase(this.clone).erase(this.element);
+		if (!this.options.constrain) droppables.append(this.lists).erase(this.list);
+		return droppables;
 	},
 
 	insert: function(dragging, element){
@@ -133,7 +141,12 @@ var Sortables = new Class({
 	},
 
 	start: function(event, element){
-		if (!this.idle) return;
+		if (
+			!this.idle ||
+			event.rightClick ||
+			['button', 'input'].contains(event.target.get('tag'))
+		) return;
+
 		this.idle = false;
 		this.element = element;
 		this.opacity = element.get('opacity');
@@ -141,6 +154,7 @@ var Sortables = new Class({
 		this.clone = this.getClone(event, element);
 
 		this.drag = new Drag.Move(this.clone, {
+			preventDefault: this.options.preventDefault,
 			snap: this.options.snap,
 			container: this.options.constrain && this.element.getParent(),
 			droppables: this.getDroppables(),
@@ -164,7 +178,7 @@ var Sortables = new Class({
 		this.element.set('opacity', this.opacity);
 		if (this.effect){
 			var dim = this.element.getStyles('width', 'height');
-			var pos = this.clone.computePosition(this.element.getPosition(this.clone.offsetParent));
+			var pos = this.clone.computePosition(this.element.getPosition(this.clone.getOffsetParent()));
 			this.effect.element = this.clone;
 			this.effect.start({
 				top: pos.top,
@@ -185,7 +199,12 @@ var Sortables = new Class({
 	},
 
 	serialize: function(){
-		var params = Array.link(arguments, {modifier: Function.type, index: $defined});
+		var params = Array.link(arguments, {
+			modifier: Type.isFunction,
+			index: function(obj){
+				return obj != null;
+			}
+		});
 		var serial = this.lists.map(function(list){
 			return list.getChildren().map(params.modifier || function(element){
 				return element.get('id');
@@ -194,7 +213,7 @@ var Sortables = new Class({
 
 		var index = params.index;
 		if (this.lists.length == 1) index = 0;
-		return $chk(index) && index >= 0 && index < this.lists.length ? serial[index] : serial;
+		return (index || index === 0) && index >= 0 && index < this.lists.length ? serial[index] : serial;
 	}
 
 });

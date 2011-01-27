@@ -1,29 +1,32 @@
-//= require "More"
+//= require "String"
 //= require "Element"
-
+//= require "More"
 /*
 ---
 
 script: Elements.From.js
+
+name: Elements.From
 
 description: Returns a collection of elements from a string of html.
 
 license: MIT-style license
 
 authors:
-- Aaron Newton
+  - Aaron Newton
 
 requires:
-- core:1.2.4/Element
-- /MooTools.More
+  - Core/String
+  - Core/Element
+  - /MooTools.More
 
-provides: [Elements.from]
+provides: [Elements.from, Elements.From]
 
 ...
 */
 
 Elements.from = function(text, excludeScripts){
-	if ($pick(excludeScripts, true)) text = text.stripScripts();
+	if (excludeScripts || excludeScripts == null) text = text.stripScripts();
 
 	var container, match = text.match(/^\s*<(t[dhr]|tbody|tfoot|thead)/i);
 

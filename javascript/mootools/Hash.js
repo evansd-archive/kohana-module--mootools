@@ -1,5 +1,5 @@
-//= require "Core"
-
+//= require "Object"
+//= require "More"
 /*
 ---
 
@@ -9,26 +9,65 @@ description: Contains Hash Prototypes. Provides a means for overcoming the JavaS
 
 license: MIT-style license.
 
-requires: Hash.base
+requires:
+  - Core/Object
+  - /MooTools.More
 
-provides: Hash
+provides: [Hash]
 
 ...
 */
+
+(function(){
+
+if (this.Hash) return;
+
+var Hash = this.Hash = new Type('Hash', function(object){
+	if (typeOf(object) == 'hash') object = Object.clone(object.getClean());
+	for (var key in object) this[key] = object[key];
+	return this;
+});
+
+this.$H = function(object){
+	return new Hash(object);
+};
+
+Hash.implement({
+
+	forEach: function(fn, bind){
+		Object.forEach(this, fn, bind);
+	},
+
+	getClean: function(){
+		var clean = {};
+		for (var key in this){
+			if (this.hasOwnProperty(key)) clean[key] = this[key];
+		}
+		return clean;
+	},
+
+	getLength: function(){
+		var length = 0;
+		for (var key in this){
+			if (this.hasOwnProperty(key)) length++;
+		}
+		return length;
+	}
+
+});
+
+Hash.alias('each', 'forEach');
 
 Hash.implement({
 
 	has: Object.prototype.hasOwnProperty,
 
 	keyOf: function(value){
-		for (var key in this){
-			if (this.hasOwnProperty(key) && this[key] === value) return key;
-		}
-		return null;
+		return Object.keyOf(this, value);
 	},
 
 	hasValue: function(value){
-		return (Hash.keyOf(this, value) !== null);
+		return Object.contains(this, value);
 	},
 
 	extend: function(properties){
@@ -72,73 +111,36 @@ Hash.implement({
 	},
 
 	map: function(fn, bind){
-		var results = new Hash;
-		Hash.each(this, function(value, key){
-			results.set(key, fn.call(bind, value, key, this));
-		}, this);
-		return results;
+		return new Hash(Object.map(this, fn, bind));
 	},
 
 	filter: function(fn, bind){
-		var results = new Hash;
-		Hash.each(this, function(value, key){
-			if (fn.call(bind, value, key, this)) results.set(key, value);
-		}, this);
-		return results;
+		return new Hash(Object.filter(this, fn, bind));
 	},
 
 	every: function(fn, bind){
-		for (var key in this){
-			if (this.hasOwnProperty(key) && !fn.call(bind, this[key], key)) return false;
-		}
-		return true;
+		return Object.every(this, fn, bind);
 	},
 
 	some: function(fn, bind){
-		for (var key in this){
-			if (this.hasOwnProperty(key) && fn.call(bind, this[key], key)) return true;
-		}
-		return false;
+		return Object.some(this, fn, bind);
 	},
 
 	getKeys: function(){
-		var keys = [];
-		Hash.each(this, function(value, key){
-			keys.push(key);
-		});
-		return keys;
+		return Object.keys(this);
 	},
 
 	getValues: function(){
-		var values = [];
-		Hash.each(this, function(value){
-			values.push(value);
-		});
-		return values;
+		return Object.values(this);
 	},
 
 	toQueryString: function(base){
-		var queryString = [];
-		Hash.each(this, function(value, key){
-			if (base) key = base + '[' + key + ']';
-			var result;
-			switch ($type(value)){
-				case 'object': result = Hash.toQueryString(value, key); break;
-				case 'array':
-					var qs = {};
-					value.each(function(val, i){
-						qs[i] = val;
-					});
-					result = Hash.toQueryString(qs, key);
-				break;
-				default: result = key + '=' + encodeURIComponent(value);
-			}
-			if (value != undefined) queryString.push(result);
-		});
-
-		return queryString.join('&');
+		return Object.toQueryString(this, base);
 	}
 
 });
 
-Hash.alias({keyOf: 'indexOf', hasValue: 'contains'});
+Hash.alias({indexOf: 'keyOf', contains: 'hasValue'});
+
+
+})();

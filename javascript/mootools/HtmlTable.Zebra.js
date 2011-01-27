@@ -1,23 +1,23 @@
-//= require "More"
 //= require "HtmlTable"
 //= require "Class.Refactor"
-
 /*
 ---
 
 script: HtmlTable.Zebra.js
+
+name: HtmlTable.Zebra
 
 description: Builds a stripy table with methods to add rows.
 
 license: MIT-style license
 
 authors:
-- Harald Kirschner
-- Aaron Newton
+  - Harald Kirschner
+  - Aaron Newton
 
 requires:
-- /HtmlTable
-- /Class.refactor
+  - /HtmlTable
+  - /Class.refactor
 
 provides: [HtmlTable.Zebra]
 

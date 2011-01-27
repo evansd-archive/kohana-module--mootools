@@ -1,23 +1,24 @@
-//= require "More"
+//= require "Class.Extras"
 //= require "Class.Extras"
 //= require "Class.Occlude"
-
 /*
 ---
 
 script: HtmlTable.js
+
+name: HtmlTable
 
 description: Builds table elements with methods to add rows.
 
 license: MIT-style license
 
 authors:
-- Aaron Newton
+  - Aaron Newton
 
 requires:
-- core:1.2.4/Options
-- core:1.2.4/Events
-- /Class.Occlude
+  - Core/Options
+  - Core/Events
+  - /Class.Occlude
 
 provides: [HtmlTable]
 
@@ -42,7 +43,7 @@ var HtmlTable = new Class({
 	property: 'HtmlTable',
 
 	initialize: function(){
-		var params = Array.link(arguments, {options: Object.type, table: Element.type});
+		var params = Array.link(arguments, {options: Type.isObject, table: Type.isElement});
 		this.setOptions(params.options);
 		this.element = params.table || new Element('table', this.options.properties);
 		if (this.occlude()) return this.occluded;
@@ -61,7 +62,7 @@ var HtmlTable = new Class({
 
 		if (this.options.footers.length) this.setFooters(this.options.footers);
 		this.tfoot = document.id(this.element.tFoot);
-		if (this.tfoot) this.foot = document.id(this.thead.rows[0]);
+		if (this.tfoot) this.foot = document.id(this.tfoot.rows[0]);
 
 		this.options.rows.each(function(row){
 			this.push(row);
@@ -81,7 +82,7 @@ var HtmlTable = new Class({
 		return this;
 	},
 
-	set: function(what, items) {
+	set: function(what, items){
 		var target = (what == 'headers') ? 'tHead' : 'tFoot';
 		this[target.toLowerCase()] = (document.id(this.element[target]) || new Element(target.toLowerCase()).inject(this.element, 'top')).empty();
 		var data = this.push(items, {}, this[target.toLowerCase()], what == 'headers' ? 'th' : 'td');
@@ -101,11 +102,18 @@ var HtmlTable = new Class({
 	},
 
 	push: function(row, rowProperties, target, tag){
+		if (typeOf(row) == "element" && row.get('tag') == 'tr'){
+			row.inject(target || this.body);
+			return {
+				tr: row,
+				tds: row.getChildren('td')
+			};
+		}
 		var tds = row.map(function(data){
-			var td = new Element(tag || 'td', data.properties),
-				type = data.content || data || '',
+			var td = new Element(tag || 'td', data ? data.properties : {}),
+				type = (data ? data.content : '') || data,
 				element = document.id(type);
-			if($type(type) != 'string' && element) td.adopt(element);
+			if (typeOf(type) != 'string' && element) td.adopt(element);
 			else td.set('html', type);
 
 			return td;

@@ -1,5 +1,6 @@
 //= require "Class.Extras"
-
+//= require "Class.Extras"
+//= require "Class.Extras"
 /*
 ---
 
@@ -16,15 +17,17 @@ provides: Fx
 ...
 */
 
-var Fx = new Class({
+(function(){
+
+var Fx = this.Fx = new Class({
 
 	Implements: [Chain, Events, Options],
 
 	options: {
 		/*
-		onStart: $empty,
-		onCancel: $empty,
-		onComplete: $empty,
+		onStart: nil,
+		onCancel: nil,
+		onComplete: nil,
 		*/
 		fps: 50,
 		unit: false,
@@ -35,9 +38,6 @@ var Fx = new Class({
 	initialize: function(options){
 		this.subject = this.subject || this;
 		this.setOptions(options);
-		this.options.duration = Fx.Durations[this.options.duration] || this.options.duration.toInt();
-		var wait = this.options.wait;
-		if (wait === false) this.options.link = 'cancel';
 	},
 
 	getTransition: function(){
@@ -47,7 +47,7 @@ var Fx = new Class({
 	},
 
 	step: function(){
-		var time = $time();
+		var time = Date.now();
 		if (time < this.time + this.options.duration){
 			var delta = this.transition((time - this.time) / this.options.duration);
 			this.set(this.compute(this.from, this.to, delta));
@@ -69,13 +69,15 @@ var Fx = new Class({
 		if (!this.timer) return true;
 		switch (this.options.link){
 			case 'cancel': this.cancel(); return true;
-			case 'chain': this.chain(this.caller.bind(this, arguments)); return false;
+			case 'chain': this.chain(this.caller.pass(arguments, this)); return false;
 		}
 		return false;
 	},
 
 	start: function(from, to){
 		if (!this.check(from, to)) return this;
+		var duration = this.options.duration;
+		this.options.duration = Fx.Durations[duration] || duration.toInt();
 		this.from = from;
 		this.to = to;
 		this.time = 0;
@@ -120,15 +122,15 @@ var Fx = new Class({
 
 	stopTimer: function(){
 		if (!this.timer) return false;
-		this.time = $time() - this.time;
-		this.timer = $clear(this.timer);
+		this.time = Date.now() - this.time;
+		this.timer = removeInstance(this);
 		return true;
 	},
 
 	startTimer: function(){
 		if (this.timer) return false;
-		this.time = $time() - this.time;
-		this.timer = this.step.periodical(Math.round(1000 / this.options.fps), this);
+		this.time = Date.now() - this.time;
+		this.timer = addInstance(this);
 		return true;
 	}
 
@@ -139,3 +141,31 @@ Fx.compute = function(from, to, delta){
 };
 
 Fx.Durations = {'short': 250, 'normal': 500, 'long': 1000};
+
+// global timers
+
+var instances = {}, timers = {};
+
+var loop = function(){
+	for (var i = this.length; i--;){
+		if (this[i]) this[i].step();
+	}
+};
+
+var addInstance = function(instance){
+	var fps = instance.options.fps,
+		list = instances[fps] || (instances[fps] = []);
+	list.push(instance);
+	if (!timers[fps]) timers[fps] = loop.periodical(Math.round(1000 / fps), list);
+	return true;
+};
+
+var removeInstance = function(instance){
+	var fps = instance.options.fps,
+		list = instances[fps] || [];
+	list.erase(instance);
+	if (!list.length && timers[fps]) timers[fps] = clearInterval(timers[fps]);
+	return false;
+};
+
+})();

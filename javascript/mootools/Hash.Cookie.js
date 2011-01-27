@@ -1,24 +1,27 @@
-//= require "More"
 //= require "Cookie"
 //= require "JSON"
-
+//= require "More"
+//= require "Hash"
 /*
 ---
 
 script: Hash.Cookie.js
+
+name: Hash.Cookie
 
 description: Class for creating, reading, and deleting Cookies in JSON format.
 
 license: MIT-style license
 
 authors:
-- Valerio Proietti
-- Aaron Newton
+  - Valerio Proietti
+  - Aaron Newton
 
 requires:
-- core:1.2.4/Cookie
-- core:1.2.4/JSON
-- /MooTools.More
+  - Core/Cookie
+  - Core/JSON
+  - /MooTools.More
+  - /Hash
 
 provides: [Hash.Cookie]
 

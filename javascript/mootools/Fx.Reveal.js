@@ -1,24 +1,24 @@
-//= require "More"
 //= require "Fx.Morph"
 //= require "Element.Shortcuts"
 //= require "Element.Measure"
-
 /*
 ---
 
 script: Fx.Reveal.js
+
+name: Fx.Reveal
 
 description: Defines Fx.Reveal, a class that shows and hides elements with a transition.
 
 license: MIT-style license
 
 authors:
-- Aaron Newton
+  - Aaron Newton
 
 requires:
-- core:1.2.4/Fx.Morph
-- /Element.Shortcuts
-- /Element.Measure
+  - Core/Fx.Morph
+  - /Element.Shortcuts
+  - /Element.Measure
 
 provides: [Fx.Reveal]
 
@@ -29,154 +29,138 @@ Fx.Reveal = new Class({
 
 	Extends: Fx.Morph,
 
-	options: {/*	  
-		onShow: $empty(thisElement),
-		onHide: $empty(thisElement),
-		onComplete: $empty(thisElement),
+	options: {/*
+		onShow: function(thisElement){},
+		onHide: function(thisElement){},
+		onComplete: function(thisElement){},
 		heightOverride: null,
-		widthOverride: null, */
+		widthOverride: null,*/
 		link: 'cancel',
 		styles: ['padding', 'border', 'margin'],
-		transitionOpacity: !Browser.Engine.trident4,
+		transitionOpacity: !Browser.ie6,
 		mode: 'vertical',
-		display: 'block',
-		hideInputs: Browser.Engine.trident ? 'select, input, textarea, object, embed' : false
+		display: function(){
+			return this.element.get('tag') != 'tr' ? 'block' : 'table-row';
+		},
+		opacity: 1,
+		hideInputs: Browser.ie ? 'select, input, textarea, object, embed' : null
 	},
 
 	dissolve: function(){
-		try {
-			if (!this.hiding && !this.showing){
-				if (this.element.getStyle('display') != 'none'){
-					this.hiding = true;
-					this.showing = false;
-					this.hidden = true;
-					this.cssText = this.element.style.cssText;
-					var startStyles = this.element.getComputedSize({
-						styles: this.options.styles,
-						mode: this.options.mode
-					});
-					this.element.setStyle('display', this.options.display);
-					if (this.options.transitionOpacity) startStyles.opacity = 1;
-					var zero = {};
-					$each(startStyles, function(style, name){
-						zero[name] = [style, 0];
-					}, this);
-					this.element.setStyle('overflow', 'hidden');
-					var hideThese = this.options.hideInputs ? this.element.getElements(this.options.hideInputs) : null;
-					this.$chain.unshift(function(){
-						if (this.hidden){
-							this.hiding = false;
-							$each(startStyles, function(style, name){
-								startStyles[name] = style;
-							}, this);
-							this.element.style.cssText = this.cssText;
-							this.element.setStyle('display', 'none');
-							if (hideThese) hideThese.setStyle('visibility', 'visible');
-						}
-						this.fireEvent('hide', this.element);
-						this.callChain();
-					}.bind(this));
-					if (hideThese) hideThese.setStyle('visibility', 'hidden');
-					this.start(zero);
-				} else {
-					this.callChain.delay(10, this);
-					this.fireEvent('complete', this.element);
+		if (!this.hiding && !this.showing){
+			if (this.element.getStyle('display') != 'none'){
+				this.hiding = true;
+				this.showing = false;
+				this.hidden = true;
+				this.cssText = this.element.style.cssText;
+
+				var startStyles = this.element.getComputedSize({
+					styles: this.options.styles,
+					mode: this.options.mode
+				});
+				if (this.options.transitionOpacity) startStyles.opacity = this.options.opacity;
+
+				var zero = {};
+				Object.each(startStyles, function(style, name){
+					zero[name] = [style, 0];
+				});
+
+				this.element.setStyles({
+					display: Function.from(this.options.display).call(this),
+					overflow: 'hidden'
+				});
+
+				var hideThese = this.options.hideInputs ? this.element.getElements(this.options.hideInputs) : null;
+				if (hideThese) hideThese.setStyle('visibility', 'hidden');
+
+				this.$chain.unshift(function(){
+					if (this.hidden){
+						this.hiding = false;
+						this.element.style.cssText = this.cssText;
+						this.element.setStyle('display', 'none');
+						if (hideThese) hideThese.setStyle('visibility', 'visible');
+					}
 					this.fireEvent('hide', this.element);
-				}
-			} else if (this.options.link == 'chain'){
-				this.chain(this.dissolve.bind(this));
-			} else if (this.options.link == 'cancel' && !this.hiding){
-				this.cancel();
-				this.dissolve();
+					this.callChain();
+				}.bind(this));
+
+				this.start(zero);
+			} else {
+				this.callChain.delay(10, this);
+				this.fireEvent('complete', this.element);
+				this.fireEvent('hide', this.element);
 			}
-		} catch(e){
-			this.hiding = false;
-			this.element.setStyle('display', 'none');
-			this.callChain.delay(10, this);
-			this.fireEvent('complete', this.element);
-			this.fireEvent('hide', this.element);
+		} else if (this.options.link == 'chain'){
+			this.chain(this.dissolve.bind(this));
+		} else if (this.options.link == 'cancel' && !this.hiding){
+			this.cancel();
+			this.dissolve();
 		}
 		return this;
 	},
 
 	reveal: function(){
-		try {
-			if (!this.showing && !this.hiding){
-				if (this.element.getStyle('display') == 'none' ||
-					 this.element.getStyle('visiblity') == 'hidden' ||
-					 this.element.getStyle('opacity') == 0){
-					this.showing = true;
-					this.hiding = this.hidden =  false;
-					var startStyles;
-					this.cssText = this.element.style.cssText;
-					//toggle display, but hide it
-					this.element.measure(function(){
-						//create the styles for the opened/visible state
-						startStyles = this.element.getComputedSize({
-							styles: this.options.styles,
-							mode: this.options.mode
-						});
-					}.bind(this));
-					$each(startStyles, function(style, name){
-						startStyles[name] = style;
+		if (!this.showing && !this.hiding){
+			if (this.element.getStyle('display') == 'none'){
+				this.hiding = false;
+				this.showing = true;
+				this.hidden = false;
+				this.cssText = this.element.style.cssText;
+
+				var startStyles;
+				this.element.measure(function(){
+					startStyles = this.element.getComputedSize({
+						styles: this.options.styles,
+						mode: this.options.mode
 					});
-					//if we're overridding height/width
-					if ($chk(this.options.heightOverride)) startStyles.height = this.options.heightOverride.toInt();
-					if ($chk(this.options.widthOverride)) startStyles.width = this.options.widthOverride.toInt();
-					if (this.options.transitionOpacity) {
-						this.element.setStyle('opacity', 0);
-						startStyles.opacity = 1;
-					}
-					//create the zero state for the beginning of the transition
-					var zero = {
-						height: 0,
-						display: this.options.display
-					};
-					$each(startStyles, function(style, name){ zero[name] = 0; });
-					//set to zero
-					this.element.setStyles($merge(zero, {overflow: 'hidden'}));
-					//hide inputs
-					var hideThese = this.options.hideInputs ? this.element.getElements(this.options.hideInputs) : null;
-					if (hideThese) hideThese.setStyle('visibility', 'hidden');
-					//start the effect
-					this.start(startStyles);
-					this.$chain.unshift(function(){
-						this.element.style.cssText = this.cssText;
-						this.element.setStyle('display', this.options.display);
-						if (!this.hidden) this.showing = false;
-						if (hideThese) hideThese.setStyle('visibility', 'visible');
-						this.callChain();
-						this.fireEvent('show', this.element);
-					}.bind(this));
-				} else {
-					this.callChain();
-					this.fireEvent('complete', this.element);
-					this.fireEvent('show', this.element);
+				}.bind(this));
+				if (this.options.heightOverride != null) startStyles.height = this.options.heightOverride.toInt();
+				if (this.options.widthOverride != null) startStyles.width = this.options.widthOverride.toInt();
+				if (this.options.transitionOpacity){
+					this.element.setStyle('opacity', 0);
+					startStyles.opacity = this.options.opacity;
 				}
-			} else if (this.options.link == 'chain'){
-				this.chain(this.reveal.bind(this));
-			} else if (this.options.link == 'cancel' && !this.showing){
-				this.cancel();
-				this.reveal();
+
+				var zero = {
+					height: 0,
+					display: Function.from(this.options.display).call(this)
+				};
+				Object.each(startStyles, function(style, name){
+					zero[name] = 0;
+				});
+				zero.overflow = 'hidden';
+
+				this.element.setStyles(zero);
+
+				var hideThese = this.options.hideInputs ? this.element.getElements(this.options.hideInputs) : null;
+				if (hideThese) hideThese.setStyle('visibility', 'hidden');
+
+				this.$chain.unshift(function(){
+					this.element.style.cssText = this.cssText;
+					this.element.setStyle('display', Function.from(this.options.display).call(this));
+					if (!this.hidden) this.showing = false;
+					if (hideThese) hideThese.setStyle('visibility', 'visible');
+					this.callChain();
+					this.fireEvent('show', this.element);
+				}.bind(this));
+
+				this.start(startStyles);
+			} else {
+				this.callChain();
+				this.fireEvent('complete', this.element);
+				this.fireEvent('show', this.element);
 			}
-		} catch(e){
-			this.element.setStyles({
-				display: this.options.display,
-				visiblity: 'visible',
-				opacity: 1
-			});
-			this.showing = false;
-			this.callChain.delay(10, this);
-			this.fireEvent('complete', this.element);
-			this.fireEvent('show', this.element);
+		} else if (this.options.link == 'chain'){
+			this.chain(this.reveal.bind(this));
+		} else if (this.options.link == 'cancel' && !this.showing){
+			this.cancel();
+			this.reveal();
 		}
 		return this;
 	},
 
 	toggle: function(){
-		if (this.element.getStyle('display') == 'none' ||
-			 this.element.getStyle('visiblity') == 'hidden' ||
-			 this.element.getStyle('opacity') == 0){
+		if (this.element.getStyle('display') == 'none'){
 			this.reveal();
 		} else {
 			this.dissolve();
@@ -187,8 +171,9 @@ Fx.Reveal = new Class({
 	cancel: function(){
 		this.parent.apply(this, arguments);
 		this.element.style.cssText = this.cssText;
-		this.hidding = false;
+		this.hiding = false;
 		this.showing = false;
+		return this;
 	}
 
 });
@@ -196,17 +181,17 @@ Fx.Reveal = new Class({
 Element.Properties.reveal = {
 
 	set: function(options){
-		var reveal = this.retrieve('reveal');
-		if (reveal) reveal.cancel();
-		return this.eliminate('reveal').store('reveal:options', options);
+		this.get('reveal').cancel().setOptions(options);
+		return this;
 	},
 
-	get: function(options){
-		if (options || !this.retrieve('reveal')){
-			if (options || !this.retrieve('reveal:options')) this.set('reveal', options);
-			this.store('reveal', new Fx.Reveal(this, this.retrieve('reveal:options')));
+	get: function(){
+		var reveal = this.retrieve('reveal');
+		if (!reveal){
+			reveal = new Fx.Reveal(this);
+			this.store('reveal', reveal);
 		}
-		return this.retrieve('reveal');
+		return reveal;
 	}
 
 };
@@ -216,32 +201,31 @@ Element.Properties.dissolve = Element.Properties.reveal;
 Element.implement({
 
 	reveal: function(options){
-		this.get('reveal', options).reveal();
+		this.get('reveal').setOptions(options).reveal();
 		return this;
 	},
 
 	dissolve: function(options){
-		this.get('reveal', options).dissolve();
+		this.get('reveal').setOptions(options).dissolve();
 		return this;
 	},
 
-	nix: function(){
-		var params = Array.link(arguments, {destroy: Boolean.type, options: Object.type});
-		this.get('reveal', params.options).dissolve().chain(function(){
+	nix: function(options){
+		var params = Array.link(arguments, {destroy: Type.isBoolean, options: Type.isObject});
+		this.get('reveal').setOptions(options).dissolve().chain(function(){
 			this[params.destroy ? 'destroy' : 'dispose']();
 		}.bind(this));
 		return this;
 	},
 
 	wink: function(){
-		var params = Array.link(arguments, {duration: Number.type, options: Object.type});
-		var reveal = this.get('reveal', params.options);
+		var params = Array.link(arguments, {duration: Type.isNumber, options: Type.isObject});
+		var reveal = this.get('reveal').setOptions(params.options);
 		reveal.reveal().chain(function(){
 			(function(){
 				reveal.dissolve();
 			}).delay(params.duration || 2000);
 		});
 	}
-
 
 });

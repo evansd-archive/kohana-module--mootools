@@ -1,6 +1,5 @@
 //= require "Fx"
 //= require "Element.Style"
-
 /*
 ---
 
@@ -24,9 +23,8 @@ Fx.CSS = new Class({
 	//prepares the base from/to object
 
 	prepare: function(element, property, values){
-		values = $splat(values);
-		var values1 = values[1];
-		if (!$chk(values1)){
+		values = Array.from(values);
+		if (values[1] == null){
 			values[1] = values[0];
 			values[0] = element.getStyle(property);
 		}
@@ -37,15 +35,15 @@ Fx.CSS = new Class({
 	//parses a value into an array
 
 	parse: function(value){
-		value = $lambda(value)();
-		value = (typeof value == 'string') ? value.split(' ') : $splat(value);
+		value = Function.from(value)();
+		value = (typeof value == 'string') ? value.split(' ') : Array.from(value);
 		return value.map(function(val){
 			val = String(val);
 			var found = false;
-			Fx.CSS.Parsers.each(function(parser, key){
+			Object.each(Fx.CSS.Parsers, function(parser, key){
 				if (found) return;
 				var parsed = parser.parse(val);
-				if ($chk(parsed)) found = {value: parsed, parser: parser};
+				if (parsed || parsed === 0) found = {value: parsed, parser: parser};
 			});
 			found = found || {value: val, parser: Fx.CSS.Parsers.String};
 			return found;
@@ -59,14 +57,14 @@ Fx.CSS = new Class({
 		(Math.min(from.length, to.length)).times(function(i){
 			computed.push({value: from[i].parser.compute(from[i].value, to[i].value, delta), parser: from[i].parser});
 		});
-		computed.$family = {name: 'fx:css:value'};
+		computed.$family = Function.from('fx:css:value');
 		return computed;
 	},
 
 	//serves the value as settable
 
 	serve: function(value, unit){
-		if ($type(value) != 'fx:css:value') value = this.parse(value);
+		if (typeOf(value) != 'fx:css:value') value = this.parse(value);
 		var returned = [];
 		value.each(function(bit){
 			returned = returned.concat(bit.parser.serve(bit.value, unit));
@@ -109,7 +107,7 @@ Fx.CSS = new Class({
 
 Fx.CSS.Cache = {};
 
-Fx.CSS.Parsers = new Hash({
+Fx.CSS.Parsers = {
 
 	Color: {
 		parse: function(value){
@@ -135,9 +133,19 @@ Fx.CSS.Parsers = new Hash({
 	},
 
 	String: {
-		parse: $lambda(false),
-		compute: $arguments(1),
-		serve: $arguments(0)
+		parse: Function.from(false),
+		compute: function(zero, one){
+			return one;
+		},
+		serve: function(zero){
+			return zero;
+		}
 	}
 
-});
+};
+
+//<1.2compat>
+
+Fx.CSS.Parsers = new Hash(Fx.CSS.Parsers);
+
+//</1.2compat>

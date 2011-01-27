@@ -1,27 +1,26 @@
-//= require "More"
+//= require "Element.Dimensions"
 //= require "Class.Binds"
 //= require "Drag"
-//= require "Element.Dimensions"
 //= require "Element.Measure"
-
 /*
 ---
 
 script: Slider.js
+
+name: Slider
 
 description: Class for creating horizontal and vertical slider controls.
 
 license: MIT-style license
 
 authors:
-- Valerio Proietti
+  - Valerio Proietti
 
 requires:
-- core:1.2.4/Element.Dimensions
-- /Class.Binds
-- /Drag
-- /Element.Dimensions
-- /Element.Measure
+  - Core/Element.Dimensions
+  - /Class.Binds
+  - /Drag
+  - /Element.Measure
 
 provides: [Slider]
 
@@ -35,9 +34,9 @@ var Slider = new Class({
 	Binds: ['clickedElement', 'draggedKnob', 'scrolledElement'],
 
 	options: {/*
-		onTick: $empty(intPosition),
-		onChange: $empty(intStep),
-		onComplete: $empty(strStep),*/
+		onTick: function(intPosition){},
+		onChange: function(intStep){},
+		onComplete: function(strStep){},*/
 		onTick: function(position){
 			if (this.options.snap) position = this.toPosition(this.step);
 			this.knob.setStyle(this.property, position);
@@ -68,20 +67,15 @@ var Slider = new Class({
 				this.property = 'left';
 				offset = 'offsetWidth';
 		}
-		
-		this.full = this.element.measure(function(){ 
-			this.half = this.knob[offset] / 2; 
-			return this.element[offset] - this.knob[offset] + (this.options.offset * 2); 
-		}.bind(this));
-		
-		this.min = $chk(this.options.range[0]) ? this.options.range[0] : 0;
-		this.max = $chk(this.options.range[1]) ? this.options.range[1] : this.options.steps;
-		this.range = this.max - this.min;
-		this.steps = this.options.steps || this.full;
-		this.stepSize = Math.abs(this.range) / this.steps;
-		this.stepWidth = this.stepSize * this.full / Math.abs(this.range) ;
 
-		this.knob.setStyle('position', 'relative').setStyle(this.property, this.options.initialStep ? this.toPosition(this.options.initialStep) : - this.options.offset);
+		this.full = this.element.measure(function(){
+			this.half = this.knob[offset] / 2;
+			return this.element[offset] - this.knob[offset] + (this.options.offset * 2);
+		}.bind(this));
+
+		this.setRange(this.options.range);
+
+		this.knob.setStyle('position', 'relative').setStyle(this.property, - this.options.offset);
 		modifiers[this.axis] = this.property;
 		limit[this.axis] = [- this.options.offset, this.full - this.options.offset];
 
@@ -94,7 +88,7 @@ var Slider = new Class({
 			onBeforeStart: (function(){
 				this.isDragging = true;
 			}).bind(this),
-			onCancel: function() {
+			onCancel: function(){
 				this.isDragging = false;
 			}.bind(this),
 			onComplete: function(){
@@ -110,6 +104,7 @@ var Slider = new Class({
 
 		this.drag = new Drag(this.knob, dragOptions);
 		this.attach();
+		if (this.options.initialStep != null) this.set(this.options.initialStep)
 	},
 
 	attach: function(){
@@ -134,6 +129,17 @@ var Slider = new Class({
 		this.checkStep();
 		this.fireEvent('tick', this.toPosition(this.step));
 		this.end();
+		return this;
+	},
+
+	setRange: function(range, pos){
+		this.min = Array.pick([range[0], 0]);
+		this.max = Array.pick([range[1], this.options.steps]);
+		this.range = this.max - this.min;
+		this.steps = this.options.steps || this.full;
+		this.stepSize = Math.abs(this.range) / this.steps;
+		this.stepWidth = this.stepSize * this.full / Math.abs(this.range);
+		this.set(Array.pick([pos, this.step]).floor(this.min).max(this.max));
 		return this;
 	},
 

@@ -1,21 +1,22 @@
-//= require "More"
 //= require "Request"
-
+//= require "More"
 /*
 ---
 
 script: Request.Periodical.js
+
+name: Request.Periodical
 
 description: Requests the same URL to pull data from a server but increases the intervals if no data is returned to reduce the load
 
 license: MIT-style license
 
 authors:
-- Christoph Pojer
+  - Christoph Pojer
 
 requires:
-- core:1.2.4/Request
-- /MooTools.More
+  - Core/Request
+  - /MooTools.More
 
 provides: [Request.Periodical]
 
@@ -34,10 +35,10 @@ Request.implement({
 		var fn = function(){
 			if (!this.running) this.send({data: data});
 		};
-		this.timer = fn.delay(this.options.initialDelay, this);
 		this.lastDelay = this.options.initialDelay;
+		this.timer = fn.delay(this.lastDelay, this);
 		this.completeCheck = function(response){
-			$clear(this.timer);
+			clearTimeout(this.timer);
 			this.lastDelay = (response) ? this.options.delay : (this.lastDelay + this.options.delay).min(this.options.limit);
 			this.timer = fn.delay(this.lastDelay, this);
 		};
@@ -45,7 +46,7 @@ Request.implement({
 	},
 
 	stopTimer: function(){
-		$clear(this.timer);
+		clearTimeout(this.timer);
 		return this.removeEvent('complete', this.completeCheck);
 	}
 

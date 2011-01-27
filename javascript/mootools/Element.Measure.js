@@ -1,10 +1,12 @@
-//= require "More"
 //= require "Element.Style"
-
+//= require "Element.Dimensions"
+//= require "More"
 /*
 ---
 
 script: Element.Measure.js
+
+name: Element.Measure
 
 description: Extends the Element native object to include methods useful in measuring dimensions.
 
@@ -13,29 +15,52 @@ credits: "Element.measure / .expose methods by Daniel Steigerwald License: MIT-s
 license: MIT-style license
 
 authors:
-- Aaron Newton
+  - Aaron Newton
 
 requires:
-- core:1.2.4/Element.Style
-- core:1.2.4/Element.Dimensions
-- /MooTools.More
+  - Core/Element.Style
+  - Core/Element.Dimensions
+  - /MooTools.More
 
 provides: [Element.Measure]
 
 ...
 */
 
+(function(){
+
+var getStylesList = function(styles, planes){
+	var list = [];
+	Object.each(planes, function(directions){
+		Object.each(directions, function(edge){
+			styles.each(function(style){
+				list.push(style + '-' + edge + (style == 'border' ? '-width' : ''));
+			});
+		});
+	});
+	return list;
+};
+
+var calculateEdgeSize = function(edge, styles){
+	var total = 0;
+	Object.each(styles, function(value, style){
+		if (style.test(edge)) total = total + value.toInt();
+	});
+	return total;
+};
+
+
 Element.implement({
 
 	measure: function(fn){
-		var vis = function(el) {
+		var visibility = function(el){
 			return !!(!el || el.offsetHeight || el.offsetWidth);
 		};
-		if (vis(this)) return fn.apply(this);
+		if (visibility(this)) return fn.apply(this);
 		var parent = this.getParent(),
 			restorers = [],
-			toMeasure = []; 
-		while (!vis(parent) && parent != document.body) {
+			toMeasure = [];
+		while (!visibility(parent) && parent != document.body){
 			toMeasure.push(parent.expose());
 			parent = parent.getParent();
 		}
@@ -49,7 +74,7 @@ Element.implement({
 	},
 
 	expose: function(){
-		if (this.getStyle('display') != 'none') return $empty;
+		if (this.getStyle('display') != 'none') return function(){};
 		var before = this.style.cssText;
 		this.setStyles({
 			display: 'block',
@@ -62,12 +87,15 @@ Element.implement({
 	},
 
 	getDimensions: function(options){
-		options = $merge({computeSize: false},options);
-		var dim = {};
+		options = Object.merge({computeSize: false}, options);
+		var dim = {x: 0, y: 0};
+
 		var getSize = function(el, options){
-			return (options.computeSize)?el.getComputedSize(options):el.getSize();
+			return (options.computeSize) ? el.getComputedSize(options) : el.getSize();
 		};
+
 		var parent = this.getParent('body');
+
 		if (parent && this.getStyle('display') == 'none'){
 			dim = this.measure(function(){
 				return getSize(this, options);
@@ -76,76 +104,66 @@ Element.implement({
 			try { //safari sometimes crashes here, so catch it
 				dim = getSize(this, options);
 			}catch(e){}
-		} else {
-			dim = {x: 0, y: 0};
 		}
-		return $chk(dim.x) ? $extend(dim, {width: dim.x, height: dim.y}) : $extend(dim, {x: dim.width, y: dim.height});
+
+		return Object.append(dim, (dim.x || dim.x === 0) ? {
+				width: dim.x,
+				height: dim.y
+			} : {
+				x: dim.width,
+				y: dim.height
+			}
+		);
 	},
 
 	getComputedSize: function(options){
-		options = $merge({
+		//<1.2compat>
+		//legacy support for my stupid spelling error
+		if (options && options.plains) options.planes = options.plains;
+		//</1.2compat>
+
+		options = Object.merge({
 			styles: ['padding','border'],
-			plains: {
+			planes: {
 				height: ['top','bottom'],
 				width: ['left','right']
 			},
 			mode: 'both'
 		}, options);
-		var size = {width: 0,height: 0};
-		switch (options.mode){
-			case 'vertical':
-				delete size.width;
-				delete options.plains.width;
-				break;
-			case 'horizontal':
-				delete size.height;
-				delete options.plains.height;
-				break;
+
+		var styles = {},
+			size = {width: 0, height: 0};
+
+		if (options.mode == 'vertical'){
+			delete size.width;
+			delete options.planes.width;
+		} else if (options.mode == 'horizontal'){
+			delete size.height;
+			delete options.planes.height;
 		}
-		var getStyles = [];
-		//this function might be useful in other places; perhaps it should be outside this function?
-		$each(options.plains, function(plain, key){
-			plain.each(function(edge){
-				options.styles.each(function(style){
-					getStyles.push((style == 'border') ? style + '-' + edge + '-' + 'width' : style + '-' + edge);
-				});
-			});
-		});
-		var styles = {};
-		getStyles.each(function(style){ styles[style] = this.getComputedStyle(style); }, this);
-		var subtracted = [];
-		$each(options.plains, function(plain, key){ //keys: width, height, plains: ['left', 'right'], ['top','bottom']
-			var capitalized = key.capitalize();
-			size['total' + capitalized] = size['computed' + capitalized] = 0;
-			plain.each(function(edge){ //top, left, right, bottom
-				size['computed' + edge.capitalize()] = 0;
-				getStyles.each(function(style, i){ //padding, border, etc.
-					//'padding-left'.test('left') size['totalWidth'] = size['width'] + [padding-left]
-					if (style.test(edge)){
-						styles[style] = styles[style].toInt() || 0; //styles['padding-left'] = 5;
-						size['total' + capitalized] = size['total' + capitalized] + styles[style];
-						size['computed' + edge.capitalize()] = size['computed' + edge.capitalize()] + styles[style];
-					}
-					//if width != width (so, padding-left, for instance), then subtract that from the total
-					if (style.test(edge) && key != style &&
-						(style.test('border') || style.test('padding')) && !subtracted.contains(style)){
-						subtracted.push(style);
-						size['computed' + capitalized] = size['computed' + capitalized]-styles[style];
-					}
-				});
-			});
-		});
 
-		['Width', 'Height'].each(function(value){
-			var lower = value.toLowerCase();
-			if(!$chk(size[lower])) return;
 
-			size[lower] = size[lower] + this['offset' + value] + size['computed' + value];
-			size['total' + value] = size[lower] + size['total' + value];
-			delete size['computed' + value];
+		getStylesList(options.styles, options.planes).each(function(style){
+			styles[style] = this.getStyle(style).toInt();
 		}, this);
 
-		return $extend(styles, size);
+		Object.each(options.planes, function(edges, plane){
+
+			var capitalized = plane.capitalize();
+			styles[plane] = this.getStyle(plane).toInt();
+			size['total' + capitalized] = styles[plane];
+
+			edges.each(function(edge){
+				var edgesize = calculateEdgeSize(edge, styles);
+				size['computed' + edge.capitalize()] = edgesize;
+				size['total' + capitalized] += edgesize;
+			});
+
+		}, this);
+
+		return Object.append(size, styles);
 	}
 
 });
+
+})();

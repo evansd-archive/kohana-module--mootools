@@ -1,23 +1,27 @@
-//= require "More"
-//= require "String"
 //= require "Array"
-
+//= require "String"
+//= require "More"
 /*
 ---
 
 script: String.QueryString.js
+
+name: String.QueryString
 
 description: Methods for dealing with URI query strings.
 
 license: MIT-style license
 
 authors:
-- Sebastian Markbåge, Aaron Newton, Lennart Pilon, Valerio Proietti
+  - Sebastian Markbåge
+  - Aaron Newton
+  - Lennart Pilon
+  - Valerio Proietti
 
 requires:
-- core:1.2.4/Array
-- core:1.2.4/String
-- /MooTools.More
+  - Core/Array
+  - Core/String
+  - /MooTools.More
 
 provides: [String.QueryString]
 
@@ -26,32 +30,41 @@ provides: [String.QueryString]
 
 String.implement({
 
-	parseQueryString: function(){
-		var vars = this.split(/[&;]/), res = {};
-		if (vars.length) vars.each(function(val){
+	parseQueryString: function(decodeKeys, decodeValues){
+		if (decodeKeys == null) decodeKeys = true;
+		if (decodeValues == null) decodeValues = true;
+
+		var vars = this.split(/[&;]/),
+			object = {};
+		if (!vars.length) return object;
+
+		vars.each(function(val){
 			var index = val.indexOf('='),
-				keys = index < 0 ? [''] : val.substr(0, index).match(/[^\]\[]+/g),
-				value = decodeURIComponent(val.substr(index + 1)),
-				obj = res;
+				value = val.substr(index + 1),
+				keys = index < 0 ? [''] : val.substr(0, index).match(/([^\]\[]+|(\B)(?=\]))/g),
+				obj = object;
+
+			if (decodeValues) value = decodeURIComponent(value);
 			keys.each(function(key, i){
+				if (decodeKeys) key = decodeURIComponent(key);
 				var current = obj[key];
-				if(i < keys.length - 1)
-					obj = obj[key] = current || {};
-				else if($type(current) == 'array')
-					current.push(value);
-				else
-					obj[key] = $defined(current) ? [current, value] : value;
+
+				if (i < keys.length - 1) obj = obj[key] = current || {};
+				else if (typeOf(current) == 'array') current.push(value);
+				else obj[key] = current != null ? [current, value] : value;
 			});
 		});
-		return res;
+
+		return object;
 	},
 
 	cleanQueryString: function(method){
 		return this.split('&').filter(function(val){
 			var index = val.indexOf('='),
-			key = index < 0 ? '' : val.substr(0, index),
-			value = val.substr(index + 1);
-			return method ? method.run([key, value]) : $chk(value);
+				key = index < 0 ? '' : val.substr(0, index),
+				value = val.substr(index + 1);
+
+			return method ? method.call(null, key, value) : (value || value === 0);
 		}).join('&');
 	}
 

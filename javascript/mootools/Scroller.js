@@ -1,25 +1,26 @@
-//= require "More"
+//= require "Class.Extras"
 //= require "Class.Extras"
 //= require "Element.Event"
 //= require "Element.Dimensions"
-
 /*
 ---
 
 script: Scroller.js
+
+name: Scroller
 
 description: Class which scrolls the contents of any Element (including the window) when the mouse reaches the Element's boundaries.
 
 license: MIT-style license
 
 authors:
-- Valerio Proietti
+  - Valerio Proietti
 
 requires:
-- core:1.2.4/Events
-- core:1.2.4/Options
-- core:1.2.4/Element.Event
-- core:1.2.4/Element.Dimensions
+  - Core/Events
+  - Core/Options
+  - Core/Element.Event
+  - Core/Element.Dimensions
 
 provides: [Scroller]
 
@@ -43,7 +44,7 @@ var Scroller = new Class({
 		this.setOptions(options);
 		this.element = document.id(element);
 		this.docBody = document.id(this.element.getDocument().body);
-		this.listener = ($type(this.element) != 'element') ?  this.docBody : this.element;
+		this.listener = (typeOf(this.element) != 'element') ? this.docBody : this.element;
 		this.timer = null;
 		this.bound = {
 			attach: this.attach.bind(this),
@@ -54,18 +55,20 @@ var Scroller = new Class({
 
 	start: function(){
 		this.listener.addEvents({
-			mouseover: this.bound.attach,
-			mouseout: this.bound.detach
+			mouseenter: this.bound.attach,
+			mouseleave: this.bound.detach
 		});
+		return this;
 	},
 
 	stop: function(){
 		this.listener.removeEvents({
-			mouseover: this.bound.attach,
-			mouseout: this.bound.detach
+			mouseenter: this.bound.attach,
+			mouseleave: this.bound.detach
 		});
 		this.detach();
-		this.timer = $clear(this.timer);
+		this.timer = clearInterval(this.timer);
+		return this;
 	},
 
 	attach: function(){
@@ -74,7 +77,7 @@ var Scroller = new Class({
 
 	detach: function(){
 		this.listener.removeEvent('mousemove', this.bound.getCoords);
-		this.timer = $clear(this.timer);
+		this.timer = clearInterval(this.timer);
 	},
 
 	getCoords: function(event){
@@ -83,17 +86,20 @@ var Scroller = new Class({
 	},
 
 	scroll: function(){
-		var size = this.element.getSize(), 
-			scroll = this.element.getScroll(), 
-			pos = this.element != this.docBody ? this.element.getOffsets() : {x: 0, y:0}, 
-			scrollSize = this.element.getScrollSize(), 
-			change = {x: 0, y: 0};
+		var size = this.element.getSize(),
+			scroll = this.element.getScroll(),
+			pos = this.element != this.docBody ? this.element.getOffsets() : {x: 0, y:0},
+			scrollSize = this.element.getScrollSize(),
+			change = {x: 0, y: 0},
+			top = this.options.area.top || this.options.area,
+			bottom = this.options.area.bottom || this.options.area;
 		for (var z in this.page){
-			if (this.page[z] < (this.options.area + pos[z]) && scroll[z] != 0) {
-				change[z] = (this.page[z] - this.options.area - pos[z]) * this.options.velocity;
-			} else if (this.page[z] + this.options.area > (size[z] + pos[z]) && scroll[z] + size[z] != scrollSize[z]) {
-				change[z] = (this.page[z] - size[z] + this.options.area - pos[z]) * this.options.velocity;
+			if (this.page[z] < (top + pos[z]) && scroll[z] != 0){
+				change[z] = (this.page[z] - top - pos[z]) * this.options.velocity;
+			} else if (this.page[z] + bottom > (size[z] + pos[z]) && scroll[z] + size[z] != scrollSize[z]){
+				change[z] = (this.page[z] - size[z] + bottom - pos[z]) * this.options.velocity;
 			}
+			change[z] = change[z].round();
 		}
 		if (change.y || change.x) this.fireEvent('change', [scroll.x + change.x, scroll.y + change.y]);
 	}

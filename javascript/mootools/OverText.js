@@ -1,31 +1,32 @@
-//= require "More"
+//= require "Class.Extras"
 //= require "Class.Extras"
 //= require "Element.Event"
 //= require "Class.Binds"
 //= require "Class.Occlude"
 //= require "Element.Position"
 //= require "Element.Shortcuts"
-
 /*
 ---
 
 script: OverText.js
+
+name: OverText
 
 description: Shows text over an input that disappears when the user clicks into it. The text remains hidden if the user adds a value.
 
 license: MIT-style license
 
 authors:
-- Aaron Newton
+  - Aaron Newton
 
 requires:
-- core:1.2.4/Options
-- core:1.2.4/Events
-- core:1.2.4/Element.Event
-- /Class.Binds
-- /Class.Occlude
-- /Element.Position
-- /Element.Shortcuts
+  - Core/Options
+  - Core/Events
+  - Core/Element.Event
+  - /Class.Binds
+  - /Class.Occlude
+  - /Element.Position
+  - /Element.Shortcuts
 
 provides: [OverText]
 
@@ -40,9 +41,9 @@ var OverText = new Class({
 
 	options: {/*
 		textOverride: null,
-		onFocus: $empty()
-		onTextHide: $empty(textEl, inputEl),
-		onTextShow: $empty(textEl, inputEl), */
+		onFocus: function(){},
+		onTextHide: function(textEl, inputEl){},
+		onTextShow: function(textEl, inputEl){}, */
 		element: 'label',
 		positionOptions: {
 			position: 'upperLeft',
@@ -88,12 +89,12 @@ var OverText = new Class({
 				click: this.hide.pass(this.options.element == 'label', this)
 			}
 		}).inject(this.element, 'after');
-		if (this.options.element == 'label') {
+		if (this.options.element == 'label'){
 			if (!this.element.get('id')) this.element.set('id', 'input_' + new Date().getTime());
 			this.text.set('for', this.element.get('id'));
 		}
 
-		if (this.options.wrap) {
+		if (this.options.wrap){
 			this.textHolder = new Element('div', {
 				styles: {
 					lineHeight: 'normal',
@@ -103,18 +104,42 @@ var OverText = new Class({
 			}).adopt(this.text).inject(this.element, 'before');
 		}
 
+		return this.enable();
+	},
+
+	destroy: function(){
+		this.element.eliminate('OverTextDiv').eliminate('OverText');
+		this.disable();
+		if (this.text) this.text.destroy();
+		if (this.textHolder) this.textHolder.destroy();
+		return this;
+	},
+
+	disable: function(){
+		this.element.removeEvents({
+			focus: this.focus,
+			blur: this.assert,
+			change: this.assert
+		});
+		window.removeEvent('resize', this.reposition);
+		this.hide(true, true);
+		return this;
+	},
+
+	enable: function(){
 		this.element.addEvents({
 			focus: this.focus,
 			blur: this.assert,
 			change: this.assert
-		}).store('OverTextDiv', this.text);
-		window.addEvent('resize', this.reposition.bind(this));
+		});
+		window.addEvent('resize', this.reposition);
 		this.assert(true);
 		this.reposition();
+		return this;
 	},
 
 	wrap: function(){
-		if (this.options.element == 'label') {
+		if (this.options.element == 'label'){
 			if (!this.element.get('id')) this.element.set('id', 'input_' + new Date().getTime());
 			this.text.set('for', this.element.get('id'));
 		}
@@ -133,7 +158,7 @@ var OverText = new Class({
 		var test = function(){
 			if (!this.pollingPaused) this.assert(true);
 		}.bind(this);
-		if (stop) $clear(this.poller);
+		if (stop) clearInterval(this.poller);
 		else this.poller = test.periodical(this.options.pollInterval, this);
 		return this;
 	},
@@ -185,7 +210,7 @@ var OverText = new Class({
 	reposition: function(){
 		this.assert(true);
 		if (!this.element.isVisible()) return this.stopPolling().hide();
-		if (this.text && this.test()) this.text.position($merge(this.options.positionOptions, {relativeTo: this.element}));
+		if (this.text && this.test()) this.text.position(Object.merge(this.options.positionOptions, {relativeTo: this.element}));
 		return this;
 	}
 
@@ -193,15 +218,15 @@ var OverText = new Class({
 
 OverText.instances = [];
 
-$extend(OverText, {
+Object.append(OverText, {
 
-	each: function(fn) {
+	each: function(fn){
 		return OverText.instances.map(function(ot, i){
 			if (ot.element && ot.text) return fn.apply(OverText, [ot, i]);
 			return null; //the input or the text was destroyed
 		});
 	},
-	
+
 	update: function(){
 
 		return OverText.each(function(ot){
@@ -219,15 +244,15 @@ $extend(OverText, {
 	},
 
 	showAll: function(){
-		return OverText.each(function(ot) {
+		return OverText.each(function(ot){
 			return ot.show();
 		});
 	}
 
 });
 
-if (window.Fx && Fx.Reveal) {
+if (window.Fx && Fx.Reveal){
 	Fx.Reveal.implement({
-		hideInputs: Browser.Engine.trident ? 'select, input, textarea, object, embed, .overTxtLabel' : false
+		hideInputs: Browser.ie ? 'select, input, textarea, object, embed, .overTxtLabel' : false
 	});
 }
