@@ -2,6 +2,7 @@
 //= require "Class.Extras"
 //= require "Element.Event"
 //= require "Element.Dimensions"
+//= require "More"
 /*
 ---
 
@@ -21,6 +22,7 @@ requires:
   - Core/Options
   - Core/Element.Event
   - Core/Element.Dimensions
+  - MooTools.More
 
 provides: [Scroller]
 
@@ -55,7 +57,7 @@ var Scroller = new Class({
 
 	start: function(){
 		this.listener.addEvents({
-			mouseenter: this.bound.attach,
+			mouseover: this.bound.attach,
 			mouseleave: this.bound.detach
 		});
 		return this;
@@ -63,7 +65,7 @@ var Scroller = new Class({
 
 	stop: function(){
 		this.listener.removeEvents({
-			mouseenter: this.bound.attach,
+			mouseover: this.bound.attach,
 			mouseleave: this.bound.detach
 		});
 		this.detach();

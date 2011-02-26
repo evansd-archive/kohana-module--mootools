@@ -1,5 +1,6 @@
 //= require "Element"
 //= require "Request"
+//= require "More"
 /*
 ---
 
@@ -19,6 +20,7 @@ authors:
 requires:
   - Core/Element
   - Core/Request
+  - MooTools.More
 
 provides: [Request.JSONP]
 
@@ -84,28 +86,24 @@ Request.JSONP = new Class({
 
 		if (src.length > 2083) this.fireEvent('error', src);
 
-		var script = this.getScript(src).inject(options.injectScript);
-
-		this.fireEvent('request', [script.get('src'), script]);
-
 		Request.JSONP.request_map['request_' + index] = function(){
 			this.success(arguments, index);
 		}.bind(this);
 
-		if (options.timeout){
-			(function(){
-				if (this.running) this.fireEvent('timeout', [script.get('src'), script]).fireEvent('failure').cancel();
-			}).delay(options.timeout, this);
-		}
+		var script = this.getScript(src).inject(options.injectScript);
+		this.fireEvent('request', [src, script]);
+
+		if (options.timeout) this.timeout.delay(options.timeout, this);
 
 		return this;
 	},
 
 	getScript: function(src){
-		return this.script = new Element('script', {
-			type: 'text/javascript',
+		if (!this.script) this.script = new Element('script[type=text/javascript]', {
+			async: true,
 			src: src
 		});
+		return this.script;
 	},
 
 	success: function(args, index){
@@ -116,7 +114,8 @@ Request.JSONP = new Class({
 	},
 
 	cancel: function(){
-		return this.running ? this.clear().fireEvent('cancel') : this;
+		if (this.running) this.clear().fireEvent('cancel');
+		return this;
 	},
 
 	isRunning: function(){
@@ -124,8 +123,19 @@ Request.JSONP = new Class({
 	},
 
 	clear: function(){
-		if (this.script) this.script.destroy();
 		this.running = false;
+		if (this.script){
+			this.script.destroy();
+			this.script = null;
+		}
+		return this;
+	},
+
+	timeout: function(){
+		if (this.running){
+			this.running = false;
+			this.fireEvent('timeout', [this.script.get('src'), this.script]).fireEvent('failure').cancel();
+		}
 		return this;
 	}
 

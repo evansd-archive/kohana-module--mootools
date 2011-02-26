@@ -27,6 +27,10 @@ provides: [Fx.SmoothScroll]
 
 	Extends: Fx.Scroll,
 
+	options: {
+		axes: ['x', 'y']
+	},
+
 	initialize: function(options, context){
 		context = context || document;
 		this.doc = context.getDocument();
@@ -41,6 +45,11 @@ provides: [Fx.SmoothScroll]
 			var anchor = link.href.substr(location.length);
 			if (anchor) this.useLink(link, anchor);
 		}, this);
+
+		this.addEvent('complete', function(){
+			win.location.hash = this.anchor;
+			this.element.scrollTo(this.to[0], this.to[1]);
+		}, true);
 	},
 
 	useLink: function(link, anchor){
@@ -50,9 +59,11 @@ provides: [Fx.SmoothScroll]
 			if (!el) return;
 
 			event.preventDefault();
-			this.toElement(el).chain(function(){
+			this.toElement(el, this.options.axes).chain(function(){
 				this.fireEvent('scrolledTo', [link, el]);
 			}.bind(this));
+
+			this.anchor = anchor;
 
 		}.bind(this));
 

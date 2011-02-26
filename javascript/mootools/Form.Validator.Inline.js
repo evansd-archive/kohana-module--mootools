@@ -84,10 +84,15 @@ Form.Validator.Inline = new Class({
 
 	showAdvice: function(className, field){
 		var advice = this.getAdvice(className, field);
-		if (advice && !field.retrieve('$moo:' + this.getPropName(className))
-				&& (advice.getStyle('display') == 'none'
-				|| advice.getStyle('visiblity') == 'hidden'
-				|| advice.getStyle('opacity') == 0)){
+		if (
+			advice &&
+			!field.retrieve('$moo:' + this.getPropName(className)) &&
+			(
+				advice.getStyle('display') == 'none' ||
+				advice.getStyle('visiblity') == 'hidden' ||
+				advice.getStyle('opacity') == 0
+			)
+		){
 			field.store('$moo:' + this.getPropName(className), true);
 			this.options.showError(advice);
 			this.fireEvent('showAdvice', [field, advice, className]);
@@ -111,7 +116,7 @@ Form.Validator.Inline = new Class({
 		field = document.id(field);
 		if (!field) return this;
 		this.parent(field);
-		field.className.split(' ').each(function(className){
+		field.get('validators').each(function(className){
 			this.hideAdvice(className, field);
 		}, this);
 		return this;
@@ -120,7 +125,7 @@ Form.Validator.Inline = new Class({
 	getAllAdviceMessages: function(field, force){
 		var advice = [];
 		if (field.hasClass('ignoreValidation') && !force) return advice;
-		var validators = field.className.split(' ').some(function(cn){
+		var validators = field.get('validators').some(function(cn){
 			var warner = cn.test('^warn-') || field.hasClass('warnOnly');
 			if (warner) cn = cn.replace(/^warn-/, '');
 			var validator = this.getValidator(cn);

@@ -1,4 +1,5 @@
 //= require "Class.Extras"
+//= require "Browser"
 /*
 ---
 
@@ -11,7 +12,7 @@ license: MIT-style license.
 credits:
   - Based on the functions by Peter-Paul Koch (http://quirksmode.org).
 
-requires: Options
+requires: [Options, Browser]
 
 provides: Cookie
 

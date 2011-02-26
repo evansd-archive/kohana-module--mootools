@@ -2,7 +2,7 @@
 /*
 ---
 
-name: Locale-uk-UA.Date
+name: Locale.uk-UA.Date
 
 description: Date messages for Ukrainian (utf-8).
 
@@ -14,7 +14,7 @@ authors:
 requires:
   - /Locale
 
-provides: [Locale-uk-UA.Date]
+provides: [Locale.uk-UA.Date]
 
 ...
 */
@@ -45,6 +45,7 @@ Locale.define('uk-UA', 'Date', {
 	shortTime: '%H:%M',
 	AM: 'до полудня',
 	PM: 'по полудню',
+	firstDayOfWeek: 1,
 
 	// Date.Extras
 	ordinal: '',
@@ -79,4 +80,4 @@ Locale.define('uk-UA', 'Date', {
 
 });
 
-})();
+}).call(this);

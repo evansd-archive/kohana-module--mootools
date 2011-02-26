@@ -32,6 +32,7 @@ Locale.define('he-IL', 'Date', {
 	shortTime: '%H:%M',
 	AM: 'AM',
 	PM: 'PM',
+	firstDayOfWeek: 0,
 
 	// Date.Extras
 	ordinal: '',

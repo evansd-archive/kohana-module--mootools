@@ -24,6 +24,7 @@ provides: [Class.Binds]
 */
 
 Class.Mutators.Binds = function(binds){
+	if (!this.prototype.initialize) this.implement('initialize', function(){});
 	return binds;
 };
 

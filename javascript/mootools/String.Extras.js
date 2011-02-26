@@ -1,5 +1,6 @@
 //= require "String"
 //= require "Array"
+//= require "More"
 /*
 ---
 
@@ -19,6 +20,7 @@ authors:
 requires:
   - Core/String
   - Core/Array
+  - MooTools.More
 
 provides: [String.Extras]
 
@@ -83,15 +85,15 @@ tidy = {
 };
 
 var walk = function(string, replacements){
-	var result = string;
+	var result = string, key;
 	for (key in replacements) result = result.replace(replacements[key], key);
 	return result;
 };
 
 var getRegexForTag = function(tag, contents){
 	tag = tag || '';
-	var regstr = contents ? "<" + tag + "(?!\\w)[^>]*>([\\s\\S]*?)<\/" + tag + "(?!\\w)>" : "<\/?" + tag + "([^>]+)?>";
-	reg = new RegExp(regstr, "gi");
+	var regstr = contents ? "<" + tag + "(?!\\w)[^>]*>([\\s\\S]*?)<\/" + tag + "(?!\\w)>" : "<\/?" + tag + "([^>]+)?>",
+		reg = new RegExp(regstr, "gi");
 	return reg;
 };
 
@@ -128,8 +130,22 @@ String.implement({
 
 	tidy: function(){
 		return walk(this, tidy);
+	},
+
+	truncate: function(max, trail, atChar){
+		var string = this;
+		if (trail == null && arguments.length == 1) trail = '…';
+		if (string.length > max){
+			string = string.substring(0, max);
+			if (atChar){
+				var index = string.lastIndexOf(atChar);
+				if (index != -1) string = string.substr(0, index);
+			}
+			if (trail) string += trail;
+		}
+		return string;
 	}
 
 });
 
-})();
+}).call(this);

@@ -22,6 +22,21 @@ provides: [Element.Dimensions]
 
 (function(){
 
+var element = document.createElement('div'),
+	child = document.createElement('div');
+element.style.height = '0';
+element.appendChild(child);
+var brokenOffsetParent = (child.offsetParent === element);
+element = child = null;
+
+var isOffset = function(el){
+	return styleString(el, 'position') != 'static' || isBody(el);
+};
+
+var isOffsetStatic = function(el){
+	return isOffset(el) || (/^(?:table|td|th)$/i).test(el.tagName);
+};
+
 Element.implement({
 
 	scrollTo: function(x, y){
@@ -59,13 +74,22 @@ Element.implement({
 		return position;
 	},
 
-	getOffsetParent: function(){
+	getOffsetParent: brokenOffsetParent ? function(){
 		var element = this;
-		if (isBody(element)) return null;
-		if (!Browser.ie) return element.offsetParent;
+		if (isBody(element) || styleString(element, 'position') == 'fixed') return null;
+
+		var isOffsetCheck = (styleString(element, 'position') == 'static') ? isOffsetStatic : isOffset;
 		while ((element = element.parentNode)){
-			if (styleString(element, 'position') != 'static' || isBody(element)) return element;
+			if (isOffsetCheck(element)) return element;
 		}
+		return null;
+	} : function(){
+		var element = this;
+		if (isBody(element) || styleString(element, 'position') == 'fixed') return null;
+
+		try {
+			return element.offsetParent;
+		} catch(e) {}
 		return null;
 	},
 
@@ -196,30 +220,30 @@ var styleString = Element.getComputedStyle;
 
 function styleNumber(element, style){
 	return styleString(element, style).toInt() || 0;
-};
+}
 
 function borderBox(element){
 	return styleString(element, '-moz-box-sizing') == 'border-box';
-};
+}
 
 function topBorder(element){
 	return styleNumber(element, 'border-top-width');
-};
+}
 
 function leftBorder(element){
 	return styleNumber(element, 'border-left-width');
-};
+}
 
 function isBody(element){
 	return (/^(?:body|html)$/i).test(element.tagName);
-};
+}
 
 function getCompatElement(element){
 	var doc = element.getDocument();
 	return (!doc.compatMode || doc.compatMode == 'CSS1Compat') ? doc.html : doc.body;
-};
+}
 
-})();
+}).call(this);
 
 //aliases
 Element.alias({position: 'setPosition'}); //compatability

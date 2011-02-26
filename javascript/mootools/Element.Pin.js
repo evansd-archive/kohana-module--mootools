@@ -40,7 +40,7 @@ provides: [Element.Pin]
 		supportsPositionFixed = (test.offsetTop === 0);
 		test.dispose();
 		supportTested = true;
-	}
+	};
 
 	Element.implement({
 
@@ -49,7 +49,9 @@ provides: [Element.Pin]
 			if (this.getStyle('display') == 'none') return this;
 
 			var pinnedPosition,
-				scroll = window.getScroll();
+				scroll = window.getScroll(),
+				parent,
+				scrollFixer;
 
 			if (enable !== false){
 				pinnedPosition = this.getPosition(supportsPositionFixed ? document.body : this.getOffsetParent());
@@ -63,8 +65,8 @@ provides: [Element.Pin]
 						this.setStyle('position', 'fixed').setStyles(currentPosition);
 					} else {
 
-						var parent = this.getOffsetParent(),
-							position = this.getPosition(parent),
+						parent = this.getOffsetParent();
+						var position = this.getPosition(parent),
 							styles = this.getStyles('left', 'top');
 
 						if (parent && styles.left == 'auto' || styles.top == 'auto') this.setPosition(position);
@@ -75,7 +77,7 @@ provides: [Element.Pin]
 							y: styles.top.toInt() - scroll.y
 						};
 
-						var scrollFixer = function(){
+						scrollFixer = function(){
 							if (!this.retrieve('pin:_pinned')) return;
 							var scroll = window.getScroll();
 							this.setStyles({
@@ -93,13 +95,13 @@ provides: [Element.Pin]
 			} else {
 				if (!this.retrieve('pin:_pinned')) return this;
 
-				var parent = this.getParent(),
-					offsetParent = (parent.getComputedStyle('position') != 'static' ? parent : parent.getOffsetParent());
+				parent = this.getParent();
+				var offsetParent = (parent.getComputedStyle('position') != 'static' ? parent : parent.getOffsetParent());
 
 				pinnedPosition = this.getPosition(offsetParent);
 
 				this.store('pin:_pinned', false);
-				var scrollFixer = this.retrieve('pin:_scrollFixer');
+				scrollFixer = this.retrieve('pin:_scrollFixer');
 				if (!scrollFixer){
 					this.setStyles({
 						position: 'absolute',
@@ -119,10 +121,14 @@ provides: [Element.Pin]
 			return this.pin(false);
 		},
 
-		togglepin: function(){
+		togglePin: function(){
 			return this.pin(!this.retrieve('pin:_pinned'));
 		}
 
 	});
 
-})();
+//<1.2compat>
+Element.alias('togglepin', 'togglePin');
+//</1.2compat>
+
+}).call(this);

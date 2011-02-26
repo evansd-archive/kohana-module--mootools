@@ -29,18 +29,20 @@ var Event = new Type('Event', function(event, win){
 	var type = event.type,
 		target = event.target || event.srcElement,
 		page = {},
-		client = {};
+		client = {},
+		related = null,
+		rightClick, wheel, code, key;
 	while (target && target.nodeType == 3) target = target.parentNode;
 
 	if (type.indexOf('key') != -1){
-		var code = event.which || event.keyCode;
-		var key = Object.keyOf(Event.Keys, code);
+		code = event.which || event.keyCode;
+		key = Object.keyOf(Event.Keys, code);
 		if (type == 'keydown'){
 			var fKey = code - 111;
 			if (fKey > 0 && fKey < 13) key = 'f' + fKey;
 		}
 		if (!key) key = String.fromCharCode(code).toLowerCase();
-	} else if (type.test(/click|mouse|menu/i)){
+	} else if ((/click|mouse|menu/i).test(type)){
 		doc = (!doc.compatMode || doc.compatMode == 'CSS1Compat') ? doc.html : doc.body;
 		page = {
 			x: (event.pageX != null) ? event.pageX : event.clientX + doc.scrollLeft,
@@ -50,12 +52,11 @@ var Event = new Type('Event', function(event, win){
 			x: (event.pageX != null) ? event.pageX - win.pageXOffset : event.clientX,
 			y: (event.pageY != null) ? event.pageY - win.pageYOffset : event.clientY
 		};
-		if (type.test(/DOMMouseScroll|mousewheel/)){
-			var wheel = (event.wheelDelta) ? event.wheelDelta / 120 : -(event.detail || 0) / 3;
+		if ((/DOMMouseScroll|mousewheel/).test(type)){
+			wheel = (event.wheelDelta) ? event.wheelDelta / 120 : -(event.detail || 0) / 3;
 		}
-		var rightClick = (event.which == 3) || (event.button == 2),
-			related = null;
-		if (type.test(/over|out/)){
+		rightClick = (event.which == 3) || (event.button == 2);
+		if ((/over|out/).test(type)){
 			related = event.relatedTarget || event[(type == 'mouseover' ? 'from' : 'to') + 'Element'];
 			var testRelated = function(){
 				while (related && related.nodeType == 3) related = related.parentNode;
@@ -64,7 +65,7 @@ var Event = new Type('Event', function(event, win){
 			var hasRelated = (Browser.firefox2) ? testRelated.attempt() : testRelated();
 			related = (hasRelated) ? related : null;
 		}
-	} else if (type.test(/gesture|touch/i)){
+	} else if ((/gesture|touch/i).test(type)){
 		this.rotation = event.rotation;
 		this.scale = event.scale;
 		this.targetTouches = event.targetTouches;

@@ -59,7 +59,7 @@ Fx.Scroll = new Class({
 	set: function(){
 		var now = Array.flatten(arguments);
 		if (Browser.firefox) now = [Math.round(now[0]), Math.round(now[1])]; // not needed anymore in newer firefox versions
-		this.element.scrollTo(now[0] + this.options.offset.x, now[1] + this.options.offset.y);
+		this.element.scrollTo(now[0], now[1]);
 	},
 
 	compute: function(from, to, delta){
@@ -70,45 +70,54 @@ Fx.Scroll = new Class({
 
 	start: function(x, y){
 		if (!this.check(x, y)) return this;
+		var scroll = this.element.getScroll();
+		return this.parent([scroll.x, scroll.y], [x, y]);
+	},
+
+	calculateScroll: function(x, y){
 		var element = this.element,
 			scrollSize = element.getScrollSize(),
 			scroll = element.getScroll(),
-			size = element.getSize();
+			size = element.getSize(),
+			offset = this.options.offset,
 			values = {x: x, y: y};
 
 		for (var z in values){
 			if (!values[z] && values[z] !== 0) values[z] = scroll[z];
 			if (typeOf(values[z]) != 'number') values[z] = scrollSize[z] - size[z];
-			values[z] += this.options.offset[z];
+			values[z] += offset[z];
 		}
 
-		return this.parent([scroll.x, scroll.y], [values.x, values.y]);
+		return [values.x, values.y];
 	},
 
 	toTop: function(){
-		return this.start(false, 0);
+		return this.start.apply(this, this.calculateScroll(false, 0));
 	},
 
 	toLeft: function(){
-		return this.start(0, false);
+		return this.start.apply(this, this.calculateScroll(0, false));
 	},
 
 	toRight: function(){
-		return this.start('right', false);
+		return this.start.apply(this, this.calculateScroll('right', false));
 	},
 
 	toBottom: function(){
-		return this.start(false, 'bottom');
+		return this.start.apply(this, this.calculateScroll(false, 'bottom'));
 	},
 
-	toElement: function(el){
-		var position = document.id(el).getPosition(this.element),
-			scroll = isBody(this.element) ? {x: 0, y: 0} : this.element.getScroll();
-		return this.start(position.x + scroll.x, position.y + scroll.y);
+	toElement: function(el, axes){
+		axes = axes ? Array.from(axes) : ['x', 'y'];
+		var scroll = isBody(this.element) ? {x: 0, y: 0} : this.element.getScroll();
+		var position = Object.map(document.id(el).getPosition(this.element), function(value, axis){
+			return axes.contains(axis) ? value + scroll[axis] : false;
+		});
+		return this.start.apply(this, this.calculateScroll(position.x, position.y));
 	},
 
-	scrollIntoView: function(el, axes, offset){
-		axes = axes ? Array.from(axes) : ['x','y'];
+	toElementEdge: function(el, axes, offset){
+		axes = axes ? Array.from(axes) : ['x', 'y'];
 		el = document.id(el);
 		var to = {},
 			position = el.getPosition(this.element),
@@ -120,7 +129,7 @@ Fx.Scroll = new Class({
 				y: position.y + size.y
 			};
 
-		['x','y'].each(function(axis){
+		['x', 'y'].each(function(axis){
 			if (axes.contains(axis)){
 				if (edge[axis] > scroll[axis] + containerSize[axis]) to[axis] = edge[axis] - containerSize[axis];
 				if (position[axis] < scroll[axis]) to[axis] = position[axis];
@@ -133,7 +142,7 @@ Fx.Scroll = new Class({
 		return this;
 	},
 
-	scrollToCenter: function(el, axes, offset){
+	toElementCenter: function(el, axes, offset){
 		axes = axes ? Array.from(axes) : ['x', 'y'];
 		el = document.id(el);
 		var to = {},
@@ -142,9 +151,9 @@ Fx.Scroll = new Class({
 			scroll = this.element.getScroll(),
 			containerSize = this.element.getSize();
 
-		['x','y'].each(function(axis){
+		['x', 'y'].each(function(axis){
 			if (axes.contains(axis)){
-				to[axis] = position[axis] - (containerSize[axis] - size[axis])/2;
+				to[axis] = position[axis] - (containerSize[axis] - size[axis]) / 2;
 			}
 			if (to[axis] == null) to[axis] = scroll[axis];
 			if (offset && offset[axis]) to[axis] = to[axis] + offset[axis];
@@ -156,8 +165,19 @@ Fx.Scroll = new Class({
 
 });
 
+//<1.2compat>
+Fx.Scroll.implement({
+	scrollToCenter: function(){
+		return this.toElementCenter.apply(this, arguments);
+	},
+	scrollIntoView: function(){
+		return this.toElementEdge.apply(this, arguments);
+	}
+});
+//</1.2compat>
+
 function isBody(element){
 	return (/^(?:body|html)$/i).test(element.tagName);
-};
+}
 
-})();
+}).call(this);

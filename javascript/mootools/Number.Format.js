@@ -52,14 +52,13 @@ Number.implement({
 		var prefix = getOption('prefix'),
 			suffix = getOption('suffix');
 
-		if (decimals > 0 && decimals <= 20) value = value.toFixed(decimals);
-		if (precision >= 1 && precision <= 21) value = value.toPrecision(precision);
+		if (decimals !== '' && decimals >= 0 && decimals <= 20) value = value.toFixed(decimals);
+		if (precision >= 1 && precision <= 21) value = (+value).toPrecision(precision);
 
 		value += '';
-
+		var index;
 		if (getOption('scientific') === false && value.indexOf('e') > -1){
 			var match = value.split('e'),
-				index,
 				zeros = +match[1];
 			value = match[0].replace('.', '');
 

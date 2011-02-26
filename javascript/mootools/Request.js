@@ -22,7 +22,8 @@ provides: Request
 
 (function(){
 
-var progressSupport = ('onprogress' in new Browser.Request);
+var empty = function(){},
+	progressSupport = ('onprogress' in new Browser.Request);
 
 var Request = this.Request = new Class({
 
@@ -75,7 +76,8 @@ var Request = this.Request = new Class({
 			var status = xhr.status;
 			this.status = (status == 1223) ? 204 : status;
 		}.bind(this));
-		xhr.onreadystatechange = function(){};
+		xhr.onreadystatechange = empty;
+		if (progressSupport) xhr.onprogress = xhr.onloadstart = empty;
 		clearTimeout(this.timer);
 		
 		this.response = {text: this.xhr.responseText || '', xml: this.xhr.responseXML};
@@ -226,7 +228,8 @@ var Request = this.Request = new Class({
 		var xhr = this.xhr;
 		xhr.abort();
 		clearTimeout(this.timer);
-		xhr.onreadystatechange = xhr.onprogress = xhr.onloadstart = function(){};
+		xhr.onreadystatechange = empty;
+		if (progressSupport) xhr.onprogress = xhr.onloadstart = empty;
 		this.xhr = new Browser.Request();
 		this.fireEvent('cancel');
 		return this;
@@ -237,10 +240,11 @@ var Request = this.Request = new Class({
 var methods = {};
 ['get', 'post', 'put', 'delete', 'GET', 'POST', 'PUT', 'DELETE'].each(function(method){
 	methods[method] = function(data){
-		return this.send({
-			data: data,
+		var object = {
 			method: method
-		});
+		};
+		if (data != null) object.data = data;
+		return this.send(object);
 	};
 });
 

@@ -1,4 +1,5 @@
 //= require "Array"
+//= require "More"
 /*
 ---
 
@@ -16,11 +17,15 @@ authors:
 
 requires:
   - Core/Array
+  - MooTools.More
 
 provides: [Array.Extras]
 
 ...
 */
+
+(function(nil){
+
 Array.implement({
 
 	min: function(){
@@ -38,7 +43,7 @@ Array.implement({
 	sum: function(){
 		var result = 0, l = this.length;
 		if (l){
-			while(l--) result += this[l];
+			while (l--) result += this[l];
 		}
 		return result;
 	},
@@ -57,19 +62,20 @@ Array.implement({
 	},
 
 	reduce: function(fn, value){
-		var undefined;
 		for (var i = 0, l = this.length; i < l; i++){
-			if (i in this) value = value === undefined ? this[i] : fn.call(null, value, this[i], i, this);
+			if (i in this) value = value === nil ? this[i] : fn.call(null, value, this[i], i, this);
 		}
 		return value;
 	},
 
 	reduceRight: function(fn, value){
-		var i = this.length, undefined;
+		var i = this.length;
 		while (i--){
-			if (i in this) value = value === undefined ? this[i] : fn.call(null, value, this[i], i, this);
+			if (i in this) value = value === nil ? this[i] : fn.call(null, value, this[i], i, this);
 		}
 		return value;
 	}
 
 });
+
+}).call(this);

@@ -29,7 +29,7 @@ var Element = function(tag, props){
 
 	if (!props) props = {};
 
-	if (!tag.test(/^[\w-]+$/)){
+	if (!(/^[\w-]+$/).test(tag)){
 		var parsed = Slick.parse(tag).expressions[0][0];
 		tag = (parsed.tag == '*') ? 'div' : parsed.tag;
 		if (parsed.id && props.id == null) props.id = parsed.id;
@@ -101,7 +101,7 @@ var IFrame = new Type('IFrame', function(){
 	var onLoad = function(){
 		onload.call(iframe.contentWindow);
 	};
-	
+
 	if (window.frames[props.id]) onLoad();
 	else iframe.addListener('load', onLoad);
 	return iframe;
@@ -141,6 +141,15 @@ new Type('Elements', Elements).implement({
 		return (this.length = length);
 	}.protect(),
 
+	unshift: function(){
+		var items = [];
+		for (var i = 0, l = arguments.length; i < l; i++){
+			var item = document.id(arguments[i]);
+			if (item) items.push(item);
+		}
+		return Array.prototype.unshift.apply(this, items);
+	}.protect(),
+
 	concat: function(){
 		var newElements = new Elements(this);
 		for (var i = 0, l = arguments.length; i < l; i++){
@@ -162,6 +171,12 @@ new Type('Elements', Elements).implement({
 	}.protect()
 
 });
+
+//<1.2compat>
+
+Elements.alias('extend', 'append');
+
+//</1.2compat>
 
 (function(){
 
@@ -238,7 +253,7 @@ Document.implement({
 
 			element: function(el, nocash){
 				$uid(el);
-				if (!nocash && !el.$family && !(/^object|embed$/i).test(el.tagName)){
+				if (!nocash && !el.$family && !(/^(?:object|embed)$/i).test(el.tagName)){
 					Object.append(el, Element.Prototype);
 				}
 				return el;
@@ -351,16 +366,16 @@ if (window.$$ == null) Window.implement('$$', function(selector){
 (function(){
 
 var collected = {}, storage = {};
-var props = {input: 'checked', option: 'selected', textarea: 'value'};
+var formProps = {input: 'checked', option: 'selected', textarea: 'value'};
 
 var get = function(uid){
 	return (storage[uid] || (storage[uid] = {}));
 };
 
 var clean = function(item){
+	var uid = item.uid;
 	if (item.removeEvents) item.removeEvents();
 	if (item.clearAttributes) item.clearAttributes();
-	var uid = item.uid;
 	if (uid != null){
 		delete collected[uid];
 		delete storage[uid];
@@ -372,7 +387,7 @@ var camels = ['defaultValue', 'accessKey', 'cellPadding', 'cellSpacing', 'colSpa
 	'rowSpan', 'tabIndex', 'useMap'
 ];
 var bools = ['compact', 'nowrap', 'ismap', 'declare', 'noshade', 'checked', 'disabled', 'readOnly', 'multiple', 'selected',
-	'noresize', 'defer'
+	'noresize', 'defer', 'defaultChecked'
 ];
  var attributes = {
 	'html': 'innerHTML',
@@ -380,7 +395,7 @@ var bools = ['compact', 'nowrap', 'ismap', 'declare', 'noshade', 'checked', 'dis
 	'for': 'htmlFor',
 	'text': (function(){
 		var temp = document.createElement('div');
-		return (temp.innerText == null) ? 'textContent' : 'innerText';
+		return (temp.textContent == null) ? 'innerText' : 'textContent';
 	})()
 };
 var readOnly = ['type'];
@@ -444,7 +459,7 @@ Object.each(inserters, function(inserter, where){
 var injectCombinator = function(expression, combinator){
 	if (!expression) return combinator;
 
-	expression = Slick.parse(expression);
+	expression = Object.clone(Slick.parse(expression));
 
 	var expressions = expression.expressions;
 	for (var i = expressions.length; i--;)
@@ -647,41 +662,6 @@ Element.implement({
 		return queryString.join('&');
 	},
 
-	clone: function(contents, keepid){
-		contents = contents !== false;
-		var clone = this.cloneNode(contents);
-		var clean = function(node, element){
-			if (!keepid) node.removeAttribute('id');
-			if (Browser.ie){
-				node.clearAttributes();
-				node.mergeAttributes(element);
-				node.removeAttribute('uid');
-				if (node.options){
-					var no = node.options, eo = element.options;
-					for (var j = no.length; j--;) no[j].selected = eo[j].selected;
-				}
-			}
-			var prop = props[element.tagName.toLowerCase()];
-			if (prop && element[prop]) node[prop] = element[prop];
-		};
-
-		var i;
-		if (contents){
-			var ce = clone.getElementsByTagName('*'), te = this.getElementsByTagName('*');
-			for (i = ce.length; i--;) clean(ce[i], te[i]);
-		}
-
-		clean(clone, this);
-		if (Browser.ie){
-			var ts = this.getElementsByTagName('object'),
-				cs = clone.getElementsByTagName('object'),
-				tl = ts.length, cl = cs.length;
-			for (i = 0; i < tl && i < cl; i++)
-				cs[i].outerHTML = ts[i].outerHTML;
-		}
-		return document.id(clone);
-	},
-
 	destroy: function(){
 		var children = clean(this).getElementsByTagName('*');
 		Array.each(children, clean);
@@ -702,6 +682,40 @@ Element.implement({
 		return !expression || Slick.match(this, expression);
 	}
 
+});
+
+var cleanClone = function(node, element, keepid){
+	if (!keepid) node.setAttributeNode(document.createAttribute('id'));
+	if (node.clearAttributes){
+		node.clearAttributes();
+		node.mergeAttributes(element);
+		node.removeAttribute('uid');
+		if (node.options){
+			var no = node.options, eo = element.options;
+			for (var i = no.length; i--;) no[i].selected = eo[i].selected;
+		}
+	}
+
+	var prop = formProps[element.tagName.toLowerCase()];
+	if (prop && element[prop]) node[prop] = element[prop];
+};
+
+Element.implement('clone', function(contents, keepid){
+	contents = contents !== false;
+	var clone = this.cloneNode(contents), i;
+
+	if (contents){
+		var ce = clone.getElementsByTagName('*'), te = this.getElementsByTagName('*');
+		for (i = ce.length; i--;) cleanClone(ce[i], te[i], keepid);
+	}
+
+	cleanClone(clone, this, keepid);
+
+	if (Browser.ie){
+		var co = clone.getElementsByTagName('object'), to = this.getElementsByTagName('object');
+		for (i = co.length; i--;) co[i].outerHTML = to[i].outerHTML;
+	}
+	return document.id(clone);
 });
 
 var contains = {contains: function(element){
@@ -729,33 +743,33 @@ Element.implement('hasChild', function(element){
 				old();
 			};
 		} else {
-			collected[this.uid] = this;
+			collected[$uid(this)] = this;
 		}
-		if (this.addEventListener) this.addEventListener(type, fn, false);
+		if (this.addEventListener) this.addEventListener(type, fn, !!arguments[2]);
 		else this.attachEvent('on' + type, fn);
 		return this;
 	},
 
 	removeListener: function(type, fn){
-		if (this.removeEventListener) this.removeEventListener(type, fn, false);
+		if (this.removeEventListener) this.removeEventListener(type, fn, !!arguments[2]);
 		else this.detachEvent('on' + type, fn);
 		return this;
 	},
 
 	retrieve: function(property, dflt){
-		var storage = get(this.uid), prop = storage[property];
+		var storage = get($uid(this)), prop = storage[property];
 		if (dflt != null && prop == null) prop = storage[property] = dflt;
 		return prop != null ? prop : null;
 	},
 
 	store: function(property, value){
-		var storage = get(this.uid);
+		var storage = get($uid(this));
 		storage[property] = value;
 		return this;
 	},
 
 	eliminate: function(property){
-		var storage = get(this.uid);
+		var storage = get($uid(this));
 		delete storage[property];
 		return this;
 	}

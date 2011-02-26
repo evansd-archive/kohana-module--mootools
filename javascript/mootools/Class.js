@@ -116,4 +116,4 @@ Class.Mutators = {
 	}
 };
 
-})();
+}).call(this);

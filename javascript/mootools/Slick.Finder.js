@@ -8,9 +8,11 @@ requires: Slick.Parser
 ...
 */
 
-(function(){
+;(function(){
 
-var local = {};
+var local = {},
+	featuresCache = {},
+	toString = Object.prototype.toString;
 
 // Feature / Bug detection
 
@@ -19,16 +21,16 @@ local.isNativeCode = function(fn){
 };
 
 local.isXML = function(document){
-	return (!!document.xmlVersion) || (!!document.xml) || (Object.prototype.toString.call(document) === '[object XMLDocument]') ||
-	(document.nodeType === 9 && document.documentElement.nodeName !== 'HTML');
+	return (!!document.xmlVersion) || (!!document.xml) || (toString.call(document) == '[object XMLDocument]') ||
+	(document.nodeType == 9 && document.documentElement.nodeName != 'HTML');
 };
 
 local.setDocument = function(document){
 
 	// convert elements / window arguments to document. if document cannot be extrapolated, the function returns.
-
-	if (document.nodeType === 9); // document
-	else if (document.ownerDocument) document = document.ownerDocument; // node
+	var nodeType = document.nodeType;
+	if (nodeType == 9); // document
+	else if (nodeType) document = document.ownerDocument; // node
 	else if (document.navigator) document = document.document; // window
 	else return;
 
@@ -36,106 +38,166 @@ local.setDocument = function(document){
 
 	if (this.document === document) return;
 	this.document = document;
-	var root = this.root = document.documentElement;
 
-	this.isXMLDocument = this.isXML(document);
+	// check if we have done feature detection on this document before
 
-	this.brokenStarGEBTN
-	= this.starSelectsClosedQSA
-	= this.idGetsName
-	= this.brokenMixedCaseQSA
-	= this.brokenGEBCN
-	= this.brokenCheckedQSA
-	= this.brokenEmptyAttributeQSA
-	= this.isHTMLDocument
+	var root = document.documentElement,
+		rootUid = this.getUIDXML(root),
+		features = featuresCache[rootUid],
+		feature;
+
+	if (features){
+		for (feature in features){
+			this[feature] = features[feature];
+		}
+		return;
+	}
+
+	features = featuresCache[rootUid] = {};
+
+	features.root = root;
+	features.isXMLDocument = this.isXML(document);
+
+	features.brokenStarGEBTN
+	= features.starSelectsClosedQSA
+	= features.idGetsName
+	= features.brokenMixedCaseQSA
+	= features.brokenGEBCN
+	= features.brokenCheckedQSA
+	= features.brokenEmptyAttributeQSA
+	= features.isHTMLDocument
+	= features.nativeMatchesSelector
 	= false;
 
 	var starSelectsClosed, starSelectsComments,
-		brokenSecondClassNameGEBCN, cachedGetElementsByClassName;
+		brokenSecondClassNameGEBCN, cachedGetElementsByClassName,
+		brokenFormAttributeGetter;
 
-	var selected, id;
+	var selected, id = 'slick_uniqueid';
 	var testNode = document.createElement('div');
-	root.appendChild(testNode);
+	
+	var testRoot = document.body || document.getElementsByTagName('body')[0] || root;
+	testRoot.appendChild(testNode);
 
 	// on non-HTML documents innerHTML and getElementsById doesnt work properly
 	try {
-		id = 'slick_getbyid_test';
 		testNode.innerHTML = '<a id="'+id+'"></a>';
-		this.isHTMLDocument = !!document.getElementById(id);
+		features.isHTMLDocument = !!document.getElementById(id);
 	} catch(e){};
 
-	if (this.isHTMLDocument){
-		
+	if (features.isHTMLDocument){
+
 		testNode.style.display = 'none';
-		
+
 		// IE returns comment nodes for getElementsByTagName('*') for some documents
 		testNode.appendChild(document.createComment(''));
-		starSelectsComments = (testNode.getElementsByTagName('*').length > 0);
+		starSelectsComments = (testNode.getElementsByTagName('*').length > 1);
 
 		// IE returns closed nodes (EG:"</foo>") for getElementsByTagName('*') for some documents
 		try {
 			testNode.innerHTML = 'foo</foo>';
 			selected = testNode.getElementsByTagName('*');
-			starSelectsClosed = (selected && selected.length && selected[0].nodeName.charAt(0) == '/');
+			starSelectsClosed = (selected && !!selected.length && selected[0].nodeName.charAt(0) == '/');
 		} catch(e){};
 
-		this.brokenStarGEBTN = starSelectsComments || starSelectsClosed;
-
-		// IE 8 returns closed nodes (EG:"</foo>") for querySelectorAll('*') for some documents
-		if (testNode.querySelectorAll) try {
-			testNode.innerHTML = 'foo</foo>';
-			selected = testNode.querySelectorAll('*');
-			this.starSelectsClosedQSA = (selected && selected.length && selected[0].nodeName.charAt(0) == '/');
-		} catch(e){};
+		features.brokenStarGEBTN = starSelectsComments || starSelectsClosed;
 
 		// IE returns elements with the name instead of just id for getElementsById for some documents
 		try {
-			id = 'slick_id_gets_name';
-			testNode.innerHTML = '<a name="'+id+'"></a><b id="'+id+'"></b>';
-			this.idGetsName = document.getElementById(id) === testNode.firstChild;
+			testNode.innerHTML = '<a name="'+ id +'"></a><b id="'+ id +'"></b>';
+			features.idGetsName = document.getElementById(id) === testNode.firstChild;
 		} catch(e){};
 
-		// Safari 3.2 querySelectorAll doesnt work with mixedcase on quirksmode
-		try {
-			testNode.innerHTML = '<a class="MiXedCaSe"></a>';
-			this.brokenMixedCaseQSA = !testNode.querySelectorAll('.MiXedCaSe').length;
-		} catch(e){};
+		if (testNode.getElementsByClassName){
 
-		try {
-			testNode.innerHTML = '<a class="f"></a><a class="b"></a>';
-			testNode.getElementsByClassName('b').length;
-			testNode.firstChild.className = 'b';
-			cachedGetElementsByClassName = (testNode.getElementsByClassName('b').length != 2);
-		} catch(e){};
+			// Safari 3.2 getElementsByClassName caches results
+			try {
+				testNode.innerHTML = '<a class="f"></a><a class="b"></a>';
+				testNode.getElementsByClassName('b').length;
+				testNode.firstChild.className = 'b';
+				cachedGetElementsByClassName = (testNode.getElementsByClassName('b').length != 2);
+			} catch(e){};
 
-		// Opera 9.6 getElementsByClassName doesnt detects the class if its not the first one
-		try {
-			testNode.innerHTML = '<a class="a"></a><a class="f b a"></a>';
-			brokenSecondClassNameGEBCN = (testNode.getElementsByClassName('a').length != 2);
-		} catch(e){};
+			// Opera 9.6 getElementsByClassName doesnt detects the class if its not the first one
+			try {
+				testNode.innerHTML = '<a class="a"></a><a class="f b a"></a>';
+				brokenSecondClassNameGEBCN = (testNode.getElementsByClassName('a').length != 2);
+			} catch(e){};
 
-		this.brokenGEBCN = cachedGetElementsByClassName || brokenSecondClassNameGEBCN;
+			features.brokenGEBCN = cachedGetElementsByClassName || brokenSecondClassNameGEBCN;
+		}
 		
-		// Webkit dont return selected options on querySelectorAll
+		if (testNode.querySelectorAll){
+			// IE 8 returns closed nodes (EG:"</foo>") for querySelectorAll('*') for some documents
+			try {
+				testNode.innerHTML = 'foo</foo>';
+				selected = testNode.querySelectorAll('*');
+				features.starSelectsClosedQSA = (selected && !!selected.length && selected[0].nodeName.charAt(0) == '/');
+			} catch(e){};
+
+			// Safari 3.2 querySelectorAll doesnt work with mixedcase on quirksmode
+			try {
+				testNode.innerHTML = '<a class="MiX"></a>';
+				features.brokenMixedCaseQSA = !testNode.querySelectorAll('.MiX').length;
+			} catch(e){};
+
+			// Webkit and Opera dont return selected options on querySelectorAll
+			try {
+				testNode.innerHTML = '<select><option selected="selected">a</option></select>';
+				features.brokenCheckedQSA = (testNode.querySelectorAll(':checked').length == 0);
+			} catch(e){};
+
+			// IE returns incorrect results for attr[*^$]="" selectors on querySelectorAll
+			try {
+				testNode.innerHTML = '<a class=""></a>';
+				features.brokenEmptyAttributeQSA = (testNode.querySelectorAll('[class*=""]').length != 0);
+			} catch(e){};
+
+		}
+
+		// IE6-7, if a form has an input of id x, form.getAttribute(x) returns a reference to the input
 		try {
-			testNode.innerHTML = '<select><option selected="selected">a</option></select>';
-			this.brokenCheckedQSA = (testNode.querySelectorAll(':checked').length == 0);
+			testNode.innerHTML = '<form action="s"><input id="action"/></form>';
+			brokenFormAttributeGetter = (testNode.firstChild.getAttribute('action') != 's');
 		} catch(e){};
-		
-		// IE returns incorrect results for attr[*^$]="" selectors on querySelectorAll
-		try {
-			testNode.innerHTML = '<a class=""></a>';
-			this.brokenEmptyAttributeQSA = (testNode.querySelectorAll('[class*=""]').length != 0);
+
+		// native matchesSelector function
+
+		features.nativeMatchesSelector = root.matchesSelector || /*root.msMatchesSelector ||*/ root.mozMatchesSelector || root.webkitMatchesSelector;
+		if (features.nativeMatchesSelector) try {
+			// if matchesSelector trows errors on incorrect sintaxes we can use it
+			features.nativeMatchesSelector.call(root, ':slick');
+			features.nativeMatchesSelector = null;
 		} catch(e){};
-		
+
 	}
 
-	root.removeChild(testNode);
-	testNode = null;
+	try {
+		root.slick_expando = 1;
+		delete root.slick_expando;
+		features.getUID = this.getUIDHTML;
+	} catch(e) {
+		features.getUID = this.getUIDXML;
+	}
+
+	testRoot.removeChild(testNode);
+	testNode = selected = testRoot = null;
+
+	// getAttribute
+
+	features.getAttribute = (features.isHTMLDocument && brokenFormAttributeGetter) ? function(node, name){
+		var method = this.attributeGetters[name];
+		if (method) return method.call(node);
+		var attributeNode = node.getAttributeNode(name);
+		return (attributeNode) ? attributeNode.nodeValue : null;
+	} : function(node, name){
+		var method = this.attributeGetters[name];
+		return (method) ? method.call(node) : node.getAttribute(name);
+	};
 
 	// hasAttribute
 
-	this.hasAttribute = (root && this.isNativeCode(root.hasAttribute)) ? function(node, attribute) {
+	features.hasAttribute = (root && this.isNativeCode(root.hasAttribute)) ? function(node, attribute) {
 		return node.hasAttribute(attribute);
 	} : function(node, attribute) {
 		node = node.getAttributeNode(attribute);
@@ -144,7 +206,7 @@ local.setDocument = function(document){
 
 	// contains
 	// FIXME: Add specs: local.contains should be different for xml and html documents?
-	this.contains = (root && this.isNativeCode(root.contains)) ? function(context, node){
+	features.contains = (root && this.isNativeCode(root.contains)) ? function(context, node){
 		return context.contains(node);
 	} : (root && root.compareDocumentPosition) ? function(context, node){
 		return context === node || !!(context.compareDocumentPosition(node) & 16);
@@ -158,7 +220,7 @@ local.setDocument = function(document){
 	// document order sorting
 	// credits to Sizzle (http://sizzlejs.com/)
 
-	this.documentSorter = (root.compareDocumentPosition) ? function(a, b){
+	features.documentSorter = (root.compareDocumentPosition) ? function(a, b){
 		if (!a.compareDocumentPosition || !b.compareDocumentPosition) return 0;
 		return a.compareDocumentPosition(b) & 4 ? -1 : a === b ? 0 : 1;
 	} : ('sourceIndex' in root) ? function(a, b){
@@ -174,52 +236,137 @@ local.setDocument = function(document){
 		return aRange.compareBoundaryPoints(Range.START_TO_END, bRange);
 	} : null ;
 
-	this.getUID = (this.isHTMLDocument) ? this.getUIDHTML : this.getUIDXML;
+	root = null;
 
+	for (feature in features){
+		this[feature] = features[feature];
+	}
 };
 
 // Main Method
 
+var reSimpleSelector = /^([#.]?)((?:[\w-]+|\*))$/,
+	reEmptyAttribute = /\[.+[*$^]=(?:""|'')?\]/,
+	qsaFailExpCache = {};
+
 local.search = function(context, expression, append, first){
 
 	var found = this.found = (first) ? null : (append || []);
-
-	// context checks
-
-	if (!context) return found; // No context
-	if (context.navigator) context = context.document; // Convert the node from a window to a document
-	else if (!context.nodeType) return found; // Reject misc junk input
+	
+	if (!context) return found;
+	else if (context.navigator) context = context.document; // Convert the node from a window to a document
+	else if (!context.nodeType) return found;
 
 	// setup
 
-	var parsed, i;
+	var parsed, i,
+		uniques = this.uniques = {},
+		hasOthers = !!(append && append.length),
+		contextIsDocument = (context.nodeType == 9);
 
-	var uniques = this.uniques = {};
-
-	if (this.document !== (context.ownerDocument || context)) this.setDocument(context);
-
-	// should sort if there are nodes in append and if you pass multiple expressions.
-	// should remove duplicates if append already has items
-	var shouldUniques = !!(append && append.length);
+	if (this.document !== (contextIsDocument ? context : context.ownerDocument)) this.setDocument(context);
 
 	// avoid duplicating items already in the append array
-	if (shouldUniques) for (i = found.length; i--;) this.uniques[this.getUID(found[i])] = true;
+	if (hasOthers) for (i = found.length; i--;) uniques[this.getUID(found[i])] = true;
 
 	// expression checks
 
 	if (typeof expression == 'string'){ // expression is a string
 
-		// Overrides
+		/*<simple-selectors-override>*/
+		var simpleSelector = expression.match(reSimpleSelector);
+		simpleSelectors: if (simpleSelector) {
 
-		for (i = this.overrides.length; i--;){
-			var override = this.overrides[i];
-			if (override.regexp.test(expression)){
-				var result = override.method.call(context, expression, found, first);
-				if (result === false) continue;
-				if (result === true) return found;
-				return result;
+			var symbol = simpleSelector[1],
+				name = simpleSelector[2],
+				node, nodes;
+
+			if (!symbol){
+
+				if (name == '*' && this.brokenStarGEBTN) break simpleSelectors;
+				nodes = context.getElementsByTagName(name);
+				if (first) return nodes[0] || null;
+				for (i = 0; node = nodes[i++];){
+					if (!(hasOthers && uniques[this.getUID(node)])) found.push(node);
+				}
+
+			} else if (symbol == '#'){
+
+				if (!this.isHTMLDocument || !contextIsDocument) break simpleSelectors;
+				node = context.getElementById(name);
+				if (!node) return found;
+				if (this.idGetsName && node.getAttributeNode('id').nodeValue != name) break simpleSelectors;
+				if (first) return node || null;
+				if (!(hasOthers && uniques[this.getUID(node)])) found.push(node);
+
+			} else if (symbol == '.'){
+
+				if (!this.isHTMLDocument || ((!context.getElementsByClassName || this.brokenGEBCN) && context.querySelectorAll)) break simpleSelectors;
+				if (context.getElementsByClassName && !this.brokenGEBCN){
+					nodes = context.getElementsByClassName(name);
+					if (first) return nodes[0] || null;
+					for (i = 0; node = nodes[i++];){
+						if (!(hasOthers && uniques[this.getUID(node)])) found.push(node);
+					}
+				} else {
+					var matchClass = new RegExp('(^|\\s)'+ Slick.escapeRegExp(name) +'(\\s|$)');
+					nodes = context.getElementsByTagName('*');
+					for (i = 0; node = nodes[i++];){
+						className = node.className;
+						if (!(className && matchClass.test(className))) continue;
+						if (first) return node;
+						if (!(hasOthers && uniques[this.getUID(node)])) found.push(node);
+					}
+				}
+
 			}
+
+			if (hasOthers) this.sort(found);
+			return (first) ? null : found;
+
 		}
+		/*</simple-selectors-override>*/
+
+		/*<query-selector-override>*/
+		querySelector: if (context.querySelectorAll) {
+
+			if (!this.isHTMLDocument || this.brokenMixedCaseQSA || qsaFailExpCache[expression] ||
+			(this.brokenCheckedQSA && expression.indexOf(':checked') > -1) ||
+			(this.brokenEmptyAttributeQSA && reEmptyAttribute.test(expression)) || Slick.disableQSA) break querySelector;
+
+			var _expression = expression;
+			if (!contextIsDocument){
+				// non-document rooted QSA
+				// credits to Andrew Dupont
+				var currentId = context.getAttribute('id'), slickid = 'slickid__';
+				context.setAttribute('id', slickid);
+				_expression = '#' + slickid + ' ' + _expression;
+			}
+
+			try {
+				if (first) return context.querySelector(_expression) || null;
+				else nodes = context.querySelectorAll(_expression);
+			} catch(e) {
+				qsaFailExpCache[expression] = 1;
+				break querySelector;
+			} finally {
+				if (!contextIsDocument){
+					if (currentId) context.setAttribute('id', currentId);
+					else context.removeAttribute('id');
+				}
+			}
+
+			if (this.starSelectsClosedQSA) for (i = 0; node = nodes[i++];){
+				if (node.nodeName > '@' && !(hasOthers && uniques[this.getUID(node)])) found.push(node);
+			} else for (i = 0; node = nodes[i++];){
+				if (!(hasOthers && uniques[this.getUID(node)])) found.push(node);
+			}
+
+			if (hasOthers) this.sort(found);
+			return found;
+
+		}
+		/*</query-selector-override>*/
 
 		parsed = this.Slick.parse(expression);
 		if (!parsed.length) return found;
@@ -234,9 +381,9 @@ local.search = function(context, expression, append, first){
 		return found;
 	}
 
-	// cache elements for the nth selectors
-
 	/*<pseudo-selectors>*//*<nth-pseudo-selectors>*/
+
+	// cache elements for the nth selectors
 
 	this.posNTH = {};
 	this.posNTHLast = {};
@@ -246,7 +393,7 @@ local.search = function(context, expression, append, first){
 	/*</nth-pseudo-selectors>*//*</pseudo-selectors>*/
 
 	// if append is null and there is only a single selector with one expression use pushArray, else use pushUID
-	this.push = (!shouldUniques && (first || (parsed.length == 1 && parsed.expressions[0].length == 1))) ? this.pushArray : this.pushUID;
+	this.push = (!hasOthers && (first || (parsed.length == 1 && parsed.expressions[0].length == 1))) ? this.pushArray : this.pushUID;
 
 	if (found == null) found = [];
 
@@ -292,7 +439,8 @@ local.search = function(context, expression, append, first){
 		currentItems = this.found;
 	}
 
-	if (shouldUniques || (parsed.expressions.length > 1)) this.sort(found);
+	// should sort if there are nodes in append and if you pass multiple expressions.
+	if (hasOthers || (parsed.expressions.length > 1)) this.sort(found);
 
 	return (first) ? (found[0] || null) : found;
 };
@@ -300,7 +448,7 @@ local.search = function(context, expression, append, first){
 // Utils
 
 local.uidx = 1;
-local.uidk = 'slick:uniqueid';
+local.uidk = 'slick-uniqueid';
 
 local.getUIDXML = function(node){
 	var uid = node.getAttribute(this.uidk);
@@ -354,12 +502,12 @@ local.createNTHPseudo = function(child, sibling, positions, ofType){
 			if (ofType){
 				var nodeName = node.nodeName;
 				do {
-					if (el.nodeName !== nodeName) continue;
+					if (el.nodeName != nodeName) continue;
 					this[positions][this.getUID(el)] = count++;
 				} while ((el = el[sibling]));
 			} else {
 				do {
-					if (el.nodeType !== 1) continue;
+					if (el.nodeType != 1) continue;
 					this[positions][this.getUID(el)] = count++;
 				} while ((el = el[sibling]));
 			}
@@ -393,17 +541,29 @@ local.pushUID = function(node, tag, id, classes, attributes, pseudos){
 };
 
 local.matchNode = function(node, selector){
+	if (this.isHTMLDocument && this.nativeMatchesSelector){
+		try {
+			return this.nativeMatchesSelector.call(node, selector.replace(/\[([^=]+)=\s*([^'"\]]+?)\s*\]/g, '[$1="$2"]'));
+		} catch(matchError) {}
+	}
+	
 	var parsed = this.Slick.parse(selector);
 	if (!parsed) return true;
 
 	// simple (single) selectors
-	if(parsed.length == 1 && parsed.expressions[0].length == 1){
-		var exp = parsed.expressions[0][0];
-		return this.matchSelector(node, (this.isXMLDocument) ? exp.tag : exp.tag.toUpperCase(), exp.id, exp.classes, exp.attributes, exp.pseudos);
+	var expressions = parsed.expressions, reversedExpressions, simpleExpCounter = 0, i;
+	for (i = 0; (currentExpression = expressions[i]); i++){
+		if (currentExpression.length == 1){
+			var exp = currentExpression[0];
+			if (this.matchSelector(node, (this.isXMLDocument) ? exp.tag : exp.tag.toUpperCase(), exp.id, exp.classes, exp.attributes, exp.pseudos)) return true;
+			simpleExpCounter++;
+		}
 	}
 
-	var nodes = this.search(this.document, parsed);
-	for (var i = 0, item; item = nodes[i++];){
+	if (simpleExpCounter == parsed.length) return false;
+
+	var nodes = this.search(this.document, parsed), item;
+	for (i = 0; item = nodes[i++];){
 		if (item === node) return true;
 	}
 	return false;
@@ -418,10 +578,11 @@ local.matchPseudo = function(node, name, argument){
 
 local.matchSelector = function(node, tag, id, classes, attributes, pseudos){
 	if (tag){
+		var nodeName = (this.isXMLDocument) ? node.nodeName : node.nodeName.toUpperCase();
 		if (tag == '*'){
-			if (node.nodeName < '@') return false; // Fix for comment nodes and closed nodes
+			if (nodeName < '@') return false; // Fix for comment nodes and closed nodes
 		} else {
-			if (node.nodeName != tag) return false;
+			if (nodeName != tag) return false;
 		}
 	}
 
@@ -429,7 +590,7 @@ local.matchSelector = function(node, tag, id, classes, attributes, pseudos){
 
 	var i, part, cls;
 	if (classes) for (i = classes.length; i--;){
-		cls = ('className' in node) ? node.className : node.getAttribute('class');
+		cls = node.getAttribute('class') || node.className;
 		if (!(cls && classes[i].regexp.test(cls))) return false;
 	}
 	if (attributes) for (i = attributes.length; i--;){
@@ -458,15 +619,18 @@ var combinators = {
 					children = node.all[id];
 					if (!children) return;
 					if (!children[0]) children = [children];
-					for (i = 0; item = children[i++];) if (item.getAttributeNode('id').nodeValue == id){
-						this.push(item, tag, null, classes, attributes, pseudos);
-						break;
+					for (i = 0; item = children[i++];){
+						var idNode = item.getAttributeNode('id');
+						if (idNode && idNode.nodeValue == id){
+							this.push(item, tag, null, classes, attributes, pseudos);
+							break;
+						}
 					} 
 					return;
 				}
 				if (!item){
 					// if the context is in the dom we return, else we will try GEBTN, breaking the getById label
-					if (this.contains(this.document.documentElement, node)) return;
+					if (this.contains(this.root, node)) return;
 					else break getById;
 				} else if (this.document !== node && !this.contains(node, item)) return;
 				this.push(item, tag, null, classes, attributes, pseudos);
@@ -489,12 +653,12 @@ var combinators = {
 
 	'>': function(node, tag, id, classes, attributes, pseudos){ // direct children
 		if ((node = node.firstChild)) do {
-			if (node.nodeType === 1) this.push(node, tag, id, classes, attributes, pseudos);
+			if (node.nodeType == 1) this.push(node, tag, id, classes, attributes, pseudos);
 		} while ((node = node.nextSibling));
 	},
 
 	'+': function(node, tag, id, classes, attributes, pseudos){ // next sibling
-		while ((node = node.nextSibling)) if (node.nodeType === 1){
+		while ((node = node.nextSibling)) if (node.nodeType == 1){
 			this.push(node, tag, id, classes, attributes, pseudos);
 			break;
 		}
@@ -503,14 +667,14 @@ var combinators = {
 	'^': function(node, tag, id, classes, attributes, pseudos){ // first child
 		node = node.firstChild;
 		if (node){
-			if (node.nodeType === 1) this.push(node, tag, id, classes, attributes, pseudos);
+			if (node.nodeType == 1) this.push(node, tag, id, classes, attributes, pseudos);
 			else this['combinator:+'](node, tag, id, classes, attributes, pseudos);
 		}
 	},
 
 	'~': function(node, tag, id, classes, attributes, pseudos){ // next siblings
 		while ((node = node.nextSibling)){
-			if (node.nodeType !== 1) continue;
+			if (node.nodeType != 1) continue;
 			var uid = this.getUID(node);
 			if (this.bitUniques[uid]) break;
 			this.bitUniques[uid] = true;
@@ -528,7 +692,7 @@ var combinators = {
 		this['combinator:!~'](node, tag, id, classes, attributes, pseudos);
 	},
 
-	'!': function(node, tag, id, classes, attributes, pseudos){  // all parent nodes up to document
+	'!': function(node, tag, id, classes, attributes, pseudos){ // all parent nodes up to document
 		while ((node = node.parentNode)) if (node !== this.document) this.push(node, tag, id, classes, attributes, pseudos);
 	},
 
@@ -538,7 +702,7 @@ var combinators = {
 	},
 
 	'!+': function(node, tag, id, classes, attributes, pseudos){ // previous sibling
-		while ((node = node.previousSibling)) if (node.nodeType === 1){
+		while ((node = node.previousSibling)) if (node.nodeType == 1){
 			this.push(node, tag, id, classes, attributes, pseudos);
 			break;
 		}
@@ -547,14 +711,14 @@ var combinators = {
 	'!^': function(node, tag, id, classes, attributes, pseudos){ // last child
 		node = node.lastChild;
 		if (node){
-			if (node.nodeType === 1) this.push(node, tag, id, classes, attributes, pseudos);
+			if (node.nodeType == 1) this.push(node, tag, id, classes, attributes, pseudos);
 			else this['combinator:!+'](node, tag, id, classes, attributes, pseudos);
 		}
 	},
 
 	'!~': function(node, tag, id, classes, attributes, pseudos){ // previous siblings
 		while ((node = node.previousSibling)){
-			if (node.nodeType !== 1) continue;
+			if (node.nodeType != 1) continue;
 			var uid = this.getUID(node);
 			if (this.bitUniques[uid]) break;
 			this.bitUniques[uid] = true;
@@ -584,20 +748,20 @@ var pseudos = {
 	},
 
 	'first-child': function(node){
-		while ((node = node.previousSibling)) if (node.nodeType === 1) return false;
+		while ((node = node.previousSibling)) if (node.nodeType == 1) return false;
 		return true;
 	},
 
 	'last-child': function(node){
-		while ((node = node.nextSibling)) if (node.nodeType === 1) return false;
+		while ((node = node.nextSibling)) if (node.nodeType == 1) return false;
 		return true;
 	},
 
 	'only-child': function(node){
 		var prev = node;
-		while ((prev = prev.previousSibling)) if (prev.nodeType === 1) return false;
+		while ((prev = prev.previousSibling)) if (prev.nodeType == 1) return false;
 		var next = node;
-		while ((next = next.nextSibling)) if (next.nodeType === 1) return false;
+		while ((next = next.nextSibling)) if (next.nodeType == 1) return false;
 		return true;
 	},
 
@@ -615,11 +779,11 @@ var pseudos = {
 		return this['pseudo:nth-child'](node, '' + index + 1);
 	},
 
-	'even': function(node, argument){
+	'even': function(node){
 		return this['pseudo:nth-child'](node, '2n');
 	},
 
-	'odd': function(node, argument){
+	'odd': function(node){
 		return this['pseudo:nth-child'](node, '2n+1');
 	},
 
@@ -629,21 +793,21 @@ var pseudos = {
 
 	'first-of-type': function(node){
 		var nodeName = node.nodeName;
-		while ((node = node.previousSibling)) if (node.nodeName === nodeName) return false;
+		while ((node = node.previousSibling)) if (node.nodeName == nodeName) return false;
 		return true;
 	},
 
 	'last-of-type': function(node){
 		var nodeName = node.nodeName;
-		while ((node = node.nextSibling)) if (node.nodeName === nodeName) return false;
+		while ((node = node.nextSibling)) if (node.nodeName == nodeName) return false;
 		return true;
 	},
 
 	'only-of-type': function(node){
 		var prev = node, nodeName = node.nodeName;
-		while ((prev = prev.previousSibling)) if (prev.nodeName === nodeName) return false;
+		while ((prev = prev.previousSibling)) if (prev.nodeName == nodeName) return false;
 		var next = node;
-		while ((next = next.nextSibling)) if (next.nodeName === nodeName) return false;
+		while ((next = next.nextSibling)) if (next.nodeName == nodeName) return false;
 		return true;
 	},
 
@@ -652,11 +816,11 @@ var pseudos = {
 	// custom pseudos
 
 	'enabled': function(node){
-		return (node.disabled === false);
+		return !node.disabled;
 	},
 
 	'disabled': function(node){
-		return (node.disabled === true);
+		return node.disabled;
 	},
 
 	'checked': function(node){
@@ -685,7 +849,7 @@ for (var p in pseudos) local['pseudo:' + p] = pseudos[p];
 local.attributeGetters = {
 
 	'class': function(){
-		return ('className' in this) ? this.className : this.getAttribute('class');
+		return this.getAttribute('class') || this.className;
 	},
 
 	'for': function(){
@@ -698,139 +862,24 @@ local.attributeGetters = {
 
 	'style': function(){
 		return (this.style) ? this.style.cssText : this.getAttribute('style');
+	},
+	
+	'tabindex': function(){
+		var attributeNode = this.getAttributeNode('tabindex');
+		return (attributeNode && attributeNode.specified) ? attributeNode.nodeValue : null;
+	},
+
+	'type': function(){
+		return this.getAttribute('type');
 	}
 
 };
-
-local.getAttribute = function(node, name){
-	// FIXME: check if getAttribute() will get input elements on a form on this browser
-	// getAttribute is faster than getAttributeNode().nodeValue
-	var method = this.attributeGetters[name];
-	if (method) return method.call(node);
-	var attributeNode = node.getAttributeNode(name);
-	return attributeNode ? attributeNode.nodeValue : null;
-};
-
-// overrides
-
-local.overrides = [];
-
-local.override = function(regexp, method){
-	this.overrides.push({regexp: regexp, method: method});
-};
-
-/*<overrides>*/
-
-/*<query-selector-override>*/
-
-var reEmptyAttribute = /\[.*[*$^]=(?:["']{2})?\]/;
-
-local.override(/./, function(expression, found, first){ //querySelectorAll override
-
-	if (!this.querySelectorAll || this.nodeType != 9 || !local.isHTMLDocument || local.brokenMixedCaseQSA ||
-	(local.brokenCheckedQSA && expression.indexOf(':checked') > -1) ||
-	(local.brokenEmptyAttributeQSA && reEmptyAttribute.test(expression)) || Slick.disableQSA) return false;
-
-	var nodes, node;
-	try {
-		if (first) return this.querySelector(expression) || null;
-		else nodes = this.querySelectorAll(expression);
-	} catch(error){
-		return false;
-	}
-
-	var i, hasOthers = !!(found.length);
-
-	if (local.starSelectsClosedQSA) for (i = 0; node = nodes[i++];){
-		if (node.nodeName > '@' && (!hasOthers || !local.uniques[local.getUIDHTML(node)])) found.push(node);
-	} else for (i = 0; node = nodes[i++];){
-		if (!hasOthers || !local.uniques[local.getUIDHTML(node)]) found.push(node);
-	}
-
-	if (hasOthers) local.sort(found);
-
-	return true;
-
-});
-
-/*</query-selector-override>*/
-
-/*<tag-override>*/
-
-local.override(/^[\w-]+$|^\*$/, function(expression, found, first){ // tag override
-	var tag = expression;
-	if (tag == '*' && local.brokenStarGEBTN) return false;
-
-	var nodes = this.getElementsByTagName(tag);
-
-	if (first) return nodes[0] || null;
-	var i, node, hasOthers = !!(found.length);
-
-	for (i = 0; node = nodes[i++];){
-		if (!hasOthers || !local.uniques[local.getUID(node)]) found.push(node);
-	}
-
-	if (hasOthers) local.sort(found);
-
-	return true;
-});
-
-/*</tag-override>*/
-
-/*<class-override>*/
-
-local.override(/^\.[\w-]+$/, function(expression, found, first){ // class override
-	if (!local.isHTMLDocument || (!this.getElementsByClassName && this.querySelectorAll)) return false;
-
-	var nodes, node, i, hasOthers = !!(found && found.length), className = expression.substring(1);
-	if (this.getElementsByClassName && !local.brokenGEBCN){
-		nodes = this.getElementsByClassName(className);
-		if (first) return nodes[0] || null;
-		for (i = 0; node = nodes[i++];){
-			if (!hasOthers || !local.uniques[local.getUIDHTML(node)]) found.push(node);
-		}
-	} else {
-		var matchClass = new RegExp('(^|\\s)'+ Slick.escapeRegExp(className) +'(\\s|$)');
-		nodes = this.getElementsByTagName('*');
-		for (i = 0; node = nodes[i++];){
-			className = node.className;
-			if (!className || !matchClass.test(className)) continue;
-			if (first) return node;
-			if (!hasOthers || !local.uniques[local.getUIDHTML(node)]) found.push(node);
-		}
-	}
-	if (hasOthers) local.sort(found);
-	return (first) ? null : true;
-});
-
-/*</class-override>*/
-
-/*<id-override>*/
-
-local.override(/^#[\w-]+$/, function(expression, found, first){ // ID override
-	if (!local.isHTMLDocument || this.nodeType != 9) return false;
-
-	var id = expression.substring(1), el = this.getElementById(id);
-	if (!el) return found;
-	if (local.idGetsName && el.getAttributeNode('id').nodeValue != id) return false;
-	if (first) return el || null;
-	var hasOthers = !!(found.length);
-	if (!hasOthers || !local.uniques[local.getUIDHTML(el)]) found.push(el);
-	if (hasOthers) local.sort(found);
-	return true;
-});
-
-/*</id-override>*/
-
-/*</overrides>*/
-
-if (typeof document != 'undefined') local.setDocument(document);
 
 // Slick
 
 var Slick = local.Slick = (this.Slick || {});
 
-Slick.version = '0.9dev';
+Slick.version = '1.1.5';
 
 // Slick finder
 
@@ -860,7 +909,6 @@ Slick.getAttribute = function(node, name){
 Slick.match = function(node, selector){
 	if (!(node && selector)) return false;
 	if (!selector || selector === node) return true;
-	if (typeof selector != 'string') return false;
 	local.setDocument(node);
 	return local.matchNode(node, selector);
 };

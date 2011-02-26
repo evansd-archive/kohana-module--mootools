@@ -18,6 +18,7 @@ license: MIT-style license
 authors:
   - Harald Kirschner
   - Aaron Newton
+  - Jacob Thornton
 
 requires:
   - Core/Hash
@@ -48,7 +49,8 @@ HtmlTable = Class.refactor(HtmlTable, {
 		classGroup: 'table-tr-group',
 		classCellSort: 'table-td-sort',
 		classSortSpan: 'table-th-sort-span',
-		sortable: false
+		sortable: false,
+		thSelector: 'th'
 	},
 
 	initialize: function (){
@@ -66,160 +68,171 @@ HtmlTable = Class.refactor(HtmlTable, {
 	},
 
 	attachSorts: function(attach){
-		this.element.removeEvents('click:relay(th)');
-		this.element[attach !== false ? 'addEvent' : 'removeEvent']('click:relay(th)', this.bound.headClick);
+		this.detachSorts();
+		if (attach !== false) this.element.addEvent('click:relay(' + this.options.thSelector + ')', this.bound.headClick);
+	},
+
+	detachSorts: function(){
+		this.element.removeEvents('click:relay(' + this.options.thSelector + ')');
 	},
 
 	setHeaders: function(){
 		this.previous.apply(this, arguments);
-		if (this.sortEnabled) this.detectParsers();
+		if (this.sortEnabled) this.setParsers();
 	},
 
-	detectParsers: function(force){
-		if (!this.head) return;
-		var parsers = this.options.parsers,
-			rows = this.body.rows;
+	setParsers: function(){
+		this.parsers = this.detectParsers();
+	},
 
-		// auto-detect
-		this.parsers = $$(this.head.cells).map(function(cell, index){
-			if (!force && (cell.hasClass(this.options.classNoSort) || cell.retrieve('htmltable-parser'))) return cell.retrieve('htmltable-parser');
-			var thDiv = new Element('div');
-			Array.each(cell.childNodes, function(node){
-				thDiv.adopt(node);
-			});
-			thDiv.inject(cell);
-			var sortSpan = new Element('span', {'html': '&#160;', 'class': this.options.classSortSpan}).inject(thDiv, 'top');
+	detectParsers: function(){
+		return this.head && this.head.getElements(this.options.thSelector).flatten().map(this.detectParser, this);
+	},
 
-			this.sortSpans.push(sortSpan);
-
-			var parser = parsers[index],
-					cancel;
-			switch (typeOf(parser)){
-				case 'function': parser = {convert: parser}; cancel = true; break;
-				case 'string': parser = parser; cancel = true; break;
-			}
-			if (!cancel){
-				Object.some(HtmlTable.Parsers, function(current){
-					var match = current.match;
-					if (!match) return false;
-					for (var i = 0, j = rows.length; i < j; i++){
-						var cell = document.id(rows[i].cells[index]);
-						var text = cell ? cell.get('html').clean() : '';
-						if (text && match.test(text)){
-							parser = current;
-							return true;
-						}
+	detectParser: function(cell, index){
+		if (cell.hasClass(this.options.classNoSort) || cell.retrieve('htmltable-parser')) return cell.retrieve('htmltable-parser');
+		var thDiv = new Element('div');
+		thDiv.adopt(cell.childNodes).inject(cell);
+		var sortSpan = new Element('span', {'html': '&#160;', 'class': this.options.classSortSpan}).inject(thDiv, 'top');
+		this.sortSpans.push(sortSpan);
+		var parser = this.options.parsers[index],
+			rows = this.body.rows,
+			cancel;
+		switch (typeOf(parser)){
+			case 'function': parser = {convert: parser}; cancel = true; break;
+			case 'string': parser = parser; cancel = true; break;
+		}
+		if (!cancel){
+			HtmlTable.ParserPriority.some(function(parserName){
+				var current = HtmlTable.Parsers[parserName],
+					match = current.match;
+				if (!match) return false;
+				for (var i = 0, j = rows.length; i < j; i++){
+					var cell = document.id(rows[i].cells[index]),
+						text = cell ? cell.get('html').clean() : '';
+					if (text && match.test(text)){
+						parser = current;
+						return true;
 					}
-				});
-			}
-
-			if (!parser) parser = this.options.defaultParser;
-			cell.store('htmltable-parser', parser);
-			return parser;
-		}, this);
+				}
+			});
+		}
+		if (!parser) parser = this.options.defaultParser;
+		cell.store('htmltable-parser', parser);
+		return parser;
 	},
 
 	headClick: function(event, el){
 		if (!this.head || el.hasClass(this.options.classNoSort)) return;
-		var index = Array.indexOf(this.head.cells, el);
-		this.sort(index);
-		return false;
+		return this.sort(Array.indexOf(this.head.getElements(this.options.thSelector).flatten(), el) % this.body.rows[0].cells.length);
+	},
+
+	setSortedState: function(index, reverse){
+		if (reverse != null) this.sorted.reverse = reverse;
+		else if (this.sorted.index == index) this.sorted.reverse = !this.sorted.reverse;
+		else this.sorted.reverse = this.sorted.index == null;
+
+		if (index != null) this.sorted.index = index;
+	},
+
+	setHeadSort: function(sorted){
+		var head = $$(!this.head.length ? this.head.cells[this.sorted.index] : this.head.map(function(row){
+			return row.getElements(this.options.thSelector)[this.sorted.index];
+		}, this).clean());
+		if (!head.length) return;
+		if (sorted){
+			head.addClass(this.options.classHeadSort);
+			if (this.sorted.reverse) head.addClass(this.options.classHeadSortRev);
+			else head.removeClass(this.options.classHeadSortRev);
+		} else {
+			head.removeClass(this.options.classHeadSort).removeClass(this.options.classHeadSortRev);
+		}
+	},
+
+	setRowSort: function(data, pre){
+		var count = data.length,
+			body = this.body,
+			group,
+			rowIndex;
+
+		while (count){
+			var item = data[--count],
+				position = item.position,
+				row = body.rows[position];
+
+			if (row.disabled) continue;
+			if (!pre){
+				group = this.setGroupSort(group, row, item);
+				this.setRowStyle(row, count);
+			}
+			body.appendChild(row);
+
+			for (rowIndex = 0; rowIndex < count; rowIndex++){
+				if (data[rowIndex].position > position) data[rowIndex].position--;
+			}
+		}
+	},
+
+	setRowStyle: function(row, i){
+		this.previous(row, i);
+		row.cells[this.sorted.index].addClass(this.options.classCellSort);
+	},
+
+	setGroupSort: function(group, row, item){
+		if (group == item.value) row.removeClass(this.options.classGroupHead).addClass(this.options.classGroup);
+		else row.removeClass(this.options.classGroup).addClass(this.options.classGroupHead);
+		return item.value;
+	},
+
+	getParser: function(){
+		var parser = this.parsers[this.sorted.index];
+		return typeOf(parser) == 'string' ? HtmlTable.Parsers[parser] : parser;
 	},
 
 	sort: function(index, reverse, pre){
 		if (!this.head) return;
-		var classCellSort = this.options.classCellSort;
-		var classGroup = this.options.classGroup,
-			classGroupHead = this.options.classGroupHead;
 
 		if (!pre){
-			if (index != null){
-				if (this.sorted.index == index){
-					this.sorted.reverse = !(this.sorted.reverse);
-				} else {
-					if (this.sorted.index != null){
-						this.sorted.reverse = false;
-						this.head.cells[this.sorted.index].removeClass(this.options.classHeadSort).removeClass(this.options.classHeadSortRev);
-					} else {
-						this.sorted.reverse = true;
-					}
-					this.sorted.index = index;
-				}
-			} else {
-				index = this.sorted.index;
-			}
-
-			if (reverse != null) this.sorted.reverse = reverse;
-
-			var head = document.id(this.head.cells[index]);
-			if (head){
-				head.addClass(this.options.classHeadSort);
-				if (this.sorted.reverse) head.addClass(this.options.classHeadSortRev);
-				else head.removeClass(this.options.classHeadSortRev);
-			}
-
-			this.body.getElements('td').removeClass(this.options.classCellSort);
+			this.clearSort();
+			this.setSortedState(index, reverse);
+			this.setHeadSort(true);
 		}
 
-		var parser = this.parsers[index];
-		if (typeOf(parser) == 'string') parser = HtmlTable.Parsers[parser];
+		var parser = this.getParser();
 		if (!parser) return;
 
+		var rel;
 		if (!Browser.ie){
-			var rel = this.body.getParent();
+			rel = this.body.getParent();
 			this.body.dispose();
 		}
 
-		var data = Array.map(this.body.rows, function(row, i){
-			var value = parser.convert.call(document.id(row.cells[index]));
-
-			return {
-				position: i,
-				value: value,
-				toString: function(){
-					return value.toString();
-				}
-			};
-		}, this);
-		data.reverse(true);
-
-		data.sort(function(a, b){
+		var data = this.parseData(parser).sort(function(a, b){
 			if (a.value === b.value) return 0;
 			return a.value > b.value ? 1 : -1;
 		});
 
-		if (!this.sorted.reverse) data.reverse(true);
+		if (this.sorted.reverse == (parser == HtmlTable.Parsers['input-checked'])) data.reverse(true);
+		this.setRowSort(data, pre);
 
-		var i = data.length, body = this.body;
-		var j, position, entry, group;
+		if (rel) rel.grab(this.body);
 
-		while (i){
-			var item = data[--i];
-			position = item.position;
-			var row = body.rows[position];
-			if (row.disabled) continue;
+		return this.fireEvent('sort', [this.body, this.sorted.index]);
+	},
 
-			if (!pre){
-				if (group === item.value){
-					row.removeClass(classGroupHead).addClass(classGroup);
-				} else {
-					group = item.value;
-					row.removeClass(classGroup).addClass(classGroupHead);
-				}
-				if (this.options.zebra) this.zebra(row, i);
+	parseData: function(parser){
+		return Array.map(this.body.rows, function(row, i){
+			var value = parser.convert.call(document.id(row.cells[this.sorted.index]));
+			return {
+				position: i,
+				value: value
+			};
+		}, this);
+	},
 
-				row.cells[index].addClass(classCellSort);
-			}
-
-			body.appendChild(row);
-			for (j = 0; j < i; j++){
-				if (data[j].position > position) data[j].position--;
-			}
-		};
-		data = null;
-		if (rel) rel.grab(body);
-
-		return this.fireEvent('sort', [body, index]);
+	clearSort: function(){
+		this.setHeadSort(false);
+		this.body.getElements('td').removeClass(this.options.classCellSort);
 	},
 
 	reSort: function(){
@@ -230,7 +243,7 @@ HtmlTable = Class.refactor(HtmlTable, {
 	enableSort: function(){
 		this.element.addClass(this.options.classSortable);
 		this.attachSorts(true);
-		this.detectParsers();
+		this.setParsers();
 		this.sortEnabled = true;
 		return this;
 	},
@@ -238,13 +251,17 @@ HtmlTable = Class.refactor(HtmlTable, {
 	disableSort: function(){
 		this.element.removeClass(this.options.classSortable);
 		this.attachSorts(false);
-		this.sortSpans.each(function(span){ span.destroy(); });
+		this.sortSpans.each(function(span){
+			span.destroy();
+		});
 		this.sortSpans.empty();
 		this.sortEnabled = false;
 		return this;
 	}
 
 });
+
+HtmlTable.ParserPriority = ['date', 'input-checked', 'input-value', 'float', 'number'];
 
 HtmlTable.Parsers = {
 
@@ -299,7 +316,7 @@ HtmlTable.Parsers = {
 	'string': {
 		match: null,
 		convert: function(){
-			return this.get('text').stripTags();
+			return this.get('text').stripTags().toLowerCase();
 		}
 	},
 	'title': {
@@ -317,4 +334,7 @@ HtmlTable.Parsers = new Hash(HtmlTable.Parsers);
 
 HtmlTable.defineParsers = function(parsers){
 	HtmlTable.Parsers = Object.append(HtmlTable.Parsers, parsers);
+	for (var parser in parsers){
+		HtmlTable.ParserPriority.unshift(parser);
+	}
 };

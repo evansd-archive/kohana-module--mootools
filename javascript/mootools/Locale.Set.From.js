@@ -39,7 +39,7 @@ Locale.Set.from = function(set, type){
 	if (!type && typeOf(set) == 'string') type = 'json';
 	if (parsers[type]) set = parsers[type](set);
 
-	locale = new Locale.Set;
+	var locale = new Locale.Set;
 
 	locale.sets = set.sets || {};
 
@@ -49,6 +49,6 @@ Locale.Set.from = function(set, type){
 	}
 
 	return locale;
-}
+};
 
-})();
+}).call(this);

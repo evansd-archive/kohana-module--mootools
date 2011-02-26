@@ -39,14 +39,9 @@ provides: [Chain.Wait]
 
 	Chain.implement(wait);
 
-	if (this.Fx){
-		Fx.implement(wait);
-		['Css', 'Tween', 'Elements'].each(function(cls){
-			if (Fx[cls]) Fx[cls].implement(wait);
-		});
-	}
+	if (this.Fx) Fx.implement(wait);
 
-	if (this.Element && this.Fx){
+	if (this.Element && Element.implement && this.Fx){
 		Element.implement({
 
 			chains: function(effects){
@@ -68,4 +63,4 @@ provides: [Chain.Wait]
 		});
 	}
 
-})();
+}).call(this);

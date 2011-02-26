@@ -32,6 +32,7 @@ Locale.define('sv-SE', 'Date', {
 	shortTime: '%H:%M',
 	AM: '',
 	PM: '',
+	firstDayOfWeek: 1,
 
 	// Date.Extras
 	ordinal: '',

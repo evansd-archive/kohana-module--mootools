@@ -32,6 +32,7 @@ Locale.define('ca-CA', 'Date', {
 	shortTime: '%H:%M',
 	AM: 'AM',
 	PM: 'PM',
+	firstDayOfWeek: 0,
 
 	// Date.Extras
 	ordinal: '',

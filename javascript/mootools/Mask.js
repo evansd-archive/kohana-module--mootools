@@ -41,7 +41,7 @@ var Mask = new Class({
 		onShow: function(){},
 		onHide: function(){},
 		onDestroy: function(){},
-		onClick: function(){},
+		onClick: function(event){},
 		inject: {
 			where: 'after',
 			target: null,
@@ -68,12 +68,12 @@ var Mask = new Class({
 		this.element = new Element('div', {
 			'class': this.options['class'],
 			id: this.options.id || 'mask-' + String.uniqueID(),
-			styles: Object.merge(this.options.style, {
+			styles: Object.merge({}, this.options.style, {
 				display: 'none'
 			}),
 			events: {
-				click: function(){
-					this.fireEvent('click');
+				click: function(event){
+					this.fireEvent('click', event);
 					if (this.options.hideOnClick) this.hide();
 				}.bind(this)
 			}
@@ -88,7 +88,7 @@ var Mask = new Class({
 
 	inject: function(target, where){
 		where = where || (this.options.inject ? this.options.inject.where : '') || this.target == document.body ? 'inside' : 'after';
-		target = target || (this.options.inject ? this.options.inject.target : '') || this.target;
+		target = target || (this.options.inject && this.options.inject.target) || this.target;
 
 		this.element.inject(target, where);
 
@@ -124,6 +124,7 @@ var Mask = new Class({
 
 		var dim = this.target.getComputedSize(opt);
 		if (this.target == document.body){
+			this.element.setStyles({width: 0, height: 0});
 			var win = window.getScrollSize();
 			if (dim.totalHeight < win.y) dim.totalHeight = win.y;
 			if (dim.totalWidth < win.x) dim.totalWidth = win.x;

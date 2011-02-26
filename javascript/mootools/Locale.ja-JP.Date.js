@@ -32,6 +32,7 @@ Locale.define('ja-JP', 'Date', {
 	shortTime: '%H:%M',
 	AM: '午前',
 	PM: '午後',
+	firstDayOfWeek: 0,
 
 	// Date.Extras
 	ordinal: '',
