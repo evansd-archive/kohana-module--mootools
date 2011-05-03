@@ -170,4 +170,4 @@ Element.implement({
 
 });
 
-}).call(this);
+})();

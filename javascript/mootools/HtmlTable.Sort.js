@@ -93,7 +93,7 @@ HtmlTable = Class.refactor(HtmlTable, {
 		if (cell.hasClass(this.options.classNoSort) || cell.retrieve('htmltable-parser')) return cell.retrieve('htmltable-parser');
 		var thDiv = new Element('div');
 		thDiv.adopt(cell.childNodes).inject(cell);
-		var sortSpan = new Element('span', {'html': '&#160;', 'class': this.options.classSortSpan}).inject(thDiv, 'top');
+		var sortSpan = new Element('span', {'class': this.options.classSortSpan}).inject(thDiv, 'top');
 		this.sortSpans.push(sortSpan);
 		var parser = this.options.parsers[index],
 			rows = this.body.rows,
@@ -125,6 +125,22 @@ HtmlTable = Class.refactor(HtmlTable, {
 	headClick: function(event, el){
 		if (!this.head || el.hasClass(this.options.classNoSort)) return;
 		return this.sort(Array.indexOf(this.head.getElements(this.options.thSelector).flatten(), el) % this.body.rows[0].cells.length);
+	},
+
+	serialize: function() {
+		var previousSerialization = this.previous.apply(this, arguments) || {};
+		if (this.options.sortable) {
+			previousSerialization.sortIndex = this.sorted.index;
+			previousSerialization.sortReverse = this.sorted.reverse;
+		}
+		return previousSerialization;
+	},
+
+	restore: function(tableState) {
+		if(this.options.sortable && tableState.sortIndex) {
+			this.sort(tableState.sortIndex, tableState.sortReverse);
+		}
+		this.previous.apply(this, arguments);
 	},
 
 	setSortedState: function(index, reverse){
@@ -216,7 +232,7 @@ HtmlTable = Class.refactor(HtmlTable, {
 		this.setRowSort(data, pre);
 
 		if (rel) rel.grab(this.body);
-
+		this.fireEvent('stateChanged');
 		return this.fireEvent('sort', [this.body, this.sorted.index]);
 	},
 

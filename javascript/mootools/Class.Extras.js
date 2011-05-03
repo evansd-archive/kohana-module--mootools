@@ -119,4 +119,4 @@ this.Options = new Class({
 
 });
 
-}).call(this);
+})();

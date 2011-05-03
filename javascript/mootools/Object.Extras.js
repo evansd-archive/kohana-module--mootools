@@ -65,4 +65,4 @@ Object.extend({
 
 });
 
-}).call(this);
+})();

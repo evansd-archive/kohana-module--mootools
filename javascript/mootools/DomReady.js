@@ -1,1 +1,1 @@
-/home/dave/projects/kohana-module--mootools/javascript/mootools/DOMReady.js
+DOMReady.js

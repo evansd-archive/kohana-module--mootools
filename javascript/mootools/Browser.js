@@ -163,12 +163,13 @@ Document.mirror(function(name, method){
 });
 
 document.html = document.documentElement;
-document.head = document.getElementsByTagName('head')[0];
+if (!document.head) document.head = document.getElementsByTagName('head')[0];
 
 if (document.execCommand) try {
 	document.execCommand("BackgroundImageCache", false, true);
 } catch (e){}
 
+/*<ltIE9>*/
 if (this.attachEvent && !this.addEventListener){
 	var unloadEvent = function(){
 		this.detachEvent('onunload', unloadEvent);
@@ -200,6 +201,7 @@ try {
 		};
 	});
 }
+/*</ltIE9>*/
 
 //<1.2compat>
 
@@ -263,4 +265,4 @@ this.$exec = Browser.exec;
 
 //</1.2compat>
 
-}).call(this);
+})();

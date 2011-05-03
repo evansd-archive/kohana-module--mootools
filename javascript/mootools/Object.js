@@ -25,7 +25,7 @@ Object.extend({
 		var results = {};
 		for (var i = 0, l = keys.length; i < l; i++){
 			var k = keys[i];
-			results[k] = object[k];
+			if (k in object) results[k] = object[k];
 		}
 		return results;
 	},
@@ -40,9 +40,10 @@ Object.extend({
 
 	filter: function(object, fn, bind){
 		var results = {};
-		Object.each(object, function(value, key){
-			if (fn.call(bind, value, key, object)) results[key] = value;
-		});
+		for (var key in object){
+			var value = object[key];
+			if (hasOwnProperty.call(object, key) && fn.call(bind, value, key, object)) results[key] = value;
+		}
 		return results;
 	},
 

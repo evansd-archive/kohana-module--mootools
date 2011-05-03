@@ -180,4 +180,4 @@ Events.implement(Events.Pseudos(pseudos, proto.addEvent, proto.removeEvent));
 	if (this[klass]) this[klass].implement(Events.prototype);
 });
 
-}).call(this);
+})();

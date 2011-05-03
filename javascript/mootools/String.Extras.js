@@ -148,4 +148,4 @@ String.implement({
 
 });
 
-}).call(this);
+})();

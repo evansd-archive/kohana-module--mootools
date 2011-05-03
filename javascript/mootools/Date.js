@@ -570,4 +570,4 @@ Locale.addEvent('change', function(language){
 	if (Locale.get('Date')) recompile(language);
 }).fireEvent('change', Locale.getCurrent());
 
-}).call(this);
+})();

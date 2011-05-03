@@ -80,4 +80,4 @@ Locale.define('uk-UA', 'Date', {
 
 });
 
-}).call(this);
+})();

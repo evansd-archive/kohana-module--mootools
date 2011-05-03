@@ -33,6 +33,7 @@ provides: [Chain.Wait]
 		wait: function(duration){
 			return this.chain(function(){
 				this.callChain.delay(duration == null ? 500 : duration, this);
+				return this;
 			}.bind(this));
 		}
 	};
@@ -63,4 +64,4 @@ provides: [Chain.Wait]
 		});
 	}
 
-}).call(this);
+})();

@@ -58,4 +58,4 @@ this.Group = new Class({
 
 });
 
-}).call(this);
+})();

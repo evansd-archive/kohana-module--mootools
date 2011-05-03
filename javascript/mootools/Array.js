@@ -17,13 +17,7 @@ provides: Array
 
 Array.implement({
 
-	invoke: function(methodName){
-		var args = Array.slice(arguments, 1);
-		return this.map(function(item){
-			return item[methodName].apply(item, args);
-		});
-	},
-
+	/*<!ES5>*/
 	every: function(fn, bind){
 		for (var i = 0, l = this.length; i < l; i++){
 			if ((i in this) && !fn.call(bind, this[i], i, this)) return false;
@@ -37,12 +31,6 @@ Array.implement({
 			if ((i in this) && fn.call(bind, this[i], i, this)) results.push(this[i]);
 		}
 		return results;
-	},
-
-	clean: function(){
-		return this.filter(function(item){
-			return item != null;
-		});
 	},
 
 	indexOf: function(item, from){
@@ -66,6 +54,20 @@ Array.implement({
 			if ((i in this) && fn.call(bind, this[i], i, this)) return true;
 		}
 		return false;
+	},
+	/*</!ES5>*/
+
+	clean: function(){
+		return this.filter(function(item){
+			return item != null;
+		});
+	},
+
+	invoke: function(methodName){
+		var args = Array.slice(arguments, 1);
+		return this.map(function(item){
+			return item[methodName].apply(item, args);
+		});
 	},
 
 	associate: function(keys){

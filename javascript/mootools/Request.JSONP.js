@@ -31,8 +31,7 @@ Request.JSONP = new Class({
 
 	Implements: [Chain, Events, Options],
 
-	options: {
-	/*
+	options: {/*
 		onRequest: function(src, scriptElement){},
 		onComplete: function(data){},
 		onSuccess: function(data){},
@@ -99,7 +98,8 @@ Request.JSONP = new Class({
 	},
 
 	getScript: function(src){
-		if (!this.script) this.script = new Element('script[type=text/javascript]', {
+		if (!this.script) this.script = new Element('script', {
+			type: 'text/javascript',
 			async: true,
 			src: src
 		});
@@ -107,7 +107,7 @@ Request.JSONP = new Class({
 	},
 
 	success: function(args, index){
-		if (!this.running) return false;
+		if (!this.running) return;
 		this.clear()
 			.fireEvent('complete', args).fireEvent('success', args)
 			.callChain();

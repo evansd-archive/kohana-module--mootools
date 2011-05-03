@@ -202,7 +202,7 @@ Fx.Accordion = new Class({
 			}
 		}.bind(this));
 
-		return useFx ? this.start(obj) : this.set(obj);
+		return useFx ? this.start(obj) : this.set(obj).internalChain.callChain();
 	}
 
 });

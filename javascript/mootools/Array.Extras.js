@@ -78,4 +78,4 @@ Array.implement({
 
 });
 
-}).call(this);
+})();

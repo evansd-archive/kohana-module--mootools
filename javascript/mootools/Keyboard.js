@@ -243,4 +243,4 @@ provides: [Keyboard]
 		'keydown': handler
 	});
 
-}).call(this);
+})();

@@ -73,4 +73,4 @@ Locale.define('si-SI', 'Date', {
 
 });
 
-}).call(this);
+})();

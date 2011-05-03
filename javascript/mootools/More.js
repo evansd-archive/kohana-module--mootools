@@ -18,6 +18,7 @@ authors:
   - Tim Wienk
   - Christoph Pojer
   - Aaron Newton
+  - Jacob Thornton
 
 requires:
   - Core/MooTools
@@ -28,6 +29,6 @@ provides: [MooTools.More]
 */
 
 MooTools.More = {
-	'version': '1.3.1.1',
-	'build': '0292a3af1eea242b817fecf9daa127417d10d4ce'
+	'version': '1.3.2.1',
+	'build': 'e586bcd2496e9b22acfde32e12f84d49ce09e59d'
 };

@@ -60,6 +60,7 @@ Fx.Scroll = new Class({
 		var now = Array.flatten(arguments);
 		if (Browser.firefox) now = [Math.round(now[0]), Math.round(now[1])]; // not needed anymore in newer firefox versions
 		this.element.scrollTo(now[0], now[1]);
+		return this;
 	},
 
 	compute: function(from, to, delta){
@@ -180,4 +181,4 @@ function isBody(element){
 	return (/^(?:body|html)$/i).test(element.tagName);
 }
 
-}).call(this);
+})();
