@@ -96,7 +96,7 @@ echo "Creating mootools-core.js, which includes all of Mootools Core\n";
 $headers = array();
 foreach($files['core'] as $file => $info)
 {
-	$headers[] = '//= require "'.$info['name'].'"';
+	$headers[] = '//= require "mootools/'.$info['name'].'"';
 }
 file_put_contents($output_dir."mootools-core.js", join("\n", $headers));
 
