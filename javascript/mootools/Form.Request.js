@@ -3,7 +3,7 @@
 //= require "Class.Occlude"
 //= require "Spinner"
 //= require "String.QueryString"
-//= require "Element.Delegation"
+//= require "Element.Event.Pseudos"
 /*
 ---
 
@@ -196,7 +196,7 @@ if (!window.Form) window.Form = {};
 
 	Element.implement('formUpdate', function(update, options){
 		var fq = this.retrieve('form.request');
-		if (!fq) {
+		if (!fq){
 			fq = new Form.Request(this, update, options);
 		} else {
 			if (update) fq.setTarget(update);

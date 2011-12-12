@@ -75,7 +75,7 @@ local.setDocument = function(document){
 
 	var selected, id = 'slick_uniqueid';
 	var testNode = document.createElement('div');
-	
+
 	var testRoot = document.body || document.getElementsByTagName('body')[0] || root;
 	testRoot.appendChild(testNode);
 
@@ -126,7 +126,7 @@ local.setDocument = function(document){
 
 			features.brokenGEBCN = cachedGetElementsByClassName || brokenSecondClassNameGEBCN;
 		}
-		
+
 		if (testNode.querySelectorAll){
 			// IE 8 returns closed nodes (EG:"</foo>") for querySelectorAll('*') for some documents
 			try {
@@ -252,7 +252,7 @@ var reSimpleSelector = /^([#.]?)((?:[\w-]+|\*))$/,
 local.search = function(context, expression, append, first){
 
 	var found = this.found = (first) ? null : (append || []);
-	
+
 	if (!context) return found;
 	else if (context.navigator) context = context.document; // Convert the node from a window to a document
 	else if (!context.nodeType) return found;
@@ -558,12 +558,12 @@ local.matchNode = function(node, selector){
 			return this.nativeMatchesSelector.call(node, selector.replace(/\[([^=]+)=\s*([^'"\]]+?)\s*\]/g, '[$1="$2"]'));
 		} catch(matchError) {}
 	}
-	
+
 	var parsed = this.Slick.parse(selector);
 	if (!parsed) return true;
 
 	// simple (single) selectors
-	var expressions = parsed.expressions, reversedExpressions, simpleExpCounter = 0, i;
+	var expressions = parsed.expressions, simpleExpCounter = 0, i;
 	for (i = 0; (currentExpression = expressions[i]); i++){
 		if (currentExpression.length == 1){
 			var exp = currentExpression[0];
@@ -637,7 +637,7 @@ var combinators = {
 							this.push(item, tag, null, classes, attributes, pseudos);
 							break;
 						}
-					} 
+					}
 					return;
 				}
 				if (!item){
@@ -846,7 +846,7 @@ var pseudos = {
 	'root': function(node){
 		return (node === this.root);
 	},
-	
+
 	'selected': function(node){
 		return node.selected;
 	}
@@ -858,7 +858,7 @@ for (var p in pseudos) local['pseudo:' + p] = pseudos[p];
 
 // attributes methods
 
-local.attributeGetters = {
+var attributeGetters = local.attributeGetters = {
 
 	'class': function(){
 		return this.getAttribute('class') || this.className;
@@ -875,7 +875,7 @@ local.attributeGetters = {
 	'style': function(){
 		return (this.style) ? this.style.cssText : this.getAttribute('style');
 	},
-	
+
 	'tabindex': function(){
 		var attributeNode = this.getAttributeNode('tabindex');
 		return (attributeNode && attributeNode.specified) ? attributeNode.nodeValue : null;
@@ -883,15 +883,22 @@ local.attributeGetters = {
 
 	'type': function(){
 		return this.getAttribute('type');
+	},
+
+	'maxlength': function(){
+		var attributeNode = this.getAttributeNode('maxLength');
+		return (attributeNode && attributeNode.specified) ? attributeNode.nodeValue : null;
 	}
 
 };
+
+attributeGetters.MAXLENGTH = attributeGetters.maxLength = attributeGetters.maxlength;
 
 // Slick
 
 var Slick = local.Slick = (this.Slick || {});
 
-Slick.version = '1.1.5';
+Slick.version = '1.1.6';
 
 // Slick finder
 
@@ -913,7 +920,13 @@ Slick.contains = function(container, node){
 // Slick attribute getter
 
 Slick.getAttribute = function(node, name){
+	local.setDocument(node);
 	return local.getAttribute(node, name);
+};
+
+Slick.hasAttribute = function(node, name){
+	local.setDocument(node);
+	return local.hasAttribute(node, name);
 };
 
 // Slick matcher

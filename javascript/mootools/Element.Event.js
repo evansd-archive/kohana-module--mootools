@@ -34,14 +34,14 @@ Element.Properties.events = {set: function(events){
 			condition = fn,
 			self = this;
 		if (custom){
-			if (custom.onAdd) custom.onAdd.call(this, fn);
+			if (custom.onAdd) custom.onAdd.call(this, fn, type);
 			if (custom.condition){
 				condition = function(event){
-					if (custom.condition.call(this, event)) return fn.call(this, event);
+					if (custom.condition.call(this, event, type)) return fn.call(this, event);
 					return true;
 				};
 			}
-			realType = custom.base || realType;
+			if (custom.base) realType = Function.from(custom.base).call(this, type);
 		}
 		var defn = function(){
 			return fn.call(self);
@@ -50,7 +50,7 @@ Element.Properties.events = {set: function(events){
 		if (nativeEvent){
 			if (nativeEvent == 2){
 				defn = function(event){
-					event = new Event(event, self.getWindow());
+					event = new DOMEvent(event, self.getWindow());
 					if (condition.call(self, event) === false) event.stop();
 				};
 			}
@@ -71,8 +71,8 @@ Element.Properties.events = {set: function(events){
 		delete list.values[index];
 		var custom = Element.Events[type];
 		if (custom){
-			if (custom.onRemove) custom.onRemove.call(this, fn);
-			type = custom.base || type;
+			if (custom.onRemove) custom.onRemove.call(this, fn, type);
+			if (custom.base) type = Function.from(custom.base).call(this, type);
 		}
 		return (Element.NativeEvents[type]) ? this.removeListener(type, value, arguments[2]) : this;
 	},
@@ -138,7 +138,7 @@ Element.NativeEvents = {
 	orientationchange: 2, // mobile
 	touchstart: 2, touchmove: 2, touchend: 2, touchcancel: 2, // touch
 	gesturestart: 2, gesturechange: 2, gestureend: 2, // gesture
-	focus: 2, blur: 2, change: 2, reset: 2, select: 2, submit: 2, //form elements
+	focus: 2, blur: 2, change: 2, reset: 2, select: 2, submit: 2, paste: 2, input: 2, //form elements
 	load: 2, unload: 1, beforeunload: 2, resize: 1, move: 1, DOMContentLoaded: 1, readystatechange: 1, //window
 	error: 1, abort: 1, scroll: 1 //misc
 };
@@ -167,6 +167,21 @@ Element.Events = {
 	}
 
 };
+
+/*<ltIE9>*/
+if (!window.addEventListener){
+	Element.NativeEvents.propertychange = 2;
+	Element.Events.change = {
+		base: function(){
+			var type = this.type;
+			return (this.get('tag') == 'input' && (type == 'radio' || type == 'checkbox')) ? 'propertychange' : 'change'
+		},
+		condition: function(event){
+			return !!(this.type != 'radio' || this.checked);
+		}
+	}
+}
+/*</ltIE9>*/
 
 //<1.2compat>
 

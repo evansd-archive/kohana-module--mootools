@@ -23,8 +23,8 @@ provides: [Core, MooTools, Type, typeOf, instanceOf, Native]
 (function(){
 
 this.MooTools = {
-	version: '1.3.2',
-	build: 'c9f1ff10e9e7facb65e9481049ed1b450959d587'
+	version: '1.4.1',
+	build: 'd1fb25710e3c5482a219ab9dc675a4e0ad2176b6'
 };
 
 // typeOf, instanceOf
@@ -195,7 +195,7 @@ var implement = function(name, method){
 		if (typeOf(hook) == 'type') implement.call(hook, name, method);
 		else hook.call(this, name, method);
 	}
-	
+
 	var previous = this.prototype[name];
 	if (previous == null || !previous.$protected) this.prototype[name] = method;
 
@@ -257,7 +257,7 @@ var force = function(name, object, methods){
 
 force('String', String, [
 	'charAt', 'charCodeAt', 'concat', 'indexOf', 'lastIndexOf', 'match', 'quote', 'replace', 'search',
-	'slice', 'split', 'substr', 'substring', 'toLowerCase', 'toUpperCase'
+	'slice', 'split', 'substr', 'substring', 'trim', 'toLowerCase', 'toUpperCase'
 ])('Array', Array, [
 	'pop', 'push', 'reverse', 'shift', 'sort', 'splice', 'unshift', 'concat', 'join', 'slice',
 	'indexOf', 'lastIndexOf', 'filter', 'forEach', 'every', 'map', 'some', 'reduce', 'reduceRight'

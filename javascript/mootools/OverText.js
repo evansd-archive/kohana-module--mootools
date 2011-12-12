@@ -140,7 +140,6 @@ var OverText = new Class({
 			change: this.assert
 		});
 		window.addEvent('resize', this.reposition);
-		this.assert(true);
 		this.reposition();
 		return this;
 	},

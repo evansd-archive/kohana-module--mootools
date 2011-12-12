@@ -13,6 +13,7 @@
 //= require "mootools/Element"
 //= require "mootools/Element.Style"
 //= require "mootools/Element.Event"
+//= require "mootools/Element.Delegation"
 //= require "mootools/Element.Dimensions"
 //= require "mootools/Fx"
 //= require "mootools/Fx.CSS"

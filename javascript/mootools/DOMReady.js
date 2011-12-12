@@ -31,7 +31,7 @@ var domready = function(){
 	if (ready) return;
 	Browser.loaded = ready = true;
 	document.removeListener('DOMContentLoaded', domready).removeListener('readystatechange', check);
-	
+
 	document.fireEvent('domready');
 	window.fireEvent('domready');
 };
@@ -60,7 +60,7 @@ var doScrollWorks = function(){
 		return true;
 	} catch (e){}
 	return false;
-}
+};
 // If doScroll works already, it can't be used to determine domready
 //   e.g. in an iframe
 if (testElement.doScroll && !doScrollWorks()){

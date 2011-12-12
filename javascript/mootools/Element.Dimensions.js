@@ -139,14 +139,13 @@ Element.implement({
 	},
 
 	getPosition: function(relative){
-		if (isBody(this)) return {x: 0, y: 0};
 		var offset = this.getOffsets(),
 			scroll = this.getScrolls();
 		var position = {
 			x: offset.x - scroll.x,
 			y: offset.y - scroll.y
 		};
-		
+
 		if (relative && (relative = document.id(relative))){
 			var relativePosition = relative.getPosition();
 			return {x: position.x - relativePosition.x - leftBorder(relative), y: position.y - relativePosition.y - topBorder(relative)};

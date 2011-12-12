@@ -1,7 +1,7 @@
 //= require "Hash"
 //= require "HtmlTable"
 //= require "Class.Refactor"
-//= require "Element.Delegation"
+//= require "Element.Event.Pseudos"
 //= require "String.Extras"
 //= require "Date"
 /*
@@ -57,9 +57,8 @@ HtmlTable = Class.refactor(HtmlTable, {
 		this.previous.apply(this, arguments);
 		if (this.occluded) return this.occluded;
 		this.sorted = {index: null, dir: 1};
-		this.bound = {
-			headClick: this.headClick.bind(this)
-		};
+		if (!this.bound) this.bound = {};
+		this.bound.headClick = this.headClick.bind(this);
 		this.sortSpans = new Elements();
 		if (this.options.sortable){
 			this.enableSort();
@@ -127,17 +126,17 @@ HtmlTable = Class.refactor(HtmlTable, {
 		return this.sort(Array.indexOf(this.head.getElements(this.options.thSelector).flatten(), el) % this.body.rows[0].cells.length);
 	},
 
-	serialize: function() {
+	serialize: function(){
 		var previousSerialization = this.previous.apply(this, arguments) || {};
-		if (this.options.sortable) {
+		if (this.options.sortable){
 			previousSerialization.sortIndex = this.sorted.index;
 			previousSerialization.sortReverse = this.sorted.reverse;
 		}
 		return previousSerialization;
 	},
 
-	restore: function(tableState) {
-		if(this.options.sortable && tableState.sortIndex) {
+	restore: function(tableState){
+		if(this.options.sortable && tableState.sortIndex){
 			this.sort(tableState.sortIndex, tableState.sortReverse);
 		}
 		this.previous.apply(this, arguments);

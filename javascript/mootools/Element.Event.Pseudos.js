@@ -1,4 +1,5 @@
 //= require "Element.Event"
+//= require "Element.Event.Pseudos"
 //= require "Events.Pseudos"
 /*
 ---
@@ -12,23 +13,23 @@ license: MIT-style license
 authors:
   - Arian Stolwijk
 
-requires: [Core/Element.Event, Events.Pseudos]
+requires: [Core/Element.Event, Core/Element.Delegation, Events.Pseudos]
 
-provides: [Element.Event.Pseudos]
+provides: [Element.Event.Pseudos, Element.Delegation]
 
 ...
 */
 
 (function(){
 
-var pseudos = {},
+var pseudos = {relay: false},
 	copyFromEvents = ['once', 'throttle', 'pause'],
 	count = copyFromEvents.length;
 
 while (count--) pseudos[copyFromEvents[count]] = Events.lookupPseudo(copyFromEvents[count]);
 
-Event.definePseudo = function(key, listener){
-	pseudos[key] = Type.isFunction(listener) ? {listener: listener} : listener;
+DOMEvent.definePseudo = function(key, listener){
+	pseudos[key] = listener;
 	return this;
 };
 
