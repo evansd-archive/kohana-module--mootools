@@ -95,7 +95,7 @@ foreach($types as $type)
 		
 		$contents = file_get_contents($mootools_dir.$type.'/'.$file);
 		$contents = trim(join("\n", $headers)."\n".$contents);
-		if ($compat)
+		if ( ! $compat)
 		{
 			$contents = preg_replace('#<[\d\.]+compat>.*?</[\d\.]+compat>#s', '', $contents);
 		}
