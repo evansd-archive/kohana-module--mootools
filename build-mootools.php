@@ -28,6 +28,17 @@
 
 PHP_SAPI === 'cli' or die('Please run from the command line');
 
+$compat = in_array('--compat', $argv);
+if ($compat)
+{
+	echo "Building with compatibility code for older MooTools versions.\n";
+}
+else
+{
+	echo "Building without compatibility code for older MooTools versions.\n";
+	echo "    (Use '--compat' switch on command line to enable.)\n";
+}
+
 // Require myself a YAML parser
 require dirname(__FILE__).'/vendor/spyc/spyc.php';
 
@@ -84,13 +95,20 @@ foreach($types as $type)
 		
 		$contents = file_get_contents($mootools_dir.$type.'/'.$file);
 		$contents = trim(join("\n", $headers)."\n".$contents);
+		if ($compat)
+		{
+			$contents = preg_replace('#<[\d\.]+compat>.*?</[\d\.]+compat>#s', '', $contents);
+		}
 		file_put_contents($output_dir.'mootools/'.$info['name'].'.js', $contents);
 	}
 }
 
-echo "Creating symlinks for backwards compatibility\n";
-symlink('DOMReady.js', $output_dir.'mootools/DomReady.js');
-symlink('Element.js', $output_dir.'mootools/Selectors.js');
+if ($compat)
+{
+	echo "Creating symlinks for backwards compatibility\n";
+	symlink('DOMReady.js', $output_dir.'mootools/DomReady.js');
+	symlink('Element.js', $output_dir.'mootools/Selectors.js');
+}
 
 echo "Creating mootools-core.js, which includes all of Mootools Core\n";
 $headers = array();
